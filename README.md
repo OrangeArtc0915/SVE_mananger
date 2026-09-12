@@ -12,10 +12,6 @@
 - 在线下载：内嵌浏览器浏览八个 Mod 站点，Nexus 页面上点「Mod Manager Download」即可在启动器内下载，非会员也能用
 - 现实天气与月历：接的是现实生活的时间与天气，不是游戏内存档
 
-![启动页](docs/shot-kind.png)
-
-![Mod 管理](docs/shot-mod.png)
-
 ---
 
 ## 下载与安装
