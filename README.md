@@ -26,7 +26,7 @@
 2. 把压缩包解压到任意目录，比如 `D:\StardewLauncher`
 3. 双击 `StardewLauncher.exe` 即可运行
 
-国内访问 GitHub 较慢时，可改用 **Gitee 文件库**：<https://gitee.com/orangearc655743/SVE_mananger_File>
+国内访问 GitHub 较慢时，可改用 **Gitee 发行版页**：<https://gitee.com/orangearc655743/SVE_mananger_File/releases>
 
 发行包内容：
 
