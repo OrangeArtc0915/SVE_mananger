@@ -1,0 +1,198 @@
+<UserControl x:Class="StardewLauncher.App.Views.HomepageWidgetsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:StardewLauncher.App.Controls"
+             xmlns:svg="clr-namespace:StardewLauncher.App.Controls.Svg"
+             MinWidth="150">
+
+    <!-- 主页小组件：月历（现实日期）、现实天气（Open-Meteo）、每日一言 -->
+    <c:MasonryPanel ColumnGap="12"
+                    ItemWidth="230"
+                    Mode="AutoFit"
+                    RowGap="12">
+
+        <!-- 月历：现实生活的月份，今天用强调色实心块高亮 -->
+        <c:SurfaceCard MinHeight="140" Padding="0">
+            <Grid Margin="14,12,14,12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                    <svg:SvgIcon Width="14"
+                                 Height="14"
+                                 VerticalAlignment="Center"
+                                 Icon="app/calendar"
+                                 IconBrush="{DynamicResource Accent.Base}" />
+                    <TextBlock x:Name="LabMonthTitle"
+                               Margin="6,0,0,0"
+                               VerticalAlignment="Center"
+                               FontSize="12.5"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource Text.Primary}" />
+                </StackPanel>
+
+                <UniformGrid x:Name="WeekdayHeader"
+                             Grid.Row="1"
+                             Margin="0,10,0,2"
+                             Columns="7" />
+
+                <UniformGrid x:Name="MonthGrid" Grid.Row="2" Columns="7" />
+            </Grid>
+        </c:SurfaceCard>
+
+        <!-- 现实天气（Open-Meteo，免费无需 Key） -->
+        <c:SurfaceCard MinHeight="140" Padding="0">
+            <Grid Margin="14,12,14,10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                    <svg:SvgIcon Width="14"
+                                 Height="14"
+                                 VerticalAlignment="Center"
+                                 Icon="lucide/earth"
+                                 IconBrush="{DynamicResource Accent.Base}" />
+                    <TextBlock Margin="6,0,0,0"
+                               VerticalAlignment="Center"
+                               FontSize="11.5"
+                               Foreground="{DynamicResource Text.Tertiary}"
+                               Text="天气" />
+                </StackPanel>
+
+                <!-- 未设置城市 -->
+                <StackPanel x:Name="PanNoCity" Grid.Row="1" Margin="0,10,0,0" Visibility="Collapsed">
+                    <TextBlock FontSize="12.5"
+                               Foreground="{DynamicResource Text.Secondary}"
+                               Text="还没设置城市"
+                               TextWrapping="Wrap" />
+                    <c:OutlineButton Margin="0,10,0,0"
+                                     Padding="12,5"
+                                     HorizontalAlignment="Left"
+                                     FontSize="12"
+                                     Content="去设置"
+                                     Click="OnGoSetupClick" />
+                </StackPanel>
+
+                <!-- 已设置城市 -->
+                <StackPanel x:Name="PanWeather" Grid.Row="1" Margin="0,8,0,0">
+                    <TextBlock x:Name="LabWeatherCity"
+                               FontSize="12"
+                               Foreground="{DynamicResource Text.Secondary}"
+                               TextTrimming="CharacterEllipsis" />
+
+                    <Grid Margin="0,4,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <svg:SvgIcon x:Name="IcoWeatherBig"
+                                     Grid.Column="0"
+                                     Width="40"
+                                     Height="40"
+                                     VerticalAlignment="Center"
+                                     Icon="app/weather-cloudy"
+                                     IconBrush="{DynamicResource Accent.Base}" />
+
+                        <StackPanel Grid.Column="1"
+                                    Margin="12,0,0,0"
+                                    VerticalAlignment="Center">
+                            <TextBlock x:Name="LabWeatherTemp"
+                                       FontSize="30"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource Accent.Base}" />
+                            <TextBlock x:Name="LabWeatherDesc"
+                                       Margin="0,2,0,0"
+                                       FontSize="12.5"
+                                       Foreground="{DynamicResource Text.Primary}"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock x:Name="LabWeatherDetail"
+                               Margin="0,8,0,0"
+                               FontSize="11.5"
+                               Foreground="{DynamicResource Text.Tertiary}"
+                               TextWrapping="Wrap" />
+
+                    <TextBlock x:Name="LabWeatherNote"
+                               Margin="0,4,0,0"
+                               FontSize="11"
+                               Foreground="{DynamicResource Status.Warn}"
+                               TextWrapping="Wrap"
+                               Visibility="Collapsed" />
+                </StackPanel>
+
+                <!-- 右下角：强制刷新 -->
+                <c:RoundIconButton x:Name="BtnRefreshWeather"
+                                   Grid.Row="3"
+                                   Width="24"
+                                   Height="24"
+                                   Margin="0,8,0,0"
+                                   HorizontalAlignment="Right"
+                                   Icon="lucide/refresh-cw"
+                                   IconSize="12"
+                                   Tone="Plain"
+                                   ToolTip="刷新天气"
+                                   Click="OnRefreshWeatherClick" />
+            </Grid>
+        </c:SurfaceCard>
+
+        <!-- 每日一言：文字与交互保持原样，仅叠一层信纸底纹 -->
+        <c:SurfaceCard MinHeight="140" Padding="0">
+            <Grid>
+                <Image x:Name="ImgQuotePaper"
+                       IsHitTestVisible="False"
+                       Opacity="0.26"
+                       Source="pack://application:,,,/StardewLauncher;component/Assets/Art/letter-bg.png"
+                       Stretch="Fill" />
+
+                <Grid Margin="14,12,14,10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal">
+                        <svg:SvgIcon Width="14"
+                                     Height="14"
+                                     VerticalAlignment="Center"
+                                     Icon="lucide/message-circle"
+                                     IconBrush="{DynamicResource Accent.Base}" />
+                        <TextBlock Margin="6,0,0,0"
+                                   VerticalAlignment="Center"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   Text="每日一言" />
+                    </StackPanel>
+
+                    <TextBlock x:Name="LabQuote"
+                               Grid.Row="1"
+                               Margin="0,10,0,0"
+                               VerticalAlignment="Center"
+                               FontSize="13"
+                               LineHeight="21"
+                               TextWrapping="Wrap" />
+
+                    <c:OutlineButton x:Name="BtnNextQuote"
+                                     Grid.Row="2"
+                                     Margin="0,10,0,0"
+                                     Padding="10,4"
+                                     HorizontalAlignment="Right"
+                                     FontSize="12"
+                                     Content="换一句"
+                                     Click="OnNextQuoteClick" />
+                </Grid>
+            </Grid>
+        </c:SurfaceCard>
+
+    </c:MasonryPanel>
+</UserControl>

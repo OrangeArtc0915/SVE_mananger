@@ -1,0 +1,87 @@
+星露谷启动器 —— 第三方依赖与借鉴来源说明
+==========================================
+
+本文件说明本项目（星露谷启动器，代码标识 StardewLauncher）在设计与实现过程中
+参考或使用的第三方成果，以及相应的许可证要求。
+
+一、界面与配色
+--------------
+本项目的界面结构、视觉风格与暖焦糖配色（语义化配色键、控件模板、动画曲线组合）
+均为本项目独立设计，不复制任何第三方项目的界面资源。
+
+二、架构思路参考：PCL-CE
+------------------------
+项目地址：https://github.com/PCL-Community/PCL-CE
+许可证：Apache License 2.0
+
+本项目在早期方案设计阶段参考了 PCL-CE（一个 Minecraft 启动器）的以下架构思路，
+并在此基础上做了独立实现：
+
+  - 窗口玻璃化（DWM 框架延伸）与自绘标题栏的整体骨架；
+  - 轻量逐帧动画引擎（CompositionTarget.Rendering + 缓动函数族）的设计思路；
+  - SVG 描边图标渲染与图标包的资源组织方式。
+
+本项目未复制其源代码；上述内容均为思路层面的参考，代码为本项目自行编写。
+根据 Apache License 2.0 的要求，特此说明：
+
+  - 本项目保留 PCL-CE 的版权与许可声明（即本节）；
+  - 本项目对参考内容做了修改与重新设计，不声称与 PCL-CE 存在隶属或背书关系；
+  - Apache License 2.0 的完整许可证副本可在上述项目地址获取；
+  - Apache License 2.0 不授予任何商标权，本项目未使用 PCL-CE 的名称与标识。
+
+三、领域思路参考：Stardrop
+--------------------------
+项目地址：https://github.com/Floogen/Stardrop
+许可证：GNU General Public License v3.0
+
+本项目在星露谷领域功能（实例隔离、SMAPI 安装流程、Mod 扫描与更新检查等）
+的方案设计阶段参考了 Stardrop 的公开做法，但未复制其任何代码。
+
+四、设计思路参考：SMUI-2023
+---------------------------
+项目地址：https://github.com/Lake1059/SMUI-2023
+许可证：GNU General Public License v3.0
+
+本项目在下列功能的**设计思路**上参考了 SMUI（一个星露谷模组管理器）：
+安装规划（按步骤描述安装过程）、依赖项表视图、虚拟组/标签、目录型分类。
+
+**特别声明**：GPL-3.0 具有传染性。本项目**未复制、未改写、未逐行移植 SMUI 的任何源代码、
+数据结构、常量、命名或文案**，也未沿用其数据文件格式；上述功能的实现完全由本项目自行设计
+（例如本项目使用自定义的 `install-plan.json` 步骤格式与自有标签存储结构）。因此本项目
+自身仍以 MIT License 发布，不构成 GPL-3.0 的衍生作品。
+
+五、技术路线参考：JuniGrid
+--------------------------
+项目地址：https://github.com/MLD-yu/JuniGrid
+许可证：保留所有权利（未提供开源许可证）
+
+本项目在 Nexus Mods 集成（`nxm://` 协议关联、以登录用户身份获取下载直链、单实例参数转发）
+的技术路线阶段，了解到该项目采用了同类做法，从而确认该路径可行。
+
+**特别声明**：该项目为「保留所有权利」。本项目**未复制、未阅读其源代码与界面资源**
+（含 C# 源码、CSS/JS、SVG 资源、命名与文案）。相关实现严格以 Nexus Mods 官方公开接口约定
+为依据自行编写。
+
+六、内置图标：Lucide
+--------------------
+项目地址：https://lucide.dev
+许可证：ISC License
+
+src/StardewLauncher.App/Assets/IconPacks/lucide/ 下的 SVG 图标来自 Lucide，
+按 ISC License 使用，许可证原文见同目录下的 LICENSE.txt。
+
+七、第三方 NuGet 包
+-------------------
+  - CommunityToolkit.Mvvm（https://github.com/CommunityToolkit/dotnet），MIT License。
+  - SharpCompress（https://github.com/adamhathcock/sharpcompress），MIT License，
+    用于读取 zip / rar / 7z / tar / gz 压缩包。
+
+八、其他
+--------
+本项目自身以 MIT License 发布，详见项目根目录 LICENSE。
+
+九、游戏美术素材
+----------------
+src/StardewLauncher.App/Assets/Art/ 下的少量装饰图片来源于《星露谷物语》(Stardew Valley)，
+版权归 ConcernedApe (Eric Barone) 所有。本项目仅将其用于个人本地使用的界面点缀，
+不主张任何权利。若需分发本项目，建议移除这些素材或替换为自绘资源。

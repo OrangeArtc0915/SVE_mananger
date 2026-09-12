@@ -1,0 +1,31 @@
+# 构建产物
+bin/
+obj/
+publish/
+
+# 运行时数据：内含设置与可能的密钥（如 Nexus API Key），绝不能进版本库
+Data/
+*.failed
+
+# 放在仓库里的游戏本体副本与 Mod 库，体积很大，不进版本库
+Stardew Valley/
+Stardew Valley SMAPI/
+MODS/
+SMAPI * installer*
+
+# 游戏美术素材：版权归 ConcernedApe，且体积大，不随本仓库分发
+星露谷物语素材/
+
+# 参考用的第三方项目：含他人版权（JuniGrid 保留所有权利 / SMUI-2023 GPL-3.0），
+# 混入会污染本仓库的 MIT 授权，因此不进版本库
+JuniGrid/
+SMUI-2023/
+
+# 临时截图
+Screenshot_*.jpg
+Screenshot_*.png
+
+# 用户级覆盖
+*.user
+.vs/
+.idea/

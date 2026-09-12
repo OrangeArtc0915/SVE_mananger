@@ -1,0 +1,75 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- 默认值 = 浅色 + 焦糖。运行时由 ThemeService 按设置覆盖同名资源。 -->
+
+    <CornerRadius x:Key="Radius.Small">6</CornerRadius>
+    <CornerRadius x:Key="Radius.Button">8</CornerRadius>
+    <CornerRadius x:Key="Radius.Item">10</CornerRadius>
+    <CornerRadius x:Key="Radius.Card">12</CornerRadius>
+    <CornerRadius x:Key="Radius.Pill">1000</CornerRadius>
+
+    <FontFamily x:Key="AppFont">Microsoft YaHei UI, Segoe UI, Arial</FontFamily>
+
+    <!-- 以 Color 形式提供：阴影着色 -->
+    <Color x:Key="Shadow.Tint">#6B4A2E</Color>
+
+    <!-- 窗口底纹与卡片封面渐变 -->
+    <LinearGradientBrush x:Key="Brush.WindowBackground" StartPoint="0.88,0" EndPoint="0.12,1">
+        <GradientStop Color="#FAF1EA" Offset="0" />
+        <GradientStop Color="#FBF7F1" Offset="0.42" />
+        <GradientStop Color="#FAF1EA" Offset="1" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="Brush.CardCover" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#7A3E22" Offset="0" />
+        <GradientStop Color="#E67E22" Offset="1" />
+    </LinearGradientBrush>
+
+    <!-- 强调色 -->
+    <SolidColorBrush x:Key="Accent.Deep" Color="#7A3E22" />
+    <SolidColorBrush x:Key="Accent.Base" Color="#A0522D" />
+    <SolidColorBrush x:Key="Accent.Bright" Color="#E67E22" />
+    <SolidColorBrush x:Key="Accent.Hover" Color="#D9741D" />
+    <SolidColorBrush x:Key="Accent.Soft" Color="#F3DFD0" />
+    <SolidColorBrush x:Key="Accent.Faint" Color="#FBF0E4" />
+
+    <!-- 文字 -->
+    <SolidColorBrush x:Key="Text.Primary" Color="#46331F" />
+    <SolidColorBrush x:Key="Text.Secondary" Color="#8A6D5B" />
+    <SolidColorBrush x:Key="Text.Tertiary" Color="#A8927E" />
+    <SolidColorBrush x:Key="Text.Disabled" Color="#C4B4A2" />
+    <SolidColorBrush x:Key="Text.OnAccent" Color="#FFFFFF" />
+
+    <!-- 承载面 -->
+    <SolidColorBrush x:Key="Surface.Window" Color="#FAF6F0" />
+    <SolidColorBrush x:Key="Surface.Panel" Color="#F6EDE2" />
+    <SolidColorBrush x:Key="Surface.Card" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="Surface.CardHover" Color="#FDF6EE" />
+    <SolidColorBrush x:Key="Surface.Sunken" Color="#F7F0E7" />
+    <SolidColorBrush x:Key="Surface.Overlay" Color="#59000000" />
+
+    <!-- 描边 -->
+    <SolidColorBrush x:Key="Border.Default" Color="#EADCCC" />
+    <SolidColorBrush x:Key="Border.Strong" Color="#D9C3AA" />
+
+    <!-- 状态 -->
+    <SolidColorBrush x:Key="Status.Warn" Color="#C97A16" />
+    <SolidColorBrush x:Key="Status.WarnSoft" Color="#FBF0E4" />
+    <SolidColorBrush x:Key="Status.Danger" Color="#B23A2E" />
+    <SolidColorBrush x:Key="Status.DangerSoft" Color="#FBE7E2" />
+    <SolidColorBrush x:Key="Status.Success" Color="#4E8A3F" />
+
+    <!-- 侧栏导航 -->
+    <SolidColorBrush x:Key="Nav.ItemHover" Color="#F0E4D6" />
+    <SolidColorBrush x:Key="Nav.ItemActive" Color="#F6E3D2" />
+    <SolidColorBrush x:Key="Nav.Indicator" Color="#E67E22" />
+    <SolidColorBrush x:Key="Nav.Text" Color="#7A6551" />
+    <SolidColorBrush x:Key="Nav.TextActive" Color="#A0522D" />
+
+    <!-- 通用透明与遮罩 -->
+    <SolidColorBrush x:Key="Common.Transparent" Color="#00FFFFFF" />
+    <SolidColorBrush x:Key="Common.HalfWhite" Color="#66FFFFFF" />
+    <SolidColorBrush x:Key="Common.SemiBlack" Color="#40000000" />
+
+</ResourceDictionary>
