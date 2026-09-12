@@ -695,10 +695,23 @@
             <div class="section-head">
                 <span class="kicker">Features</span>
                 <h2>它能帮你做什么</h2>
-                <p class="section-note">六件事，把小农场打理得井井有条：从建实例、装 Mod，到查依赖、下资源、看天气。</p>
+                <p class="section-note">七件事，把小农场打理得井井有条：从装 SMAPI、建实例、装 Mod，到查依赖、下资源、看天气。</p>
             </div>
 
             <div class="grid">
+                <article class="card">
+                    <span class="icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M12 3.6v9.2M8.5 9.7 12 13.2l3.5-3.5"/>
+                            <path d="M5 16.2v1.6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1.6"/>
+                            <circle cx="12" cy="19.4" r=".9" fill="currentColor" stroke="none"/>
+                        </svg>
+                    </span>
+                    <h3>一键装 SMAPI</h3>
+                    <p>在 Mod 管理页点一下就能装 SMAPI，装完自动校验版本，不用再手动解压、找安装脚本。</p>
+                    <p>两条线路任选：官方 GitHub Releases，或启动器自建云端镜像（国内可选 Gitee 源）。</p>
+                </article>
+
                 <article class="card">
                     <span class="icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -908,8 +921,8 @@
                 </div>
                 <div class="step">
                     <span class="num">2</span>
-                    <h3>从 Mod 库或在线下载装 Mod</h3>
-                    <p>把下载好的压缩包导入 Mod 库，或在启动器里直接浏览八个站点下载；勾选后一键安装到当前实例，缺前置会顺手提醒。</p>
+                    <h3>先装 SMAPI，再装 Mod</h3>
+                    <p>在「Mod 管理」点「下载 SMAPI」，官方或云端镜像两条线路任选，装完启动器会校验版本。然后把压缩包导入 Mod 库，或在线下载安装；缺前置会顺手提醒。</p>
                 </div>
                 <div class="step">
                     <span class="num">3</span>
@@ -936,7 +949,11 @@
                 </details>
                 <details>
                     <summary>怎么让 Mod 生效？</summary>
-                    <p>需要先装好 SMAPI，并用 Mod 端实例启动游戏。启动器不会代你安装 SMAPI，但设置页里有官方下载页入口；装好之后，实例页会显示当前 SMAPI 版本。</p>
+                    <p>需要先装好 SMAPI，并用 Mod 端实例启动游戏。装 SMAPI 不用出启动器：到「Mod 管理」点「下载 SMAPI」，选好游戏实例后一键安装即可。装好之后，实例页会显示当前 SMAPI 版本。</p>
+                </details>
+                <details>
+                    <summary>装 SMAPI 时冒出一个黑窗口，是不是出问题了？</summary>
+                    <p>不是。那是 SMAPI 官方安装器自己的控制台窗口，它必须依赖真实控制台才能运行，启动器无法也不该把它藏起来。等它自己关掉就好，之后启动器会校验安装结果并把版本显示出来。</p>
                 </details>
                 <details>
                     <summary>为什么下载很慢？</summary>

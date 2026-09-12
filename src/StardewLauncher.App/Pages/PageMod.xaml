@@ -97,7 +97,17 @@
                        Margin="8,0,0,0"
                        HorizontalAlignment="Right"
                        VerticalAlignment="Center">
-                <c:OutlineButton Tone="Solid" Click="OnOnlineDownloadClick">
+                <c:OutlineButton Click="OnInstallSmapiClick">
+                    <StackPanel Orientation="Horizontal">
+                        <svg:SvgIcon Width="14"
+                                     Height="14"
+                                     VerticalAlignment="Center"
+                                     Icon="lucide/download"
+                                     IconBrush="{DynamicResource Accent.Base}" />
+                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Text="下载 SMAPI" />
+                    </StackPanel>
+                </c:OutlineButton>
+                <c:OutlineButton Margin="8,0,0,0" Tone="Solid" Click="OnOnlineDownloadClick">
                     <StackPanel Orientation="Horizontal">
                         <svg:SvgIcon Width="14"
                                      Height="14"

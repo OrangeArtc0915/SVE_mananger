@@ -922,6 +922,20 @@ public partial class PageMod : LauncherPage
     }
 
     /// <summary>
+    /// 打开「下载 SMAPI」窗口。安装可能新增 Mods 目录或 bundled mods，关闭后重扫一次。
+    /// </summary>
+    private void OnInstallSmapiClick(object sender, RoutedEventArgs e)
+    {
+        var dialog = new SmapiInstallWindow();
+        var owner = Window.GetWindow(this);
+        if (owner is not null) dialog.Owner = owner;
+
+        dialog.ShowDialog();
+
+        _ = ScanAsync();
+    }
+
+    /// <summary>
     /// 在启动器内嵌浏览器里浏览 Nexus。浏览不需要 API Key；
     /// 未配置 Key 时由窗口顶部状态提示，用户仍可正常浏览并点「Mod Manager Download」下载。
     /// </summary>

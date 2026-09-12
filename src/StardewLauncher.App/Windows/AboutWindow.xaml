@@ -133,7 +133,7 @@
                 </Grid>
 
                 <!-- 项目官网 -->
-                <Grid Margin="0,12,0,0">
+                <Grid Margin="0,10,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" MinWidth="76" />
                         <ColumnDefinition Width="*" />
@@ -143,13 +143,15 @@
                                FontSize="12"
                                Foreground="{DynamicResource Text.Secondary}"
                                Text="项目官网" />
-                    <c:OutlineButton Grid.Column="1"
-                                     Padding="10,6"
-                                     HorizontalAlignment="Left"
-                                     HorizontalContentAlignment="Left"
-                                     FontSize="11.5"
-                                     Content="在浏览器中打开 docs\website\index.html"
-                                     Click="OnOpenWebsiteClick" />
+                    <TextBlock Grid.Column="1"
+                               VerticalAlignment="Center"
+                               FontSize="12"
+                               TextTrimming="CharacterEllipsis"
+                               Foreground="{DynamicResource Accent.Base}"
+                               Cursor="Hand"
+                               Text="{x:Static core:AppInfo.WebsiteUrl}"
+                               ToolTip="{x:Static core:AppInfo.WebsiteUrl}"
+                               MouseLeftButtonUp="OnOpenWebsiteClick" />
                 </Grid>
 
                 <TextBlock x:Name="LabCopyHint"

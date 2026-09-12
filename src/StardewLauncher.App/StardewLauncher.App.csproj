@@ -11,9 +11,7 @@
     <AssemblyName>StardewLauncher</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
-    <Version>1.0.0</Version>
-    <FileVersion>1.0.0.0</FileVersion>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <!-- 版本号不在这里写死：唯一来源是 Core\App\AppInfo.cs，由 build.bat 读取后传给 MSBuild -->
     <Product>星露谷启动器</Product>
     <Company>mmm</Company>
     <AssemblyTitle>星露谷启动器</AssemblyTitle>
