@@ -2,7 +2,15 @@
 chcp 65001 >nul
 cd /d "%~dp0"
 
-echo [1/2] 正在编译星露谷启动器...
+call "%~dp0ensure-dotnet-sdk.bat"
+if errorlevel 1 (
+    echo.
+    echo 编译环境准备失败，请按上面的提示处理后重试。
+    pause
+    exit /b 1
+)
+
+echo [1/2] 正在编译星露谷启动器（首次编译需联网还原依赖包，耗时较长）...
 dotnet build src\StardewLauncher.App\StardewLauncher.App.csproj -c Debug --nologo
 if errorlevel 1 (
     echo.

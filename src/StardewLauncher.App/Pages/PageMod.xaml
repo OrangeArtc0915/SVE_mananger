@@ -97,31 +97,17 @@
                        Margin="8,0,0,0"
                        HorizontalAlignment="Right"
                        VerticalAlignment="Center">
-                <c:OutlineButton Click="OnInstallSmapiClick">
-                    <StackPanel Orientation="Horizontal">
-                        <svg:SvgIcon Width="14"
-                                     Height="14"
-                                     VerticalAlignment="Center"
-                                     Icon="lucide/download"
-                                     IconBrush="{DynamicResource Accent.Base}" />
-                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Text="下载 SMAPI" />
-                    </StackPanel>
-                </c:OutlineButton>
-                <c:OutlineButton Margin="8,0,0,0" Tone="Solid" Click="OnOnlineDownloadClick">
+                <c:OutlineButton Tone="Solid" Click="OnResourceCenterClick">
                     <StackPanel Orientation="Horizontal">
                         <svg:SvgIcon Width="14"
                                      Height="14"
                                      VerticalAlignment="Center"
                                      Icon="lucide/download"
                                      IconBrush="{DynamicResource Text.OnAccent}" />
-                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Text="在线下载" />
+                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Text="资源中心" />
                     </StackPanel>
                 </c:OutlineButton>
                 <c:OutlineButton Margin="8,0,0,0" Content="导入 Mod" Click="OnImportClick" />
-                <c:OutlineButton Margin="8,0,0,0"
-                                 Content="下载 Mod"
-                                 Tone="Solid"
-                                 Click="OnDownloadModClick" />
                 <c:OutlineButton Margin="8,0,0,0" Content="全部启用" Click="OnEnableAllClick" />
                 <c:OutlineButton Margin="8,0,0,0" Content="打开 Mods 目录" Click="OnOpenModsClick" />
                 <c:OutlineButton Margin="8,0,0,0" Content="刷新" Click="OnRefreshClick" />

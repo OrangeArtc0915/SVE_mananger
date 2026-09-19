@@ -2,6 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:c="clr-namespace:StardewLauncher.App.Controls"
+        xmlns:views="clr-namespace:StardewLauncher.App.Views"
         Title="星露谷启动器"
         Width="1080"
         Height="680"
@@ -47,9 +48,17 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
+                <!--
+                    个性化背景层：铺满整个窗口（含标题栏与侧栏）。
+                    放在 PanForm 的第一个子元素位置，所以它在所有界面之下；
+                    PanBack 的 12px 圆角裁切会连带把它裁圆，不会露出方角。
+                    没设背景时这一层完全透明，露出主题渐变。
+                -->
+                <views:BackgroundLayer x:Name="BackgroundView" Grid.RowSpan="2" />
+
                 <!-- 标题栏：暖色面板 + 底部分隔线，不使用整条强调色底 -->
                 <Grid Grid.Row="0"
-                      Background="{DynamicResource Surface.Panel}"
+                      Background="{DynamicResource Surface.PanelGlass}"
                       MouseLeftButtonDown="OnTitleBarMouseDown">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -121,7 +130,7 @@
                     </Grid.ColumnDefinitions>
 
                     <Border Grid.Column="0"
-                            Background="{DynamicResource Surface.Panel}"
+                            Background="{DynamicResource Surface.PanelGlass}"
                             BorderBrush="{DynamicResource Border.Default}"
                             BorderThickness="0,0,1,0">
                         <Grid>
@@ -144,10 +153,22 @@
                                            Tag="2"
                                            Text="游戏实例"
                                            Checked="OnNavChecked" />
+                                <c:NavItem x:Name="NavResource"
+                                           GroupName="MainNav"
+                                           Icon="lucide/download"
+                                           Tag="3"
+                                           Text="资源中心"
+                                           Checked="OnNavChecked" />
+                                <c:NavItem x:Name="NavMultiplayer"
+                                           GroupName="MainNav"
+                                           Icon="lucide/network"
+                                           Tag="4"
+                                           Text="联机大厅"
+                                           Checked="OnNavChecked" />
                                 <c:NavItem x:Name="NavSetup"
                                            GroupName="MainNav"
                                            Icon="lucide/settings"
-                                           Tag="3"
+                                           Tag="5"
                                            Text="设置"
                                            Checked="OnNavChecked" />
                             </StackPanel>

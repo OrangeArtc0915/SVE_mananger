@@ -95,11 +95,14 @@ public partial class PageLaunch : LauncherPage
         };
     }
 
-    /// <summary>全景底纹只做点缀：深色主题下再压低透明度，避免影响文字可读性。</summary>
+    /// <summary>
+    /// 全景图现在是「完整显示的一张图」，不是铺底的纹理，所以不能压得太淡——
+    /// 压狠了会变成一块看不出内容的灰块。深色主题稍微压一点，免得亮图在暗底上过于跳。
+    /// </summary>
     private void ApplyArtOpacity()
     {
-        if (ImgWelcomePanorama is null) return;
-        ImgWelcomePanorama.Opacity = ThemeService.IsDark ? 0.12 : 0.24;
+        if (BrushPanorama is null) return;
+        BrushPanorama.Opacity = ThemeService.IsDark ? 0.85 : 0.95;
     }
 
     /// <summary>把当前实例信息与按钮状态同步到界面。</summary>

@@ -14,6 +14,9 @@ echo   星露谷启动器 - 发行构建
 echo ============================================
 echo.
 
+call "%~dp0ensure-dotnet-sdk.bat"
+if errorlevel 1 goto :failed
+
 rem ---------- 读取版本号（唯一来源：AppInfo.cs）----------
 powershell -NoProfile -Command "$m=[regex]::Match((Get-Content -Raw '%APPINFO%'), 'public const string Version = .([0-9]+[.][0-9]+[.][0-9]+).'); if($m.Success){$m.Groups[1].Value}" > "_version.tmp"
 set /p VERSION=<"_version.tmp"

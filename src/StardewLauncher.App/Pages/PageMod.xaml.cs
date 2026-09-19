@@ -908,45 +908,12 @@ public partial class PageMod : LauncherPage
         ShellHelper.OpenFolder(_modsDirectory);
     }
 
-    /// <summary>打开下载中心：Nexus 查询、直链下载入库、下载目录监控入库。</summary>
-    private void OnDownloadModClick(object sender, RoutedEventArgs e)
-    {
-        var dialog = new DownloadCenterWindow();
-        var owner = Window.GetWindow(this);
-        if (owner is not null) dialog.Owner = owner;
-
-        dialog.ShowDialog();
-
-        // 下载中心可能往 Mod 库里写了东西，回到页面时刷新一次
-        _ = ScanAsync();
-    }
-
     /// <summary>
-    /// 打开「下载 SMAPI」窗口。安装可能新增 Mods 目录或 bundled mods，关闭后重扫一次。
+    /// 跳转到资源中心页：下载 Mod、安装 SMAPI、内嵌浏览 Mod 站点都在那里。
+    /// 下载与安装可能改动 Mods 目录，回到本页时 OnEnter 会重新扫描。
     /// </summary>
-    private void OnInstallSmapiClick(object sender, RoutedEventArgs e)
-    {
-        var dialog = new SmapiInstallWindow();
-        var owner = Window.GetWindow(this);
-        if (owner is not null) dialog.Owner = owner;
-
-        dialog.ShowDialog();
-
-        _ = ScanAsync();
-    }
-
-    /// <summary>
-    /// 在启动器内嵌浏览器里浏览 Nexus。浏览不需要 API Key；
-    /// 未配置 Key 时由窗口顶部状态提示，用户仍可正常浏览并点「Mod Manager Download」下载。
-    /// </summary>
-    private void OnOnlineDownloadClick(object sender, RoutedEventArgs e)
-    {
-        var dialog = new NexusBrowserWindow();
-        var owner = Window.GetWindow(this);
-        if (owner is not null) dialog.Owner = owner;
-
-        dialog.Show();
-    }
+    private void OnResourceCenterClick(object sender, RoutedEventArgs e)
+        => (Window.GetWindow(this) as MainWindow)?.SwitchToPage(NavPages.Resource);
 
     private async void OnCreateModsClick(object sender, RoutedEventArgs e)
     {

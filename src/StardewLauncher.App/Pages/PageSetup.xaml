@@ -101,6 +101,86 @@
                     </StackPanel>
                 </c:SurfaceCard>
 
+                <!-- 1.5 个性化背景 -->
+                <c:SurfaceCard Title="个性化背景">
+                    <StackPanel>
+                        <TextBlock FontSize="12" Foreground="{DynamicResource Text.Secondary}" Text="窗口背景" />
+                        <TextBlock x:Name="LabBackground"
+                                   Margin="0,8,0,0"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource Text.Primary}"
+                                   TextWrapping="Wrap"
+                                   Text="未设置，使用主题渐变。" />
+
+                        <c:OutlineButton x:Name="BtnPickBackground"
+                                         Margin="0,10,0,0"
+                                         HorizontalAlignment="Left"
+                                         Content="选择图片或视频"
+                                         Tone="Solid"
+                                         Click="OnPickBackgroundClick" />
+
+                        <c:OutlineButton x:Name="BtnClearBackground"
+                                         Margin="0,8,0,0"
+                                         HorizontalAlignment="Left"
+                                         Content="清除背景"
+                                         Tone="Danger"
+                                         Click="OnClearBackgroundClick" />
+
+                        <TextBlock Margin="0,16,0,0"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource Text.Secondary}"
+                                   Text="铺放方式" />
+                        <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                            <c:OutlineButton x:Name="BtnFitCover"
+                                             Tag="Cover"
+                                             Content="铺满"
+                                             Click="OnBackgroundFitClick" />
+                            <c:OutlineButton x:Name="BtnFitContain"
+                                             Margin="8,0,0,0"
+                                             Tag="Contain"
+                                             Content="完整"
+                                             Click="OnBackgroundFitClick" />
+                            <c:OutlineButton x:Name="BtnFitFill"
+                                             Margin="8,0,0,0"
+                                             Tag="Fill"
+                                             Content="拉伸"
+                                             Click="OnBackgroundFitClick" />
+                        </StackPanel>
+
+                        <TextBlock Margin="0,16,0,0"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource Text.Secondary}"
+                                   Text="压暗程度" />
+                        <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                            <c:OutlineButton x:Name="BtnDimNone"
+                                             Tag="0"
+                                             Content="不压"
+                                             Click="OnBackgroundDimClick" />
+                            <c:OutlineButton x:Name="BtnDimLight"
+                                             Margin="8,0,0,0"
+                                             Tag="25"
+                                             Content="轻"
+                                             Click="OnBackgroundDimClick" />
+                            <c:OutlineButton x:Name="BtnDimMedium"
+                                             Margin="8,0,0,0"
+                                             Tag="45"
+                                             Content="中"
+                                             Click="OnBackgroundDimClick" />
+                            <c:OutlineButton x:Name="BtnDimHeavy"
+                                             Margin="8,0,0,0"
+                                             Tag="65"
+                                             Content="重"
+                                             Click="OnBackgroundDimClick" />
+                        </StackPanel>
+
+                        <TextBlock Margin="0,10,0,0"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   TextWrapping="Wrap"
+                                   Text="背景铺满整个窗口，界面面板是半透明的。页面标题直接压在背景上，所以建议留着压暗。" />
+                    </StackPanel>
+                </c:SurfaceCard>
+
                 <!-- 2. 游戏与实例 -->
                 <c:SurfaceCard Title="游戏与实例">
                     <StackPanel>

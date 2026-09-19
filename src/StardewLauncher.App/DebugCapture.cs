@@ -130,6 +130,8 @@ internal static class DebugCapture
             (Index: NavPages.Launch, Name: "启动"),
             (Index: NavPages.Mod, Name: "Mod 管理"),
             (Index: NavPages.Instance, Name: "游戏实例"),
+            (Index: NavPages.Resource, Name: "资源中心"),
+            (Index: NavPages.Multiplayer, Name: "联机大厅"),
             (Index: NavPages.Setup, Name: "设置")
         };
 
@@ -163,8 +165,27 @@ internal static class DebugCapture
                                 window.UpdateLayout();
                                 await Task.Delay(500);
 
-                                DetectOverlaps(window, $"{name}@{width:0}");
-                                total += LastOverlapCount;
+                                // 页面内部的子视图（子标签页）默认是折叠的，WPF 不会给它布局，
+                                // 所以必须逐个切出来单独检查，否则那一堆面板等于没测
+                                var page = main.CurrentPage;
+                                var subViewCount = page?.SubViewCount ?? 1;
+
+                                for (var sub = 0; sub < subViewCount; sub++)
+                                {
+                                    if (sub > 0)
+                                    {
+                                        page!.SelectSubView(sub);
+                                        window.UpdateLayout();
+                                        await Task.Delay(350);
+                                    }
+
+                                    var label = subViewCount > 1
+                                        ? $"{name}#{sub + 1}@{width:0}"
+                                        : $"{name}@{width:0}";
+
+                                    DetectOverlaps(window, label);
+                                    total += LastOverlapCount;
+                                }
                             }
                         }
                     }
@@ -278,6 +299,11 @@ internal static class DebugCapture
     private static void CollectCandidates(DependencyObject node, Window window,
         List<(FrameworkElement Element, Rect Rect)> result)
     {
+        // 折叠的子树不参与布局，但里面的元素会残留上一次排列的坐标。
+        // 顺着可视树往下走时遇到折叠节点就整棵跳过，否则会报出「跨面板」的假重叠
+        //（比如子标签切走后，旧面板里的按钮和新面板里的标题被判成重叠）。
+        if (node is UIElement { Visibility: Visibility.Collapsed }) return;
+
         if (node is FrameworkElement { Visibility: Visibility.Visible } element &&
             element is ButtonBase or TextBlock &&
             element.ActualWidth > 0.5 && element.ActualHeight > 0.5)

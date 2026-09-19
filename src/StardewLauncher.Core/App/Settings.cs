@@ -22,6 +22,34 @@ public enum DownloadSource
     Gitee = 1
 }
 
+/// <summary>窗口内容区背景的类型。</summary>
+public enum BackgroundKind
+{
+    /// <summary>不设背景，用主题渐变。</summary>
+    None = 0,
+
+    Image = 1,
+
+    /// <summary>动图，逐帧播放。</summary>
+    Gif = 2,
+
+    /// <summary>视频，循环静音播放。</summary>
+    Video = 3
+}
+
+/// <summary>背景的铺放方式。</summary>
+public enum BackgroundFit
+{
+    /// <summary>等比铺满，超出部分裁掉（默认，不留空边）。</summary>
+    Cover = 0,
+
+    /// <summary>等比完整显示，可能留空边。</summary>
+    Contain = 1,
+
+    /// <summary>拉伸填满，可能变形。</summary>
+    Fill = 2
+}
+
 /// <summary>全局设置。落盘到 Paths.SettingsFile。</summary>
 public sealed class Settings
 {
@@ -92,4 +120,86 @@ public sealed class Settings
     public int MaxLogFileCount { get; set; } = 16;
 
     public long MaxLogFileSize { get; set; } = 8 * 1024 * 1024;
+
+    // ————— 联机大厅 —————
+
+    /// <summary>联机时显示的昵称，会广播给同一房间的其他人。</summary>
+    public string MultiplayerNickname { get; set; } = string.Empty;
+
+    /// <summary>联机房间名，对应 EasyTier 的网络名（network-name）。</summary>
+    public string MultiplayerRoom { get; set; } = string.Empty;
+
+    /// <summary>联机房间密码，对应 EasyTier 的网络密钥（network-secret）。</summary>
+    public string MultiplayerKey { get; set; } = string.Empty;
+
+    /// <summary>EasyTier 公共节点地址。默认走实测可用的 UDP 节点。</summary>
+    public string MultiplayerNode { get; set; } = "udp://39.108.52.138:11010";
+
+    /// <summary>虚拟 IP 分配方式：false = 自动（DHCP），true = 使用下面的固定 IP。</summary>
+    public bool MultiplayerManualIp { get; set; }
+
+    /// <summary>
+    /// 固定虚拟 IP，仅在 <see cref="MultiplayerManualIp"/> 为 true 时使用。
+    /// 必须落在 EasyTier 的默认地址池 10.126.126.0/24 内，否则会和自动分配的人不在同一网段。
+    /// </summary>
+    public string MultiplayerFixedIp { get; set; } = "10.126.126.66";
+
+    /// <summary>历史房间名，供界面下拉快速切换。</summary>
+    public List<string> MultiplayerRecentRooms { get; set; } = [];
+
+    /// <summary>用户自定义的 EasyTier 节点地址，追加在内置节点之后。</summary>
+    public List<string> MultiplayerCustomNodes { get; set; } = [];
+
+    /// <summary>收藏的队友。纯本地，不上传。</summary>
+    public List<FriendRecord> MultiplayerFriends { get; set; } = [];
+
+    // ————— 樱花FRP —————
+
+    /// <summary>
+    /// 樱花FRP 访问密钥。与 Nexus 密钥一样只保存在本机设置文件里，绝不写进日志或版本库。
+    /// 它等价于账号密码，泄露后别人可以拿你的账号开隧道。
+    /// </summary>
+    public string SakuraAccessKey { get; set; } = string.Empty;
+
+    /// <summary>上次启动过的樱花FRP 隧道 ID。</summary>
+    public int SakuraTunnelId { get; set; }
+
+    /// <summary>新建隧道时默认用的名字。</summary>
+    public string SakuraTunnelName { get; set; } = "星露谷";
+
+    // ————— 个性化背景 —————
+
+    /// <summary>窗口内容区背景类型。</summary>
+    public BackgroundKind BackgroundKind { get; set; } = BackgroundKind.None;
+
+    /// <summary>
+    /// 背景文件绝对路径。用户选的文件会被复制到数据目录，避免原文件被移动/删除后背景失效。
+    /// </summary>
+    public string BackgroundFile { get; set; } = string.Empty;
+
+    public BackgroundFit BackgroundFit { get; set; } = BackgroundFit.Cover;
+
+    /// <summary>
+    /// 背景压暗/压淡的百分比（0-80）。深色主题压黑、浅色主题压白，
+    /// 保证直接铺在背景上的页面标题仍然看得清。
+    /// </summary>
+    public int BackgroundDim { get; set; } = 45;
+}
+
+/// <summary>
+/// 收藏的一位队友。以昵称为主键——EasyTier 的虚拟 IP 每次开房都会变，当不了主键，
+/// 所以 IP / 房间名只作为「上次见到时的样子」留着做参考。
+/// </summary>
+public sealed class FriendRecord
+{
+    public string Nickname { get; set; } = string.Empty;
+
+    public string LastIp { get; set; } = string.Empty;
+
+    public string LastRoom { get; set; } = string.Empty;
+
+    /// <summary>一起联机过多少次。</summary>
+    public int Times { get; set; }
+
+    public DateTime LastSeenUtc { get; set; }
 }

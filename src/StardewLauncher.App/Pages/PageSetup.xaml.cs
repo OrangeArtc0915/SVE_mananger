@@ -5,6 +5,7 @@ using System.Windows.Input;
 using StardewLauncher.App.Controls;
 using StardewLauncher.App.Theme;
 using StardewLauncher.App.Windows;
+using StardewLauncher.Core.Appearance;
 using StardewLauncher.Core.Instances;
 using StardewLauncher.Core.IO;
 using StardewLauncher.Core.Logging;
@@ -15,6 +16,8 @@ using StardewLauncher.Core.Weather;
 using CoreApp = StardewLauncher.Core.App;
 using ThemeMode = StardewLauncher.Core.App.ThemeMode;
 using AccentTheme = StardewLauncher.Core.App.AccentTheme;
+using BackgroundKind = StardewLauncher.Core.App.BackgroundKind;
+using BackgroundFit = StardewLauncher.Core.App.BackgroundFit;
 
 namespace StardewLauncher.App.Pages;
 
@@ -638,6 +641,124 @@ public partial class PageSetup : LauncherPage
 
         ButtonTone SelectAccent(AccentTheme theme)
             => ThemeService.Accent == theme ? ButtonTone.Solid : ButtonTone.Outline;
+
+        RefreshBackground();
+    }
+
+    // ————— 个性化背景 —————
+
+    /// <summary>从本地选一张图 / 动图 / 视频当背景。</summary>
+    private void OnPickBackgroundClick(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "选择背景图片或视频",
+            Filter = "图片与视频 (*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.mp4;*.wmv;*.avi)" +
+                     "|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.mp4;*.wmv;*.avi|所有文件 (*.*)|*.*"
+        };
+
+        if (dialog.ShowDialog(Window.GetWindow(this)) != true) return;
+
+        ApplyBackgroundImport(BackgroundService.ImportFile(dialog.FileName));
+    }
+
+    private void OnClearBackgroundClick(object sender, RoutedEventArgs e)
+    {
+        BackgroundService.Clear();
+
+        var settings = CoreApp.SettingsStore.Current;
+        settings.BackgroundKind = BackgroundKind.None;
+        settings.BackgroundFile = string.Empty;
+        CoreApp.SettingsStore.Save();
+
+        RefreshBackground();
+        ApplyBackgroundToWindow();
+    }
+
+    private void OnBackgroundFitClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: string tag }) return;
+        if (!Enum.TryParse<BackgroundFit>(tag, out var fit)) return;
+
+        CoreApp.SettingsStore.Current.BackgroundFit = fit;
+        CoreApp.SettingsStore.Save();
+
+        RefreshBackground();
+        ApplyBackgroundToWindow();
+    }
+
+    private void OnBackgroundDimClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: string tag }) return;
+        if (!int.TryParse(tag, out var dim)) return;
+
+        CoreApp.SettingsStore.Current.BackgroundDim = dim;
+        CoreApp.SettingsStore.Save();
+
+        RefreshBackground();
+        ApplyBackgroundToWindow();
+    }
+
+    /// <summary>导入成功就落盘并立刻生效，失败只把原因显示出来、不动当前背景。</summary>
+    private void ApplyBackgroundImport(BackgroundImport result)
+    {
+        if (!result.Ok)
+        {
+            SetBackgroundStatus(result.Message, warn: true);
+            return;
+        }
+
+        var settings = CoreApp.SettingsStore.Current;
+        settings.BackgroundKind = result.Kind;
+        settings.BackgroundFile = result.Path;
+        CoreApp.SettingsStore.Save();
+
+        RefreshBackground();
+        ApplyBackgroundToWindow();
+
+        SetBackgroundStatus(result.Message, warn: false);
+    }
+
+    /// <summary>让主窗口按最新设置重铺背景，不用重启程序。</summary>
+    private void ApplyBackgroundToWindow()
+        => (Window.GetWindow(this) as MainWindow)?.ApplyBackground();
+
+    private void RefreshBackground()
+    {
+        var settings = CoreApp.SettingsStore.Current;
+
+        BtnFitCover.Tone = settings.BackgroundFit == BackgroundFit.Cover ? ButtonTone.Solid : ButtonTone.Outline;
+        BtnFitContain.Tone = settings.BackgroundFit == BackgroundFit.Contain ? ButtonTone.Solid : ButtonTone.Outline;
+        BtnFitFill.Tone = settings.BackgroundFit == BackgroundFit.Fill ? ButtonTone.Solid : ButtonTone.Outline;
+
+        // 档位是区间判断：用户可以手工改配置文件成任意数值，不该出现「一个都没选中」
+        BtnDimNone.Tone = settings.BackgroundDim <= 0 ? ButtonTone.Solid : ButtonTone.Outline;
+        BtnDimLight.Tone = settings.BackgroundDim is > 0 and <= 35 ? ButtonTone.Solid : ButtonTone.Outline;
+        BtnDimMedium.Tone = settings.BackgroundDim is > 35 and <= 55 ? ButtonTone.Solid : ButtonTone.Outline;
+        BtnDimHeavy.Tone = settings.BackgroundDim > 55 ? ButtonTone.Solid : ButtonTone.Outline;
+
+        var hasBackground = settings.BackgroundKind != BackgroundKind.None
+                            && File.Exists(settings.BackgroundFile);
+
+        SetBackgroundStatus(
+            hasBackground
+                ? $"当前：{DescribeBackgroundKind(settings.BackgroundKind)}　{Path.GetFileName(settings.BackgroundFile)}"
+                : "未设置，使用主题渐变。",
+            warn: false);
+    }
+
+    private static string DescribeBackgroundKind(BackgroundKind kind) => kind switch
+    {
+        BackgroundKind.Image => "静态图",
+        BackgroundKind.Gif => "动图",
+        BackgroundKind.Video => "视频",
+        _ => "无"
+    };
+
+    private void SetBackgroundStatus(string message, bool warn)
+    {
+        LabBackground.Text = message;
+        LabBackground.SetResourceReference(TextBlock.ForegroundProperty, warn ? "Status.Warn" : "Text.Primary");
     }
 
     // ————— 更新开关 —————

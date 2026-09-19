@@ -45,6 +45,7 @@
     <SolidColorBrush x:Key="Surface.Window" Color="#FAF6F0" />
     <SolidColorBrush x:Key="Surface.Panel" Color="#F6EDE2" />
     <SolidColorBrush x:Key="Surface.Card" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="Surface.CardGlass" Color="#D1FFFFFF" />
     <SolidColorBrush x:Key="Surface.CardHover" Color="#FDF6EE" />
     <SolidColorBrush x:Key="Surface.Sunken" Color="#F7F0E7" />
     <SolidColorBrush x:Key="Surface.Overlay" Color="#59000000" />

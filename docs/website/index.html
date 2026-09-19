@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>星露谷启动器 · 把游戏、SMAPI、Mod 和存档收进一个窗口里</title>
-<meta name="description" content="星露谷启动器 v1.0.0：面向《星露谷物语》的 Windows 桌面工具，一站式管理游戏实例、SMAPI 与 Mod——支持 zip / rar / 7z 导入、安装规划、依赖检查，以及在启动器内浏览八个 Mod 站点下载。">
+<meta name="description" content="星露谷启动器 v1.4.0：面向《星露谷物语》的 Windows 桌面工具，一站式管理游戏实例、SMAPI 与 Mod——支持 zip / rar / 7z 导入、安装规划、依赖检查、在启动器内浏览八个 Mod 站点下载，还能用 EasyTier 或樱花 FRP 和朋友联机种地。">
 <style>
     :root {
         --bg: #FAF6F0;
@@ -619,7 +619,7 @@
                 <circle cx="15" cy="7.9" r="3.2" fill="#E67E22"/>
             </svg>
             星露谷启动器
-            <span class="tag">v1.0.0</span>
+            <span class="tag">v1.4.0</span>
         </a>
         <nav class="header-links" aria-label="站内导航">
             <a href="#download">下载</a>
@@ -642,7 +642,7 @@
                 <p class="lede">
                     星露谷启动器是一款面向《星露谷物语》的 Windows 桌面工具：
                     原版与 Mod 端各建各的实例、互不干扰，装 Mod、查前置、下资源、看日志，
-                    都在同一个暖焦糖界面里完成。
+                    都在同一个暖焦糖界面里完成；想和朋友一起种地，它也能把大家组进同一个虚拟局域网。
                 </p>
                 <div class="hero-actions">
                     <a class="btn btn-primary" href="https://github.com/OrangeArtc0915/SVE_mananger/releases">
@@ -665,7 +665,7 @@
                     </a>
                     <a class="btn btn-ghost" href="https://github.com/OrangeArtc0915/SVE_mananger">查看源码</a>
                 </div>
-                <p class="hero-meta">当前版本 <b>v1.0.0</b> · Windows 10 1809 及以上 · .NET 8 · 作者 mmm</p>
+                <p class="hero-meta">当前版本 <b>v1.4.0</b> · Windows 10 1809 及以上 · .NET 8 · 作者 mmm</p>
             </div>
 
             <div class="hero-art">
@@ -693,6 +693,10 @@
                         <rect x="50" y="155" width="50" height="8" rx="4" fill="#D9C3AA"/>
                         <circle cx="36" cy="201" r="6" fill="#C6AB94"/>
                         <rect x="50" y="197" width="58" height="8" rx="4" fill="#D9C3AA"/>
+                        <circle cx="36" cy="243" r="6" fill="#C6AB94"/>
+                        <rect x="50" y="239" width="54" height="8" rx="4" fill="#D9C3AA"/>
+                        <circle cx="36" cy="285" r="6" fill="#C6AB94"/>
+                        <rect x="50" y="281" width="46" height="8" rx="4" fill="#D9C3AA"/>
 
                         <rect x="176" y="62" width="150" height="16" rx="8" fill="#EBD9C6"/>
                         <rect x="176" y="88" width="96" height="10" rx="5" fill="#F2E6D8"/>
@@ -725,7 +729,7 @@
                         <rect x="314" y="336" width="112" height="36" rx="10" fill="#FFFFFF" stroke="#D9C3AA"/>
                         <rect x="334" y="349" width="72" height="10" rx="5" fill="#EBD9C6"/>
                     </svg>
-                    <p class="caption">暖焦糖配色 · 深浅色可切 · 离线可用 · 不捆绑任何游戏本体</p>
+                    <p class="caption">暖焦糖配色 · 深浅色可切 · 支持联机组网 · 不捆绑任何游戏本体</p>
                 </div>
             </div>
         </div>
@@ -737,7 +741,7 @@
             <div class="section-head">
                 <span class="kicker">Features</span>
                 <h2>它能帮你做什么</h2>
-                <p class="section-note">七件事，把小农场打理得井井有条：从装 SMAPI、建实例、装 Mod，到查依赖、下资源、看天气。</p>
+                <p class="section-note">十一件事，把小农场打理得井井有条：从装 SMAPI、建实例、装 Mod，到查依赖、下资源、看天气，再到把朋友拉进同一个房间。</p>
             </div>
 
             <div class="grid">
@@ -750,7 +754,7 @@
                         </svg>
                     </span>
                     <h3>一键装 SMAPI</h3>
-                    <p>在 Mod 管理页点一下就能装 SMAPI，装完自动校验版本，不用再手动解压、找安装脚本。</p>
+                    <p>在「资源中心」点一下就能装 SMAPI，装完自动校验版本，不用再手动解压、找安装脚本。</p>
                     <p>两条线路任选：官方 GitHub Releases，或启动器自建云端镜像（国内可选 Gitee 源）。</p>
                 </article>
 
@@ -811,8 +815,8 @@
                             <path d="M5 16.2v1.6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1.6"/>
                         </svg>
                     </span>
-                    <h3>在启动器内下载</h3>
-                    <p>内嵌浏览器直连八个 Mod 站点，不用切出去。</p>
+                    <h3>资源中心</h3>
+                    <p>下载 Mod、安装 SMAPI、内嵌浏览器直连八个 Mod 站点，都在这一页里，不用切出去。</p>
                     <p>Nexus 页面上点「Mod Manager Download」即可在启动器内下载，非会员也能用。</p>
                 </article>
 
@@ -826,7 +830,58 @@
                     </span>
                     <h3>现实天气与月历</h3>
                     <p>主页按真实日期排当月月历，并显示你所在城市的天气。</p>
-                    <p>暖焦糖界面 + 深浅色，看着更像自家农场。</p>
+                    <p>数据来自 Open-Meteo，不需要填任何 Key。</p>
+                </article>
+
+                <article class="card">
+                    <span class="icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="6" cy="12" r="2.4"/>
+                            <circle cx="18" cy="6.4" r="2.4"/>
+                            <circle cx="18" cy="17.6" r="2.4"/>
+                            <path d="M8.2 10.9 15.8 7.4M8.2 13.1l7.6 3.5"/>
+                        </svg>
+                    </span>
+                    <h3>联机大厅（EasyTier）</h3>
+                    <p>填个昵称和房间名就能开房，启动器自动建一张虚拟局域网，房间名（最多 6 个字符）和密码发给朋友，他们填一样的就能进来。</p>
+                    <p>8 个内置公共节点可一键测速，也能自己填节点；「分享给队友」生成一段文本，队友在那边点「一键加入」就全填好了。</p>
+                </article>
+
+                <article class="card">
+                    <span class="icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M12 3.4 4.6 7.6v8.8L12 20.6l7.4-4.2V7.6L12 3.4Z"/>
+                            <path d="M12 11.8v8.8M4.6 7.6 12 11.8l7.4-4.2"/>
+                        </svg>
+                    </span>
+                    <h3>樱花 FRP 打通端口</h3>
+                    <p>不想走虚拟局域网？填上自己的樱花 FRP 访问密钥，启动器直接帮你建一条 UDP 24642 隧道并拉起 frpc。</p>
+                    <p>隧道起来后把连接地址复制给朋友，他们按游戏自带的联机方式进来就行。</p>
+                </article>
+
+                <article class="card">
+                    <span class="icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M4 6.6h13M13.6 3 17.2 6.6l-3.6 3.6"/>
+                            <path d="M20 17.4H7M10.4 21 6.8 17.4l3.6-3.6"/>
+                        </svg>
+                    </span>
+                    <h3>队友与文件互传</h3>
+                    <p>自动发现同一房间里开着启动器的人，把 Mod 压缩包直接发过去，收件目录一键打开。</p>
+                    <p>走虚拟局域网直连、不经过服务器，整文件 SHA-256 校验，断线可以续传；互相传过文件的人会自动收进「收藏的队友」。</p>
+                </article>
+
+                <article class="card">
+                    <span class="icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="8.6"/>
+                            <circle cx="12" cy="12" r="3.4"/>
+                            <path d="M12 3.4v2.6M12 18v2.6M3.4 12H6M18 12h2.6"/>
+                        </svg>
+                    </span>
+                    <h3>个性化背景与主题</h3>
+                    <p>背景可以换成自己的图片或 GIF 动图，界面是半透明的玻璃质感，背景会从面板后面透出来。</p>
+                    <p>四套配色（暖焦糖 / 天青 / 莓粉 / 秋绿）配深浅色切换，界面跟着一起变。</p>
                 </article>
             </div>
         </div>
@@ -964,12 +1019,13 @@
                 <div class="step">
                     <span class="num">2</span>
                     <h3>先装 SMAPI，再装 Mod</h3>
-                    <p>在「Mod 管理」点「下载 SMAPI」，官方或云端镜像两条线路任选，装完启动器会校验版本。然后把压缩包导入 Mod 库，或在线下载安装；缺前置会顺手提醒。</p>
+                    <p>在「资源中心」点「下载 SMAPI」，官方或云端镜像两条线路任选，装完启动器会校验版本。然后把压缩包导入 Mod 库，或在线下载安装；缺前置会顺手提醒。</p>
                 </div>
                 <div class="step">
                     <span class="num">3</span>
-                    <h3>点启动</h3>
+                    <h3>点启动，或者拉朋友一起种</h3>
                     <p>回到启动页按下按钮就行。启动前会校验 Mod 与前置依赖，游戏日志也会实时显示在下面的面板里。</p>
+                    <p>想和朋友一起种地，就到「联机大厅」开个房间，把「分享给队友」生成的文本发过去，对方一键加入即可。</p>
                 </div>
             </div>
         </div>
@@ -1032,9 +1088,9 @@
             </div>
 
             <div class="facts">
-                <b>包里有什么</b>：<code>StardewLauncher.exe</code>（单文件、自带 .NET 8 运行时）、README、NOTICE、LICENSE。<br>
-                <b>运行要求</b>：Windows 10 1809 及以上 / Windows 11，x64。不需要额外装 .NET，也不需要管理员权限。<br>
-                <b>怎么用</b>：解压到任意目录，双击 <code>StardewLauncher.exe</code>。首次运行会在同目录生成 <code>Data\</code> 存放设置与实例。
+                <b>包里有什么</b>：<code>StardewLauncher.exe</code>（单文件、自带 .NET 8 运行时，内置 EasyTier 组网组件）、README、NOTICE、LICENSE。<br>
+                <b>运行要求</b>：Windows 10 1809 及以上 / Windows 11，x64。不需要额外装 .NET；<b>需要管理员权限</b>——联机要装一张虚拟网卡，双击时会弹一次 UAC。<br>
+                <b>怎么用</b>：解压到任意目录，双击 <code>StardewLauncher.exe</code>。首次运行会在同目录生成 <code>Data\</code> 存放设置与实例，组网组件只在第一次开房时自解压到 <code>Data\EasyTier\</code>。
             </div>
         </div>
     </section>
@@ -1055,7 +1111,7 @@
                 </details>
                 <details>
                     <summary>怎么让 Mod 生效？</summary>
-                    <p>需要先装好 SMAPI，并用 Mod 端实例启动游戏。装 SMAPI 不用出启动器：到「Mod 管理」点「下载 SMAPI」，选好游戏实例后一键安装即可。装好之后，实例页会显示当前 SMAPI 版本。</p>
+                    <p>需要先装好 SMAPI，并用 Mod 端实例启动游戏。装 SMAPI 不用出启动器：到「资源中心」点「下载 SMAPI」，选好游戏实例后一键安装即可。装好之后，实例页会显示当前 SMAPI 版本。</p>
                 </details>
                 <details>
                     <summary>装 SMAPI 时冒出一个黑窗口，是不是出问题了？</summary>
@@ -1064,6 +1120,30 @@
                 <details>
                     <summary>为什么下载很慢？</summary>
                     <p>下载速度取决于本机网络与站点线路，启动器只做转发、不缓存也不加速。如果实在太慢，可以先用浏览器下载好，再用「导入」把压缩包放进 Mod 库安装，效果是一样的。</p>
+                </details>
+                <details>
+                    <summary>为什么启动时会弹 UAC？</summary>
+                    <p>联机要装一张 TUN 虚拟网卡（wintun）来组虚拟局域网，装驱动必须有管理员权限，所以整个程序声明为需要管理员。启动游戏时也会带上管理员权限，这是预期行为。</p>
+                </details>
+                <details>
+                    <summary>开了房间，朋友却进不来？</summary>
+                    <p>先对三件事：① 房间名和密码完全一致（房间名最多 6 个字符）；② 双方启动器版本一致——分享文本里带着版本号，版本不同会被直接拒绝并给出提示；③ 所选的公共节点互通。还是不通，就看看 Windows 防火墙有没有拦启动器的 UDP。</p>
+                </details>
+                <details>
+                    <summary>大厅广场里别人能看到什么？</summary>
+                    <p>大厅是公开广场。点「进入大厅」后，装了本启动器的人都能看到你的昵称、房间名、房间虚拟 IP 和所用节点；房间密码不会公开。不想被看到就点「离开大厅」。</p>
+                </details>
+                <details>
+                    <summary>樱花 FRP 要花钱吗？</summary>
+                    <p>需要你自己在樱花 FRP 面板拿一个访问密钥，免费账号也能开隧道。星露谷联机走 UDP，隧道要建 UDP 类型（默认端口 24642），TCP 隧道用不了。</p>
+                </details>
+                <details>
+                    <summary>传文件会经过服务器吗？</summary>
+                    <p>不经过。文件只在你们的虚拟局域网内直连传输，整文件做 SHA-256 校验，中途断线可以续传；对方不在线时传不了。</p>
+                </details>
+                <details>
+                    <summary>能把视频设成背景吗？</summary>
+                    <p>可以，但视频背景依赖系统自带的 Windows Media Player 组件。部分精简系统（如 Windows 10 LTSC）没有这个组件，此时请改用图片或 GIF 动图。</p>
                 </details>
                 <details>
                     <summary>存档在哪？会不会丢？</summary>
@@ -1079,7 +1159,7 @@
     <div class="wrap">
         <div class="footer-grid">
             <div>
-                <p class="footer-title">星露谷启动器 v1.0.0</p>
+                <p class="footer-title">星露谷启动器 v1.4.0</p>
                 <div class="footer-copy">
                     <span>作者 mmm</span>
                     <span aria-hidden="true">·</span>
@@ -1104,6 +1184,7 @@
 
         <p class="disclaimer">
             本工具不提供游戏本体分发。《星露谷物语》版权归 ConcernedApe 所有，本项目与其无隶属关系。
+            联机功能内置 EasyTier 组网组件与虚拟网卡驱动，许可证与来源见随包 NOTICE。
             Mod 下载以当前登录用户的身份进行；本页面为离线单文件页面，未引用任何外部资源。© <span id="year">2026</span> mmm
         </p>
     </div>

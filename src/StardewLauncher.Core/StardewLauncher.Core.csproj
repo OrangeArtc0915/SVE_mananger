@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MQTTnet" Version="4.3.7.1207" />
     <PackageReference Include="SharpCompress" Version="0.38.0" />
   </ItemGroup>
 

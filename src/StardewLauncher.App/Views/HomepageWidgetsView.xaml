@@ -145,51 +145,75 @@
             </Grid>
         </c:SurfaceCard>
 
-        <!-- 每日一言：文字与交互保持原样，仅叠一层信纸底纹 -->
+        <!-- 每日一言：左上大号装饰引号，正文缩进让开；换一句挪到右上角与天气卡一致 -->
         <c:SurfaceCard MinHeight="140" Padding="0">
-            <Grid>
+            <Grid ClipToBounds="True">
                 <Image x:Name="ImgQuotePaper"
+                       HorizontalAlignment="Stretch"
+                       VerticalAlignment="Stretch"
                        IsHitTestVisible="False"
                        Opacity="0.26"
                        Source="pack://application:,,,/StardewLauncher;component/Assets/Art/letter-bg.png"
-                       Stretch="Fill" />
+                       Stretch="UniformToFill" />
 
-                <Grid Margin="14,12,14,10">
+                <Grid Margin="16,12,16,12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0" Orientation="Horizontal">
-                        <svg:SvgIcon Width="14"
-                                     Height="14"
-                                     VerticalAlignment="Center"
-                                     Icon="lucide/message-circle"
-                                     IconBrush="{DynamicResource Accent.Base}" />
-                        <TextBlock Margin="6,0,0,0"
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0"
+                                    VerticalAlignment="Center"
+                                    Orientation="Horizontal">
+                            <svg:SvgIcon Width="14"
+                                         Height="14"
+                                         VerticalAlignment="Center"
+                                         Icon="lucide/message-circle"
+                                         IconBrush="{DynamicResource Accent.Base}" />
+                            <TextBlock Margin="6,0,0,0"
+                                       VerticalAlignment="Center"
+                                       FontSize="11.5"
+                                       Foreground="{DynamicResource Text.Tertiary}"
+                                       Text="每日一言" />
+                        </StackPanel>
+
+                        <c:RoundIconButton x:Name="BtnNextQuote"
+                                           Grid.Column="1"
+                                           Width="24"
+                                           Height="24"
+                                           Icon="lucide/refresh-cw"
+                                           IconSize="12"
+                                           Tone="Plain"
+                                           ToolTip="换一句"
+                                           Click="OnNextQuoteClick" />
+                    </Grid>
+
+                    <Grid Grid.Row="1" Margin="0,6,0,0">
+                        <!-- 装饰引号是水印，不参与排版，正文用左缩进让开 -->
+                        <TextBlock Margin="-4,-10,0,0"
+                                   HorizontalAlignment="Left"
+                                   VerticalAlignment="Top"
+                                   FontSize="46"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource Accent.Bright}"
+                                   IsHitTestVisible="False"
+                                   Opacity="0.24"
+                                   Text="“" />
+
+                        <TextBlock x:Name="LabQuote"
+                                   Margin="28,2,0,0"
                                    VerticalAlignment="Center"
-                                   FontSize="11.5"
-                                   Foreground="{DynamicResource Text.Tertiary}"
-                                   Text="每日一言" />
-                    </StackPanel>
-
-                    <TextBlock x:Name="LabQuote"
-                               Grid.Row="1"
-                               Margin="0,10,0,0"
-                               VerticalAlignment="Center"
-                               FontSize="13"
-                               LineHeight="21"
-                               TextWrapping="Wrap" />
-
-                    <c:OutlineButton x:Name="BtnNextQuote"
-                                     Grid.Row="2"
-                                     Margin="0,10,0,0"
-                                     Padding="10,4"
-                                     HorizontalAlignment="Right"
-                                     FontSize="12"
-                                     Content="换一句"
-                                     Click="OnNextQuoteClick" />
+                                   FontSize="14.5"
+                                   Foreground="{DynamicResource Text.Primary}"
+                                   LineHeight="24"
+                                   TextWrapping="Wrap" />
+                    </Grid>
                 </Grid>
             </Grid>
         </c:SurfaceCard>

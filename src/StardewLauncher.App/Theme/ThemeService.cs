@@ -153,6 +153,15 @@ public static class ThemeService
         // 承载面：白底 + 暖色侧栏
         brushes["Surface.Window"] = dark ? ColorOf("#1C1815") : ColorOf("#FAF6F0");
         brushes["Surface.Panel"] = dark ? ColorOf("#241F1A") : ColorOf("#F6EDE2");
+
+        // 侧栏与标题栏用半透明版本：个性化背景要能透到整个窗口，不能只铺内容区。
+        // 留 22% 的透出量——看得出是壁纸，导航文字也不至于糊在图上。
+        brushes["Surface.PanelGlass"] = dark ? ColorOf("#C7241F1A") : ColorOf("#C7F6EDE2");
+
+        // 卡片也半透明，但比侧栏稍实一点（18% 透出）：卡片里文字更密，对比度要留足。
+        // 只给 SurfaceCard 模板用；Surface.Card 保持不透明，否则嵌在卡片里的面板和弹窗
+        // 会变成「半透明套半透明」，叠出来的通透度不可控。
+        brushes["Surface.CardGlass"] = dark ? ColorOf("#D12B2520") : ColorOf("#D1FFFFFF");
         brushes["Surface.Card"] = dark ? ColorOf("#2B2520") : Colors.White;
         brushes["Surface.CardHover"] = dark ? ColorOf("#342D26") : ColorOf("#FDF6EE");
         brushes["Surface.Sunken"] = dark ? ColorOf("#211C18") : ColorOf("#F7F0E7");

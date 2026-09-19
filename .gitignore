@@ -21,6 +21,15 @@ SMAPI * installer*
 JuniGrid/
 SMUI-2023/
 
+# 参考用的第三方联机模块：同上，且体积大
+HMOL联机模块/
+
+# 另一个独立项目（超级星露谷 / 星露谷助手），与本启动器无关
+stardew-valley-assistant/
+
+# 构建工具安装包：.NET SDK 安装器约 200 MB，属于本机环境而非源码
+dotnet-sdk-*.exe
+
 # 临时截图
 Screenshot_*.jpg
 Screenshot_*.png

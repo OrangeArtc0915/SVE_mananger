@@ -9,5 +9,9 @@ public static class NavPages
 
     public const int Instance = 2;
 
-    public const int Setup = 3;
+    public const int Resource = 3;
+
+    public const int Multiplayer = 4;
+
+    public const int Setup = 5;
 }

@@ -257,6 +257,7 @@ public partial class HomepageWidgetsView : UserControl
     private void ApplyArtOpacity()
     {
         if (ImgQuotePaper is null) return;
-        ImgQuotePaper.Opacity = ThemeService.IsDark ? 0.12 : 0.26;
+        // 改成 UniformToFill 后底纹比原来实，透明度相应压低
+        ImgQuotePaper.Opacity = ThemeService.IsDark ? 0.1 : 0.18;
     }
 }

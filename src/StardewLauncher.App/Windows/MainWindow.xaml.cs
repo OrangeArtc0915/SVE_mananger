@@ -9,6 +9,7 @@ using StardewLauncher.App.Animation;
 using StardewLauncher.App.Controls;
 using StardewLauncher.App.Interop;
 using StardewLauncher.App.Pages;
+using StardewLauncher.App.Theme;
 using StardewLauncher.Core.IO;
 using StardewLauncher.Core.Logging;
 using CoreApp = StardewLauncher.Core.App;
@@ -42,11 +43,32 @@ public partial class MainWindow : Window
         Loaded += (_, _) =>
         {
             SwitchToPage(NavPages.Launch);
+            ApplyBackground();
+
+            // 主题变了要重铺一次：压暗层在深色主题用黑、浅色主题用白
+            ThemeService.ThemeChanged += ApplyBackground;
 #if DEBUG
             DebugCapture.TryRunOverlapScan(this);
             DebugCapture.TryCapture(this);
 #endif
         };
+
+        Closed += (_, _) => ThemeService.ThemeChanged -= ApplyBackground;
+
+        // 最小化时停掉视频与动图，别白烧 CPU
+        StateChanged += (_, _) => BackgroundView.SetPaused(WindowState == WindowState.Minimized);
+    }
+
+    /// <summary>按设置铺内容区背景。设置页改完直接调这里，不用重启。</summary>
+    internal void ApplyBackground()
+    {
+        var settings = CoreApp.SettingsStore.Current;
+
+        BackgroundView.Apply(
+            settings.BackgroundKind,
+            settings.BackgroundFile,
+            settings.BackgroundFit,
+            settings.BackgroundDim);
     }
 
     protected override void OnSourceInitialized(EventArgs e)
@@ -115,6 +137,9 @@ public partial class MainWindow : Window
         AnimationEngine.Opacity(previous, 0, 90, Ease.OutFluent, Swap);
     }
 
+    /// <summary>当前显示的页面。给自检用。</summary>
+    internal LauncherPage? CurrentPage => PanContent.Child as LauncherPage;
+
     private LauncherPage GetPage(int page)
     {
         if (_pages.TryGetValue(page, out var cached)) return cached;
@@ -123,6 +148,8 @@ public partial class MainWindow : Window
         {
             NavPages.Mod => new PageMod(),
             NavPages.Instance => new PageInstance(),
+            NavPages.Resource => new PageResource(),
+            NavPages.Multiplayer => new PageMultiplayer(),
             NavPages.Setup => new PageSetup(),
             _ => new PageLaunch()
         };
@@ -139,6 +166,8 @@ public partial class MainWindow : Window
         NavLaunch.IsChecked = page == NavPages.Launch;
         NavMod.IsChecked = page == NavPages.Mod;
         NavInstance.IsChecked = page == NavPages.Instance;
+        NavResource.IsChecked = page == NavPages.Resource;
+        NavMultiplayer.IsChecked = page == NavPages.Multiplayer;
         NavSetup.IsChecked = page == NavPages.Setup;
 
         _suppressNavCheck = false;

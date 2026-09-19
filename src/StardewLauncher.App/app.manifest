@@ -9,6 +9,18 @@
     </application>
   </compatibility>
 
+  <!--
+    联机功能要装虚拟网卡（EasyTier 走 wintun 建 TUN 适配器），装驱动必须管理员权限，
+    所以整个程序声明为 requireAdministrator，双击时弹一次 UAC。
+  -->
+  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
+    <security>
+      <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+        <requestedExecutionLevel level="requireAdministrator" uiAccess="false" />
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+
   <application xmlns="urn:schemas-microsoft-com:asm.v3">
     <windowsSettings>
       <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true/pm</dpiAware>

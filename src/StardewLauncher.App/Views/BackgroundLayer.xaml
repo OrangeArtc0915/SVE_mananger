@@ -1,0 +1,24 @@
+<UserControl x:Class="StardewLauncher.App.Views.BackgroundLayer"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             IsHitTestVisible="False">
+    <Grid ClipToBounds="True">
+        <!-- 静态图 / 动图共用这一个 Image：动图靠换 Source 逐帧播放 -->
+        <Image x:Name="ImgBackground"
+               Stretch="UniformToFill"
+               Visibility="Collapsed" />
+
+        <MediaElement x:Name="VidBackground"
+                      IsMuted="True"
+                      LoadedBehavior="Manual"
+                      MediaEnded="OnVideoEnded"
+                      MediaFailed="OnVideoFailed"
+                      MediaOpened="OnVideoOpened"
+                      Stretch="UniformToFill"
+                      UnloadedBehavior="Manual"
+                      Visibility="Collapsed" />
+
+        <!-- 压暗/压淡层：背景直接铺在页面标题下面，不压一层标题会看不清 -->
+        <Border x:Name="OverlayDim" Background="#00000000" />
+    </Grid>
+</UserControl>

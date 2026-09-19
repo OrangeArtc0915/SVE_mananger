@@ -1,6 +1,6 @@
 # 星露谷启动器
 
-面向《星露谷物语》(Stardew Valley) 的 Windows 桌面管理工具，把**游戏实例、SMAPI、Mod 和存档**收进一个窗口。
+面向《星露谷物语》(Stardew Valley) 的 Windows 桌面管理工具，把**游戏实例、SMAPI、Mod、存档和联机**收进一个窗口。
 
 官网：<https://orangeartc0915.github.io/SVE_mananger/>
 
@@ -8,9 +8,13 @@
 - Mod 管理：直接吃 `zip` / `rar` / `7z` / `tar` / `gz`，自动识别安装方式；支持启用/禁用、标签分类、Mod 库
 - 安装规划：安装前先列出「会发生什么」（覆盖哪些文件、替换哪些 XNB、装到哪个目录），确认后再动手
 - 依赖检查：递归解析 `manifest.json` 的前置关系，缺哪个一键补齐
-- **一键装 SMAPI**：在 Mod 管理页直接下载并安装 SMAPI，官方与启动器云端镜像两条线路可选
-- 在线下载：内嵌浏览器浏览八个 Mod 站点，Nexus 页面上点「Mod Manager Download」即可在启动器内下载，非会员也能用
+- **一键装 SMAPI**：在「资源中心」直接下载并安装 SMAPI，官方与启动器云端镜像两条线路可选
+- 资源中心：下载 Mod、安装 SMAPI、内嵌浏览器浏览八个 Mod 站点，Nexus 页面上点「Mod Manager Download」即可在启动器内下载，非会员也能用
+- **联机大厅**：用 EasyTier 建虚拟局域网把朋友拉进同一个房间，8 个内置公共节点可测速，「分享给队友」生成一段文本、队友「一键加入」；也可以到大厅广场找别人公开的房间
+- **樱花 FRP**：填自己的访问密钥，在启动器里开一条 UDP 24642 隧道，把连接地址发给朋友即可
+- **队友与文件互传**：虚拟局域网内直连传 Mod 包，支持断点续传与 SHA-256 校验，不经过第三方服务器
 - 现实天气与月历：接的是现实生活的时间与天气，不是游戏内存档
+- 个性化背景与主题：背景可换成自己的图片 / GIF，界面半透明玻璃质感，四套配色 + 深浅色可切
 
 ---
 
@@ -27,11 +31,13 @@
 发行包内容：
 
 ```
-StardewLauncher.exe   启动器本体（单文件、自带 .NET 8 运行时）
+StardewLauncher.exe   启动器本体（单文件、自带 .NET 8 运行时，内置 EasyTier 组网组件）
 README.md             本文件
 NOTICE                第三方依赖与参考来源说明
 LICENSE               MIT 许可证
 ```
+
+> 组网组件（EasyTier、wintun、WinDivert、Packet.dll）已嵌进 exe，**首次开房时才自解压**到 `Data\EasyTier\`，不联机就不会多出这些东西。
 
 ### 运行环境
 
@@ -41,7 +47,7 @@ LICENSE               MIT 许可证
 | 架构 | x64 |
 | 运行时 | **不需要**单独安装 .NET，exe 已自包含 .NET 8 |
 | WebView2 | Windows 11 自带；Windows 10 若在线浏览 Mod 页面时报缺失，装一次免费的 [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/) 即可 |
-| 权限 | 普通用户即可，**不需要**管理员权限（`nxm://` 协议只写当前用户注册表） |
+| 权限 | **需要管理员权限**：联机要装 TUN 虚拟网卡（wintun），装驱动必须有管理员权限，所以双击时会弹一次 UAC |
 
 ### 安装后第一次运行
 
@@ -50,13 +56,14 @@ LICENSE               MIT 许可证
 2. 到「游戏实例」新建一个实例，选**原版**或 **Mod 端**
    - 原版：直接拉起 `Stardew Valley.exe`
    - Mod 端：走 SMAPI 启动，Mod 管理功能只对这个实例生效
-3. 到「Mod 管理」把压缩包导入（或先在「下载中心」在线下载），勾选后一键安装
+3. 到「资源中心」下载 Mod，或把压缩包导入「Mod 管理」后勾选安装
+4. 想和朋友一起种地：到「联机大厅」，填昵称和房间名后点「开启联机」，把「分享给队友」生成的文本发过去；对方「一键加入」即可
 
 > 启动器**不分发游戏本体**。SMAPI 可以由启动器代装（见下），装好后实例页会显示当前 SMAPI 版本。
 
 ### 让启动器代装 SMAPI
 
-Mod 管理页工具栏上的 **「下载 SMAPI」**，两条线路：
+「资源中心 → 下载 SMAPI」，两条线路：
 
 | 线路 | 来源 | 说明 |
 | --- | --- | --- |
@@ -79,11 +86,16 @@ Mod 管理页工具栏上的 **「下载 SMAPI」**，两条线路：
 程序是绿色的，删掉整个目录即可。运行时会**在 exe 同目录**创建 `Data\`：
 
 ```
-Data\Settings.json     设置（含 Nexus API Key，注意别外传）
+Data\Settings.json     设置（含 Nexus API Key 与樱花 FRP 访问密钥，注意别外传）
 Data\instances\        实例定义、每个实例的 Mod / 存档目录
+Data\EasyTier\         联机用的组网组件（首次开房时自解压）
+Data\SakuraFrp\        樱花 FRP 的 frpc 客户端（首次使用时下载）
+Data\Background\       自定义背景素材
 Data\Cache\            缓存
 Data\Log\              运行日志，反馈问题时请带上
 ```
+
+另外，收到的文件与下载的安装包放在 `%LOCALAPPDATA%\StardewLauncher\Downloads\`（「收到的文件」子目录）。
 
 删掉 `Data\` 等同于恢复出厂设置。也可以用环境变量 `STARDEWLAUNCHER_DATA` 把数据目录重定向到别处，做便携部署或测试隔离。
 
@@ -113,7 +125,7 @@ src\StardewLauncher.App\bin\Debug\net8.0-windows\StardewLauncher.exe
 :: 等价于 build.bat 的发布命令
 dotnet publish src\StardewLauncher.App\StardewLauncher.App.csproj ^
     -c Release -r win-x64 --self-contained true ^
-    -p:PublishSingleFile=true -p:DebugType=none -p:Version=1.0.0 -o publish
+    -p:PublishSingleFile=true -p:DebugType=none -p:Version=1.4.0 -o publish
 ```
 
 也可以直接双击 `一键编译并运行.bat` 做「编译 + 启动」。
@@ -126,9 +138,12 @@ dotnet publish src\StardewLauncher.App\StardewLauncher.App.csproj ^
 src/
   StardewLauncher.Core/     纯逻辑，不依赖 WPF
     App/        应用元信息、路径、设置持久化
+    Appearance/ 背景素材的导入与清理
     Games/      Steam VDF 解析与游戏目录定位
     Instances/  实例模型与存储
     Mods/       manifest 解析、Mod 扫描、依赖解析、安装规划与执行
+    Multiplayer/ 联机组网（EasyTier）、大厅信标（MQTT）、分享文本、节点测速、
+                 队友收藏、文件传输、樱花 FRP
     Nexus/      Nexus API、nxm:// 链接、断点续传下载
     Smapi/      SMAPI 版本查询、云端镜像发现、安装包识别与安装器调用
     Weather/    现实天气（Open-Meteo，无需 Key）
@@ -136,9 +151,13 @@ src/
     Tasks/      后台任务中心
   StardewLauncher.App/      WPF 界面
     Windows/    主窗口及各功能弹窗
-    Pages/      启动 / Mod 管理 / 游戏实例 / 设置
+    Pages/      启动 / Mod 管理 / 游戏实例 / 资源中心 / 联机大厅 / 设置
+    Views/      嵌入页面的子视图与背景层
+    Multiplayer/ EasyTier 组件的自解压
     Controls/   自绘控件与 SVG 图标解析
+    Assets/     图标、装饰图与内置组网组件
     Resources/  语义化配色与控件样式
+    Theme/      主题与强调色
 docs/
   website/      官网（单文件静态页，GitHub Pages 从这里发布）
 build.bat       发行构建脚本
@@ -163,6 +182,21 @@ A：不是。那是 SMAPI 官方安装器自己的控制台窗口，启动器无
 **Q：下载很慢？**
 A：速度取决于本机网络与站点线路，启动器只做转发，不缓存也不加速。可以先在浏览器里下好，再用「导入」把压缩包放进 Mod 库，效果一样。SMAPI 安装包也一样，云端线路里可以换成 Gitee 源。
 
+**Q：为什么启动时会弹 UAC？**
+A：联机要装一张 TUN 虚拟网卡（wintun）来组虚拟局域网，装驱动必须有管理员权限，所以整个程序声明为需要管理员。启动后会用管理员权限启动游戏，这是预期行为。
+
+**Q：开了房间，队友却进不来？**
+A：先确认三件事——① 房间名和密码完全一致（房间名最多 6 个字符）；② 双方启动器版本一致，分享文本里带版本号，版本不同会被直接拒绝并提示；③ 所选节点互通。如果还是不通，检查 Windows 防火墙有没有拦启动器的 UDP。
+
+**Q：大厅广场会暴露我的信息吗？**
+A：大厅广场是公开广场。点「进入大厅」后，所有装了本启动器的人都能看到你的**昵称、房间名、房间虚拟 IP 与所用节点**；房间密码不会公开。不想被看到就点「离开大厅」。
+
+**Q：樱花 FRP 要花钱吗？**
+A：需要你自己在樱花 FRP 面板拿一个访问密钥，免费账号也能开隧道。星露谷联机走 UDP，隧道要建 **UDP 类型**（默认端口 24642），TCP 隧道用不了。
+
+**Q：传文件会经过服务器吗？**
+A：不经过。文件只在你们的虚拟局域网内直连传输，整文件做 SHA-256 校验，中途断线可以续传；对方不在线时传不了。
+
 **Q：支持 macOS / Linux 吗？**
 A：不支持，只做 Windows。
 
@@ -175,6 +209,8 @@ A：不支持，只做 Windows。
 界面结构、配色与图标为独立设计。参考过的开源项目、借鉴的思路以及使用的第三方包（含各自许可证要求）都写在 [NOTICE](NOTICE) 里，请一并阅读。
 
 内置图标来自 [Lucide](https://lucide.dev)（ISC License）。
+
+联机功能内置了 EasyTier 组网组件及其虚拟网卡驱动（wintun / WinDivert / Packet.dll）。它们各自有独立的许可证，其中 `Packet.dll` 属于 Npcap，**再分发有额外条件**，具体见 [NOTICE](NOTICE)。
 
 ## 免责声明
 

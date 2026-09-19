@@ -8,66 +8,77 @@
     <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="20,18,20,10">
 
-            <!-- 欢迎卡 -->
+            <!--
+                欢迎卡：左边问候语，右边整张全景图。
+                全景图是 640x400（1.6:1），内容区做 140 高时它渲染成 224x140 ——
+                用 Uniform 才是「完整显示、不裁切、不变形」，换任何比例的图都不会出问题。
+                之前用 UniformToFill 在这种扁框里铺满，必然要先把图放大再裁掉大半，怎么调都难看。
+            -->
             <c:SurfaceCard Padding="0">
-                <Grid ClipToBounds="True">
-                    <!-- 星露谷素材：低透明度全景做点缀，压在文字下方不影响可读性 -->
-                    <Image x:Name="ImgWelcomePanorama"
-                           Height="96"
-                           HorizontalAlignment="Right"
-                           VerticalAlignment="Center"
-                           IsHitTestVisible="False"
-                           Opacity="0.24"
-                           Source="pack://application:,,,/StardewLauncher;component/Assets/Art/stardew-panorama.png"
-                           Stretch="UniformToFill" />
-
-                    <Grid Margin="18,14,18,14">
+                <Grid Margin="20,18,20,18">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
+                    <!-- 图标方块：直接用程序自己的图标，和标题栏、任务栏保持一致 -->
                     <Border Grid.Column="0"
-                            Width="72"
-                            Height="72"
+                            Width="64"
+                            Height="64"
                             Margin="0,0,18,0"
-                            Background="{DynamicResource Accent.Base}"
+                            ClipToBounds="True"
+                            VerticalAlignment="Center"
                             CornerRadius="{StaticResource Radius.Card}">
-                        <svg:SvgIcon Icon="lucide/sparkles"
-                                     Width="30"
-                                     Height="30"
-                                     HorizontalAlignment="Center"
-                                     VerticalAlignment="Center"
-                                     IconBrush="{DynamicResource Text.OnAccent}" />
+                        <Image Width="64"
+                               Height="64"
+                               Source="pack://application:,,,/StardewLauncher;component/Assets/AppIcon.png"
+                               Stretch="Uniform" />
                     </Border>
 
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="1"
+                                Margin="0,0,20,0"
+                                VerticalAlignment="Center">
                         <TextBlock x:Name="LabGreeting"
-                                   FontSize="19"
+                                   FontSize="21"
                                    FontWeight="Bold"
                                    Foreground="{DynamicResource Text.Primary}" />
-                        <TextBlock Margin="0,4,0,10"
+                        <TextBlock Margin="0,5,0,0"
                                    FontSize="12.5"
                                    Foreground="{DynamicResource Text.Secondary}"
                                    Text="小农场主，今天也要好好种地呀" />
-                        <Border HorizontalAlignment="Left"
-                                Padding="12,6"
-                                Background="{DynamicResource Accent.Bright}"
+
+                        <!-- 今日宜：淡底 + 强调色字，别抢问候语的视觉重心 -->
+                        <Border Margin="0,12,0,0"
+                                Padding="10,4"
+                                HorizontalAlignment="Left"
+                                Background="{DynamicResource Accent.Faint}"
                                 CornerRadius="{StaticResource Radius.Pill}">
-                            <TextBlock FontSize="12.5"
-                                       FontWeight="Bold"
-                                       Foreground="{DynamicResource Text.OnAccent}"
+                            <TextBlock FontSize="11.5"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource Accent.Base}"
                                        Text="今日宜挖矿，宜开心" />
                         </Border>
                     </StackPanel>
 
-                    <StackPanel Grid.Column="2"
-                                HorizontalAlignment="Right"
-                                VerticalAlignment="Center">
-                        <TextBlock FontSize="20" Text="🌱" />
-                    </StackPanel>
-                    </Grid>
+                    <!--
+                        全景图整张显示，不裁切也不拉伸。
+                        圆角靠 Border 的背景裁切实现：Border 的 Background 会被裁进圆角里，
+                        不用再套一层 OpacityMask（上一版套了，反而把图切成了半张）。
+                    -->
+                    <Border Grid.Column="2"
+                            Width="240"
+                            Height="140"
+                            VerticalAlignment="Center"
+                            CornerRadius="{StaticResource Radius.Card}">
+                        <Border.Background>
+                            <ImageBrush x:Name="BrushPanorama"
+                                        AlignmentX="Center"
+                                        AlignmentY="Center"
+                                        ImageSource="pack://application:,,,/StardewLauncher;component/Assets/Art/stardew-panorama.png"
+                                        Stretch="Uniform" />
+                        </Border.Background>
+                    </Border>
                 </Grid>
             </c:SurfaceCard>
 
