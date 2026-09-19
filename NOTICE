@@ -86,55 +86,26 @@ src/StardewLauncher.App/Assets/Art/ 下的少量装饰图片来源于《星露�
 版权归 ConcernedApe (Eric Barone) 所有。本项目仅将其用于个人本地使用的界面点缀，
 不主张任何权利。若需分发本项目，建议移除这些素材或替换为自绘资源。
 
-十、内置组网组件：EasyTier
---------------------------
-项目地址：https://github.com/EasyTier/EasyTier
-许可证：Apache License 2.0（已通过 GitHub 仓库元数据核对）
+十、联机功能：樱花FRP 客户端
+----------------------------
+联机走的是第三方内网穿透服务「樱花FRP」(Sakura Frp)，服务与客户端来源：
+https://www.natfrp.com/ （接口域名 https://api.natfrp.com/）
 
-src/StardewLauncher.App/Assets/EasyTier/ 下的 easytier-core.exe 与 easytier-cli.exe
-是 EasyTier 官方 Windows 发行版的可执行文件，本项目**未做任何修改**，
-作为联机功能的组网后端随程序分发（嵌入单文件 exe，首次使用时自解压到数据目录）。
+需要说明的是：
 
-按 Apache License 2.0 的要求：
-  - 本项目保留 EasyTier 的版权与许可声明（即本节）；
-  - 不声称与 EasyTier 项目存在隶属或背书关系；
-  - Apache License 2.0 不授予任何商标权，本项目未使用 EasyTier 的名称与标识；
-  - 许可证全文可在上述项目地址获取。
+  - 本发行包**不包含**樱花FRP 的客户端 frpc，也不包含它的任何组件。
+    用户在程序里点「准备 frpc」时，程序才从樱花FRP 官方接口下载官方客户端，
+    存放在本机数据目录（Data\SakuraFrp\），并用接口返回的 MD5 校验完整性。
+    也就是说，本项目分发的是「去官方下载」这一步，而不是第三方二进制的副本。
+  - 使用该功能需要用户自备樱花FRP 账号与访问密钥。访问密钥只保存在本机设置文件里，
+    不会上传到本项目，也不会写进日志。
+  - 隧道由樱花FRP 的服务端与官方客户端维持，使用需遵守樱花FRP 的服务条款。
+  - 本项目与樱花FRP 无隶属关系，未获其授权或背书；文中出现「樱花FRP」仅用于指称该服务本身。
 
-EasyTier 官方 Windows 发行包中还附带以下两个系统组件，本项目**原样分发、未做任何修改**：
+另需说明：v1.4.0 之前的版本曾在安装包内嵌入 EasyTier 组网组件（Apache-2.0）及其附带的
+wintun.dll、WinDivert64.sys 与 Packet.dll（Npcap，闭源、不允许再分发）。
+自 v1.4.0 起联机功能改为只走樱花FRP，上述组件已**全部从项目与发行包中移除**，
+本发行包不再包含任何第三方闭源二进制。
 
-  - wintun.dll —— 来源 WireGuard LLC（文件属性：Wintun Driver 0.14.1）
-      源码采用 GPL-2.0，但官方明确说明「预编译且已签名的 DLL 采用另一份更宽松的许可，
-      该许可随压缩包提供」，并允许随软件一起分发。本项目使用的是官方签名的预编译版本。
-      项目地址：https://www.wintun.net/
-
-  - WinDivert64.sys —— 来源 WinDivert 2.2，作者 basil
-      许可证：LGPL-3.0 或 GPL-2.0（双许可，可任选其一）
-      项目地址：https://reqrypt.org/windivert.html
-      LGPL-3.0 的要求是「分发二进制时需附许可证、且接收方能够替换该组件」。
-      本项目按原文件名原样分发、未做修改，可被替换。
-
-⚠️ 分发前必须处理：Packet.dll
------------------------------
-EasyTier 官方发行包里还有第 5 个文件 Packet.dll，本项目当前也一并分发，但它**不是开源软件**：
-
-  - 实测其文件属性为 Npcap 1.79，公司 Insecure.Com LLC.（即 Nmap 项目）。
-  - Npcap 的许可协议原文明确写着：「它并非开源软件，未经 Nmap 项目特别许可，
-    不得再分发或用于其它软件」；免费版还限制只能在 5 台机器上安装。
-  - **已实测确认它是必需组件，不能靠删掉它绕过**：把 Packet.dll 从组件目录移除后，
-    easytier-core.exe 立刻以 0xC0000135（STATUS_DLL_NOT_FOUND，缺少 DLL）退出，
-    连 `--version` 都打印不出来；加回后立刻恢复正常。
-    也就是说它是加载期硬依赖，不是可选的运行时后端。
-  - 因此对外分发本程序前，只能二选一：
-
-      (a) 取得 Npcap OEM 再分发许可（商业授权，https://npcap.com/oem/redist.html）；
-      (b) 发行包中不放 Packet.dll，改为提示用户自行安装 Npcap。
-          Npcap 官方对开源项目正是这个建议：「让用户自己去下载安装，5 份以内对他们是免费的」。
-          Npcap 会把 Packet.dll 装到 System32，位于系统 DLL 搜索路径中，
-          因此用户装好之后 EasyTier 依然能正常加载。
-          代价是用户多一步手动安装，且程序需要能识别
-          「0xC0000135 退出」这种失败并给出明确指引。
-
-  - 在未处理之前，请勿对外分发本程序。
 
 

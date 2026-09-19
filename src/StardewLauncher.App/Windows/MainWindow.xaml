@@ -163,7 +163,7 @@
                                            GroupName="MainNav"
                                            Icon="lucide/network"
                                            Tag="4"
-                                           Text="联机大厅"
+                                           Text="樱花联机"
                                            Checked="OnNavChecked" />
                                 <c:NavItem x:Name="NavSetup"
                                            GroupName="MainNav"

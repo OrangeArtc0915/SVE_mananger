@@ -1,12 +1,10 @@
 <c:LauncherPage x:Class="StardewLauncher.App.Pages.PageMultiplayer"
                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                xmlns:c="clr-namespace:StardewLauncher.App.Controls"
-                xmlns:svg="clr-namespace:StardewLauncher.App.Controls.Svg">
+                xmlns:c="clr-namespace:StardewLauncher.App.Controls">
 
     <Grid Margin="24,20,24,16">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
@@ -22,11 +20,11 @@
             <StackPanel Grid.Column="0"
                         Margin="0,0,12,0"
                         VerticalAlignment="Center">
-                <TextBlock FontSize="18" FontWeight="Bold" Text="联机大厅" />
+                <TextBlock FontSize="18" FontWeight="Bold" Text="联机（樱花FRP）" />
                 <TextBlock Margin="0,4,0,0"
                            FontSize="12"
                            Foreground="{DynamicResource Text.Secondary}"
-                           Text="用虚拟局域网把朋友拉进同一个房间；也可以到大厅广场找别人公开的房间"
+                           Text="用樱花FRP 把本地 UDP 24642 穿透出去，把连接地址发给朋友，他们在游戏里按局域网联机加入"
                            TextTrimming="CharacterEllipsis" />
             </StackPanel>
 
@@ -34,934 +32,291 @@
                         VerticalAlignment="Center"
                         Orientation="Horizontal">
                 <c:OutlineButton x:Name="BtnLaunchGame"
-                                 Margin="0,0,8,0"
                                  Content="去启动游戏"
-                                 IsEnabled="False"
                                  ToolTip="切到「启动」页，用那里的启动按钮（会先做 Mod 与前置校验）"
                                  Click="OnLaunchGameClick" />
-                <c:OutlineButton x:Name="BtnShare"
-                                 Margin="0,0,8,0"
-                                 Content="分享给队友"
-                                 ToolTip="生成一段组网分享文本，队友复制后点「一键加入」即可填好同样的房间信息"
-                                 Click="OnShareClick" />
-                <c:OutlineButton x:Name="BtnJoinShare"
-                                 Margin="0,0,8,0"
-                                 Content="一键加入"
-                                 ToolTip="从剪贴板读取队友发来的分享文本，自动填好房间名 / 密码 / 节点"
-                                 Click="OnJoinShareClick" />
-                <c:OutlineButton x:Name="BtnStart"
-                                 Tone="Solid"
-                                 Click="OnStartClick">
-                    <StackPanel Orientation="Horizontal">
-                        <svg:SvgIcon Width="14"
-                                     Height="14"
-                                     VerticalAlignment="Center"
-                                     Icon="lucide/play"
-                                     IconBrush="{DynamicResource Text.OnAccent}" />
-                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Text="开启联机" />
-                    </StackPanel>
-                </c:OutlineButton>
-                <c:OutlineButton x:Name="BtnStop"
-                                 Margin="8,0,0,0"
-                                 Content="断开联机"
-                                 IsEnabled="False"
-                                 Tone="Danger"
-                                 Click="OnStopClick" />
             </StackPanel>
         </Grid>
 
-        <!-- 子标签 -->
-        <StackPanel Grid.Row="1"
-                    Margin="0,14,0,0"
-                    Orientation="Horizontal">
-            <c:OutlineButton x:Name="BtnTabMine"
-                             Content="我的房间"
-                             Tag="0"
-                             Tone="Solid"
-                             Click="OnTabClick" />
-            <c:OutlineButton x:Name="BtnTabSakura"
-                             Margin="8,0,0,0"
-                             Content="樱花FRP"
-                             Tag="1"
-                             Tone="Outline"
-                             Click="OnTabClick" />
-            <c:OutlineButton x:Name="BtnTabTeam"
-                             Margin="8,0,0,0"
-                             Content="队友"
-                             Tag="2"
-                             Tone="Outline"
-                             Click="OnTabClick" />
-            <c:OutlineButton x:Name="BtnTabHall"
-                             Margin="8,0,0,0"
-                             Content="大厅广场"
-                             Tag="3"
-                             Tone="Outline"
-                             Click="OnTabClick" />
-        </StackPanel>
+        <!-- 樱花FRP -->
+        <ScrollViewer x:Name="PanSakura"
+                      Grid.Row="1"
+                      Margin="0,12,0,0"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <c:SurfaceCard Title="账号" UseShadow="False">
+                    <StackPanel>
+                        <TextBlock FontSize="12" Foreground="{DynamicResource Text.Secondary}" Text="访问密钥" />
+                        <Border Height="34"
+                                Margin="0,8,0,0"
+                                Padding="10,0"
+                                Background="{DynamicResource Surface.Sunken}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource Radius.Button}">
+                            <TextBox x:Name="TxtSakuraKey"
+                                     VerticalContentAlignment="Center"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     CaretBrush="{DynamicResource Text.Primary}"
+                                     Foreground="{DynamicResource Text.Primary}" />
+                        </Border>
 
-        <Grid Grid.Row="2" Margin="0,12,0,0">
+                        <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                            <c:OutlineButton x:Name="BtnSakuraVerify"
+                                             Padding="12,5"
+                                             Content="验证并加载"
+                                             FontSize="12.5"
+                                             Tone="Solid"
+                                             Click="OnSakuraVerifyClick" />
+                            <TextBlock x:Name="LabSakuraState"
+                                       Margin="10,0,0,0"
+                                       VerticalAlignment="Center"
+                                       FontSize="11.5"
+                                       Foreground="{DynamicResource Text.Tertiary}"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
 
-            <!-- ===================== 我的房间 ===================== -->
-            <ScrollViewer x:Name="PanMine"
-                          HorizontalScrollBarVisibility="Disabled"
-                          VerticalScrollBarVisibility="Auto">
-                <StackPanel>
-                    <c:SurfaceCard Title="房间设置" UseShadow="False">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
+                        <TextBlock x:Name="LabSakuraAccount"
+                                   Margin="0,10,0,0"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource Text.Primary}"
+                                   TextWrapping="Wrap"
+                                   Visibility="Collapsed" />
 
-                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,0">
-                                <TextBlock FontSize="12" Foreground="{DynamicResource Text.Secondary}" Text="我的昵称" />
-                                <Border Height="34"
-                                        Margin="0,8,0,0"
-                                        Padding="10,0"
-                                        Background="{DynamicResource Surface.Sunken}"
-                                        BorderBrush="{DynamicResource Border.Default}"
-                                        BorderThickness="1"
-                                        CornerRadius="{StaticResource Radius.Button}">
-                                    <TextBox x:Name="TxtNickname"
-                                             VerticalContentAlignment="Center"
-                                             Background="Transparent"
-                                             BorderThickness="0"
-                                             CaretBrush="{DynamicResource Text.Primary}"
-                                             Foreground="{DynamicResource Text.Primary}" />
-                                </Border>
-                            </StackPanel>
+                        <TextBlock Margin="0,8,0,0"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   TextWrapping="Wrap"
+                                   Text="访问密钥在樱花FRP 管理面板 → 用户信息里复制。它等价于账号密码，只存在本机设置文件里，不会上传。" />
+                    </StackPanel>
+                </c:SurfaceCard>
 
-                            <StackPanel Grid.Row="0" Grid.Column="1" Margin="10,0,0,0">
-                                <TextBlock FontSize="12" Foreground="{DynamicResource Text.Secondary}" Text="房间名（最多 6 字）" />
-                                <Border Height="34"
-                                        Margin="0,8,0,0"
-                                        Padding="10,0"
-                                        Background="{DynamicResource Surface.Sunken}"
-                                        BorderBrush="{DynamicResource Border.Default}"
-                                        BorderThickness="1"
-                                        CornerRadius="{StaticResource Radius.Button}">
-                                    <TextBox x:Name="TxtRoom"
-                                             MaxLength="6"
-                                             VerticalContentAlignment="Center"
-                                             Background="Transparent"
-                                             BorderThickness="0"
-                                             CaretBrush="{DynamicResource Text.Primary}"
-                                             Foreground="{DynamicResource Text.Primary}" />
-                                </Border>
-                            </StackPanel>
-
-                            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,12,10,0">
-                                <TextBlock FontSize="12" Foreground="{DynamicResource Text.Secondary}" Text="房间密码（可留空）" />
-                                <Border Height="34"
-                                        Margin="0,8,0,0"
-                                        Padding="10,0"
-                                        Background="{DynamicResource Surface.Sunken}"
-                                        BorderBrush="{DynamicResource Border.Default}"
-                                        BorderThickness="1"
-                                        CornerRadius="{StaticResource Radius.Button}">
-                                    <TextBox x:Name="TxtKey"
-                                             VerticalContentAlignment="Center"
-                                             Background="Transparent"
-                                             BorderThickness="0"
-                                             CaretBrush="{DynamicResource Text.Primary}"
-                                             Foreground="{DynamicResource Text.Primary}" />
-                                </Border>
-                            </StackPanel>
-
-                            <StackPanel Grid.Row="1" Grid.Column="1" Margin="10,12,0,0">
-                                <TextBlock FontSize="12" Foreground="{DynamicResource Text.Secondary}" Text="公共节点" />
-                                <Grid Margin="0,8,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <Border Grid.Column="0"
-                                            Height="34"
-                                            Padding="10,0"
-                                            Background="{DynamicResource Surface.Sunken}"
-                                            BorderBrush="{DynamicResource Border.Default}"
-                                            BorderThickness="1"
-                                            CornerRadius="{StaticResource Radius.Button}">
-                                        <TextBlock x:Name="LabNode"
-                                                   VerticalAlignment="Center"
-                                                   FontSize="12"
-                                                   Foreground="{DynamicResource Text.Primary}"
-                                                   TextTrimming="CharacterEllipsis" />
-                                    </Border>
-
-                                    <c:OutlineButton x:Name="BtnPickNode"
-                                                     Grid.Column="1"
-                                                     Margin="8,0,0,0"
-                                                     Padding="12,6"
-                                                     Content="选择"
-                                                     FontSize="12.5"
-                                                     ToolTip="从内置节点里选，也可以添加自定义节点并测速"
-                                                     Click="OnPickNodeClick" />
-                                </Grid>
-                            </StackPanel>
-
-                            <StackPanel Grid.Row="2"
-                                        Grid.ColumnSpan="2"
-                                        Margin="0,12,0,0"
-                                        Orientation="Horizontal">
-                                <TextBlock VerticalAlignment="Center"
-                                           FontSize="12"
-                                           Foreground="{DynamicResource Text.Secondary}"
-                                           Text="虚拟 IP" />
-                                <c:OutlineButton x:Name="BtnIpAuto"
-                                                 Margin="10,0,0,0"
-                                                 Padding="12,5"
-                                                 Content="自动分配"
-                                                 FontSize="12.5"
-                                                 Tone="Solid"
-                                                 Click="OnIpModeClick" />
-                                <c:OutlineButton x:Name="BtnIpFixed"
-                                                 Margin="8,0,0,0"
-                                                 Padding="12,5"
-                                                 Content="固定 IP"
-                                                 FontSize="12.5"
-                                                 Tone="Outline"
-                                                 Click="OnIpModeClick" />
-
-                                <Border x:Name="BoxFixedIp"
-                                        Width="160"
-                                        Height="30"
-                                        Margin="10,0,0,0"
-                                        Padding="10,0"
-                                        VerticalAlignment="Center"
-                                        Background="{DynamicResource Surface.Sunken}"
-                                        BorderBrush="{DynamicResource Border.Default}"
-                                        BorderThickness="1"
-                                        CornerRadius="{StaticResource Radius.Button}"
-                                        Visibility="Collapsed">
-                                    <TextBox x:Name="TxtFixedIp"
-                                             VerticalContentAlignment="Center"
-                                             Background="Transparent"
-                                             BorderThickness="0"
-                                             CaretBrush="{DynamicResource Text.Primary}"
-                                             Foreground="{DynamicResource Text.Primary}"
-                                             ToolTip="必须和房间内其他人在同一网段：EasyTier 默认地址池是 10.126.126.0/24" />
-                                </Border>
-
-                                <TextBlock Margin="12,0,0,0"
-                                           VerticalAlignment="Center"
-                                           FontSize="11.5"
-                                           Foreground="{DynamicResource Text.Tertiary}"
-                                           Text="房间名和密码要发给朋友，他们填一样的才能进同一房间" />
-                            </StackPanel>
-                        </Grid>
-                    </c:SurfaceCard>
-
-                    <Grid Margin="0,12,0,0">
+                <c:SurfaceCard Margin="0,12,0,0" Title="frpc 客户端" UseShadow="False">
+                    <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
-                        <c:SurfaceCard Grid.Column="0"
-                                       Width="300"
-                                       Title="我的虚拟 IP"
-                                       UseShadow="False">
-                            <StackPanel>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="LabFrpcState"
+                                   Grid.Column="0"
+                                   Margin="0,0,12,0"
+                                   VerticalAlignment="Center"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource Text.Secondary}"
+                                   TextWrapping="Wrap"
+                                   Text="还没有准备 frpc 客户端。用它才能把本地端口穿透出去。" />
 
-                                    <TextBlock x:Name="LabMyIp"
-                                               Grid.Column="0"
-                                               VerticalAlignment="Center"
-                                               FontSize="19"
-                                               FontWeight="Bold"
-                                               Foreground="{DynamicResource Accent.Base}"
-                                               Text="未连接" />
-
-                                    <c:OutlineButton x:Name="BtnCopyIp"
-                                                     Grid.Column="1"
-                                                     Padding="10,4"
-                                                     Content="复制"
-                                                     FontSize="12"
-                                                     IsEnabled="False"
-                                                     ToolTip="复制虚拟 IP 到剪贴板"
-                                                     Click="OnCopyIpClick" />
-                                </Grid>
-                                <TextBlock x:Name="LabMyIpHint"
-                                           Margin="0,6,0,0"
-                                           FontSize="11.5"
-                                           Foreground="{DynamicResource Text.Tertiary}"
-                                           TextWrapping="Wrap"
-                                           Text="连接成功后会在这里显示你的虚拟 IP" />
-                                <TextBlock x:Name="LabNodeInfo"
-                                           Margin="0,12,0,0"
-                                           FontSize="11.5"
-                                           Foreground="{DynamicResource Text.Secondary}"
-                                           TextWrapping="Wrap" />
-                            </StackPanel>
-                        </c:SurfaceCard>
-
-                        <c:SurfaceCard Grid.Column="1"
-                                       Margin="12,0,0,0"
-                                       Title="房间成员"
-                                       UseShadow="False">
-                            <Grid>
-                                <TextBlock x:Name="LabNoPeers"
-                                           FontSize="12"
-                                           Foreground="{DynamicResource Text.Tertiary}"
-                                           TextWrapping="Wrap"
-                                           Text="还没有其他成员。把房间名、密码和你的虚拟 IP 发给朋友，他们连上后就会出现在这里。" />
-                                <ScrollViewer x:Name="ScrollPeers"
-                                              MaxHeight="150"
-                                              HorizontalScrollBarVisibility="Disabled"
-                                              VerticalScrollBarVisibility="Auto"
-                                              Visibility="Collapsed">
-                                    <ItemsControl x:Name="PanPeers">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Grid Margin="0,3">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
-
-                                                    <TextBlock Grid.Column="0"
-                                                               FontSize="12.5"
-                                                               Foreground="{DynamicResource Text.Primary}"
-                                                               Text="{Binding Hostname}"
-                                                               TextTrimming="CharacterEllipsis" />
-                                                    <TextBlock Grid.Column="1"
-                                                               Margin="12,0,0,0"
-                                                               FontSize="12.5"
-                                                               Foreground="{DynamicResource Text.Secondary}"
-                                                               Text="{Binding Ipv4}" />
-                                                    <TextBlock Grid.Column="2"
-                                                               Margin="12,0,0,0"
-                                                               FontSize="11.5"
-                                                               Foreground="{DynamicResource Text.Tertiary}"
-                                                               Text="{Binding LatencyText}" />
-                                                </Grid>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </ScrollViewer>
-                            </Grid>
-                        </c:SurfaceCard>
+                        <c:OutlineButton x:Name="BtnPrepareFrpc"
+                                         Grid.Column="1"
+                                         Padding="12,5"
+                                         Content="准备 frpc"
+                                         FontSize="12.5"
+                                         Click="OnPrepareFrpcClick" />
                     </Grid>
-                </StackPanel>
-            </ScrollViewer>
+                </c:SurfaceCard>
 
-            <!-- ===================== 樱花FRP ===================== -->
-            <ScrollViewer x:Name="PanSakura"
-                          HorizontalScrollBarVisibility="Disabled"
-                          VerticalScrollBarVisibility="Auto"
-                          Visibility="Collapsed">
-                <StackPanel>
-                    <c:SurfaceCard Title="账号" UseShadow="False">
-                        <StackPanel>
-                            <TextBlock FontSize="12" Foreground="{DynamicResource Text.Secondary}" Text="访问密钥" />
-                            <Border Height="34"
-                                    Margin="0,8,0,0"
-                                    Padding="10,0"
-                                    Background="{DynamicResource Surface.Sunken}"
-                                    BorderBrush="{DynamicResource Border.Default}"
-                                    BorderThickness="1"
-                                    CornerRadius="{StaticResource Radius.Button}">
-                                <TextBox x:Name="TxtSakuraKey"
-                                         VerticalContentAlignment="Center"
-                                         Background="Transparent"
-                                         BorderThickness="0"
-                                         CaretBrush="{DynamicResource Text.Primary}"
-                                         Foreground="{DynamicResource Text.Primary}" />
-                            </Border>
-
-                            <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
-                                <c:OutlineButton x:Name="BtnSakuraVerify"
-                                                 Padding="12,5"
-                                                 Content="验证并加载"
-                                                 FontSize="12.5"
-                                                 Tone="Solid"
-                                                 Click="OnSakuraVerifyClick" />
-                                <TextBlock x:Name="LabSakuraState"
-                                           Margin="10,0,0,0"
-                                           VerticalAlignment="Center"
-                                           FontSize="11.5"
-                                           Foreground="{DynamicResource Text.Tertiary}"
-                                           TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <TextBlock x:Name="LabSakuraAccount"
-                                       Margin="0,10,0,0"
-                                       FontSize="12"
-                                       Foreground="{DynamicResource Text.Primary}"
-                                       TextWrapping="Wrap"
-                                       Visibility="Collapsed" />
-
-                            <TextBlock Margin="0,8,0,0"
-                                       FontSize="11"
-                                       Foreground="{DynamicResource Text.Tertiary}"
-                                       TextWrapping="Wrap"
-                                       Text="访问密钥在樱花FRP 管理面板 → 用户信息里复制。它等价于账号密码，只存在本机设置文件里，不会上传。" />
-                        </StackPanel>
-                    </c:SurfaceCard>
-
-                    <c:SurfaceCard Margin="0,12,0,0" Title="frpc 客户端" UseShadow="False">
+                <c:SurfaceCard Margin="0,12,0,0" Title="我的 UDP 隧道" UseShadow="False">
+                    <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock x:Name="LabFrpcState"
-                                       Grid.Column="0"
+                            <TextBlock Grid.Column="0"
                                        Margin="0,0,12,0"
                                        VerticalAlignment="Center"
-                                       FontSize="12"
-                                       Foreground="{DynamicResource Text.Secondary}"
-                                       TextWrapping="Wrap"
-                                       Text="还没有准备 frpc 客户端。用它才能把本地端口穿透出去。" />
-
-                            <c:OutlineButton x:Name="BtnPrepareFrpc"
-                                             Grid.Column="1"
-                                             Padding="12,5"
-                                             Content="准备 frpc"
-                                             FontSize="12.5"
-                                             Click="OnPrepareFrpcClick" />
-                        </Grid>
-                    </c:SurfaceCard>
-
-                    <c:SurfaceCard Margin="0,12,0,0" Title="我的 UDP 隧道" UseShadow="False">
-                        <StackPanel>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-
-                                <TextBlock Grid.Column="0"
-                                           Margin="0,0,12,0"
-                                           VerticalAlignment="Center"
-                                           FontSize="11.5"
-                                           Foreground="{DynamicResource Text.Tertiary}"
-                                           TextWrapping="Wrap"
-                                           Text="只有 UDP 隧道能用于星露谷联机。启动后把连接地址发给朋友即可。" />
-
-                                <c:OutlineButton x:Name="BtnRefreshTunnels"
-                                                 Grid.Column="1"
-                                                 Padding="12,5"
-                                                 Content="刷新"
-                                                 FontSize="12.5"
-                                                 Click="OnRefreshTunnelsClick" />
-                            </Grid>
-
-                            <TextBlock x:Name="LabNoTunnels"
-                                       Margin="0,10,0,0"
-                                       FontSize="12"
-                                       Foreground="{DynamicResource Text.Tertiary}"
-                                       TextWrapping="Wrap"
-                                       Text="还没有隧道。先点「验证并加载」，再到下面新建一条。" />
-
-                            <ScrollViewer x:Name="ScrollTunnels"
-                                          MaxHeight="150"
-                                          Margin="0,4,0,0"
-                                          HorizontalScrollBarVisibility="Disabled"
-                                          VerticalScrollBarVisibility="Auto"
-                                          Visibility="Collapsed">
-                                <ItemsControl x:Name="PanTunnels">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid Margin="0,3">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-
-                                                <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                                                    <TextBlock FontSize="12.5"
-                                                               Foreground="{DynamicResource Text.Primary}"
-                                                               Text="{Binding Title}"
-                                                               TextTrimming="CharacterEllipsis" />
-                                                    <TextBlock Margin="0,2,0,0"
-                                                               FontSize="11"
-                                                               Foreground="{DynamicResource Text.Tertiary}"
-                                                               Text="{Binding Detail}"
-                                                               TextTrimming="CharacterEllipsis" />
-                                                </StackPanel>
-
-                                                <c:OutlineButton Grid.Column="1"
-                                                                 Padding="12,5"
-                                                                 VerticalAlignment="Center"
-                                                                 Content="启动"
-                                                                 FontSize="12.5"
-                                                                 Tag="{Binding}"
-                                                                 Tone="Solid"
-                                                                 Click="OnStartTunnelClick" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </ScrollViewer>
-                        </StackPanel>
-                    </c:SurfaceCard>
-
-                    <c:SurfaceCard Margin="0,12,0,0" Title="新建 UDP 隧道" UseShadow="False">
-                        <StackPanel>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-
-                                <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                                    <TextBlock FontSize="12" Foreground="{DynamicResource Text.Secondary}" Text="隧道名" />
-                                    <Border Height="34"
-                                            Margin="0,8,0,0"
-                                            Padding="10,0"
-                                            Background="{DynamicResource Surface.Sunken}"
-                                            BorderBrush="{DynamicResource Border.Default}"
-                                            BorderThickness="1"
-                                            CornerRadius="{StaticResource Radius.Button}">
-                                        <TextBox x:Name="TxtTunnelName"
-                                                 VerticalContentAlignment="Center"
-                                                 Background="Transparent"
-                                                 BorderThickness="0"
-                                                 CaretBrush="{DynamicResource Text.Primary}"
-                                                 Foreground="{DynamicResource Text.Primary}" />
-                                    </Border>
-                                </StackPanel>
-
-                                <c:OutlineButton x:Name="BtnLoadNodes"
-                                                 Grid.Column="1"
-                                                 Margin="0,28,0,0"
-                                                 Padding="12,5"
-                                                 Content="加载节点"
-                                                 FontSize="12.5"
-                                                 Click="OnLoadNodesClick" />
-                            </Grid>
-
-                            <TextBlock x:Name="LabNoNodes"
-                                       Margin="0,10,0,0"
-                                       FontSize="12"
-                                       Foreground="{DynamicResource Text.Tertiary}"
-                                       TextWrapping="Wrap"
-                                       Text="点「加载节点」列出可用于星露谷的节点（要求：允许建隧道 + 允许 UDP + 在线）。" />
-
-                            <ScrollViewer x:Name="ScrollSakuraNodes"
-                                          MaxHeight="140"
-                                          Margin="0,4,0,0"
-                                          HorizontalScrollBarVisibility="Disabled"
-                                          VerticalScrollBarVisibility="Auto"
-                                          Visibility="Collapsed">
-                                <ItemsControl x:Name="PanSakuraNodes">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <c:OutlineButton Margin="0,0,0,6"
-                                                             Padding="12,8"
-                                                             HorizontalContentAlignment="Stretch"
-                                                             Tag="{Binding}"
-                                                             Tone="{Binding Tone}"
-                                                             Click="OnSakuraNodeClick">
-                                                <StackPanel>
-                                                    <TextBlock FontSize="13"
-                                                               Foreground="{DynamicResource Text.Primary}"
-                                                               Text="{Binding Title}"
-                                                               TextTrimming="CharacterEllipsis" />
-                                                    <TextBlock Margin="0,2,0,0"
-                                                               FontSize="11"
-                                                               Foreground="{DynamicResource Text.Tertiary}"
-                                                               Text="{Binding Detail}"
-                                                               TextTrimming="CharacterEllipsis" />
-                                                </StackPanel>
-                                            </c:OutlineButton>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </ScrollViewer>
-
-                            <c:OutlineButton x:Name="BtnCreateTunnel"
-                                             Margin="0,10,0,0"
-                                             Padding="12,6"
-                                             HorizontalAlignment="Left"
-                                             Content="创建 UDP 隧道（本地端口 24642）"
-                                             FontSize="12.5"
-                                             Tone="Solid"
-                                             Click="OnCreateTunnelClick" />
-                        </StackPanel>
-                    </c:SurfaceCard>
-
-                    <c:SurfaceCard x:Name="CardTunnelRunning"
-                                   Margin="0,12,0,0"
-                                   Title="隧道运行中"
-                                   UseShadow="False"
-                                   Visibility="Collapsed">
-                        <StackPanel>
-                            <TextBlock x:Name="LabTunnelAddress"
-                                       FontSize="16"
-                                       FontWeight="Bold"
-                                       Foreground="{DynamicResource Accent.Base}"
-                                       TextWrapping="Wrap"
-                                       Text="正在等待连接地址…" />
-
-                            <TextBlock Margin="0,6,0,0"
                                        FontSize="11.5"
                                        Foreground="{DynamicResource Text.Tertiary}"
                                        TextWrapping="Wrap"
-                                       Text="朋友在游戏里：合作 → 加入局域网游戏 → 输入这个地址。原版没有密码保护，不联机时记得停掉隧道。" />
+                                       Text="只有 UDP 隧道能用于星露谷联机。启动后把连接地址发给朋友即可。" />
 
-                            <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
-                                <c:OutlineButton x:Name="BtnCopyTunnelAddress"
-                                                 Padding="12,5"
-                                                 Content="复制地址"
-                                                 FontSize="12.5"
-                                                 Click="OnCopyTunnelAddressClick" />
-                                <c:OutlineButton x:Name="BtnStopTunnel"
-                                                 Margin="8,0,0,0"
-                                                 Padding="12,5"
-                                                 Content="停止隧道"
-                                                 FontSize="12.5"
-                                                 Tone="Danger"
-                                                 Click="OnStopTunnelClick" />
-                            </StackPanel>
-                        </StackPanel>
-                    </c:SurfaceCard>
-                </StackPanel>
-            </ScrollViewer>
-
-            <!-- ===================== 队友 ===================== -->
-            <ScrollViewer x:Name="PanTeam"
-                          HorizontalScrollBarVisibility="Disabled"
-                          VerticalScrollBarVisibility="Auto"
-                          Visibility="Collapsed">
-                <StackPanel>
-                    <c:SurfaceCard Title="可发送的队友" UseShadow="False">
-                        <StackPanel>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-
-                                <TextBlock Grid.Column="0"
-                                           VerticalAlignment="Center"
-                                           FontSize="11.5"
-                                           Foreground="{DynamicResource Text.Tertiary}"
-                                           TextWrapping="Wrap"
-                                           Text="只能发给「也开着联机大厅、并且和你在同一个房间」的人。文件走虚拟局域网直传，不经过任何服务器。" />
-
-                                <c:OutlineButton x:Name="BtnRefreshTeam"
-                                                 Grid.Column="1"
-                                                 Margin="10,0,0,0"
-                                                 Padding="12,5"
-                                                 Content="刷新"
-                                                 FontSize="12.5"
-                                                 Click="OnRefreshTeamClick" />
-                            </Grid>
-
-                            <TextBlock x:Name="LabNoTeam"
-                                       Margin="0,10,0,0"
-                                       FontSize="12"
-                                       Foreground="{DynamicResource Text.Tertiary}"
-                                       TextWrapping="Wrap"
-                                       Text="还没有发现队友。先点「开启联机」，让对方也进同一个房间，再点「刷新」。" />
-
-                            <ScrollViewer x:Name="ScrollTeam"
-                                          MaxHeight="150"
-                                          Margin="0,4,0,0"
-                                          HorizontalScrollBarVisibility="Disabled"
-                                          VerticalScrollBarVisibility="Auto"
-                                          Visibility="Collapsed">
-                                <ItemsControl x:Name="PanTeamPeers">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid Margin="0,3">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-
-                                                <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                                                    <TextBlock FontSize="12.5"
-                                                               Foreground="{DynamicResource Text.Primary}"
-                                                               Text="{Binding Nickname}"
-                                                               TextTrimming="CharacterEllipsis" />
-                                                    <TextBlock Margin="0,2,0,0"
-                                                               FontSize="11"
-                                                               Foreground="{DynamicResource Text.Tertiary}"
-                                                               Text="{Binding Detail}"
-                                                               TextTrimming="CharacterEllipsis" />
-                                                </StackPanel>
-
-                                                <c:OutlineButton Grid.Column="1"
-                                                                 Padding="12,5"
-                                                                 VerticalAlignment="Center"
-                                                                 Content="发文件"
-                                                                 FontSize="12.5"
-                                                                 Tag="{Binding}"
-                                                                 Tone="Solid"
-                                                                 Click="OnSendFileClick" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </ScrollViewer>
-                        </StackPanel>
-                    </c:SurfaceCard>
-
-                    <c:SurfaceCard x:Name="CardTransfer"
-                                   Margin="0,12,0,0"
-                                   Title="传输中"
-                                   UseShadow="False"
-                                   Visibility="Collapsed">
-                        <StackPanel>
-                            <TextBlock x:Name="LabTransfer"
-                                       FontSize="12"
-                                       Foreground="{DynamicResource Text.Primary}"
-                                       TextWrapping="Wrap" />
-                            <ProgressBar x:Name="BarTransfer"
-                                         Height="6"
-                                         Margin="0,8,0,0"
-                                         Maximum="100"
-                                         Minimum="0" />
-                            <c:OutlineButton x:Name="BtnCancelTransfer"
-                                             Margin="0,10,0,0"
+                            <c:OutlineButton x:Name="BtnRefreshTunnels"
+                                             Grid.Column="1"
                                              Padding="12,5"
-                                             HorizontalAlignment="Right"
-                                             Content="取消"
+                                             Content="刷新"
                                              FontSize="12.5"
-                                             Click="OnCancelTransferClick" />
-                        </StackPanel>
-                    </c:SurfaceCard>
-
-                    <c:SurfaceCard x:Name="CardInbox"
-                                   Margin="0,12,0,0"
-                                   Title="最近收到"
-                                   UseShadow="False"
-                                   Visibility="Collapsed">
-                        <StackPanel>
-                            <TextBlock x:Name="LabInbox"
-                                       FontSize="12"
-                                       Foreground="{DynamicResource Text.Primary}"
-                                       TextWrapping="Wrap" />
-                            <c:OutlineButton Margin="0,10,0,0"
-                                             Padding="12,5"
-                                             HorizontalAlignment="Left"
-                                             Content="打开收件目录"
-                                             FontSize="12.5"
-                                             Click="OnOpenInboxClick" />
-                        </StackPanel>
-                    </c:SurfaceCard>
-
-                    <c:SurfaceCard Margin="0,12,0,0" Title="收藏的队友" UseShadow="False">
-                        <Grid>
-                            <TextBlock x:Name="LabNoFriends"
-                                       FontSize="12"
-                                       Foreground="{DynamicResource Text.Tertiary}"
-                                       TextWrapping="Wrap"
-                                       Text="还没有收藏队友。互相传过文件后会自动收藏，只存在本机、不上传。" />
-
-                            <ScrollViewer x:Name="ScrollFriends"
-                                          MaxHeight="180"
-                                          HorizontalScrollBarVisibility="Disabled"
-                                          VerticalScrollBarVisibility="Auto"
-                                          Visibility="Collapsed">
-                                <ItemsControl x:Name="PanFriends">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid Margin="0,3">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-
-                                                <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                                                    <TextBlock FontSize="12.5"
-                                                               Foreground="{DynamicResource Text.Primary}"
-                                                               Text="{Binding Nickname}"
-                                                               TextTrimming="CharacterEllipsis" />
-                                                    <TextBlock Margin="0,2,0,0"
-                                                               FontSize="11"
-                                                               Foreground="{DynamicResource Text.Tertiary}"
-                                                               Text="{Binding Detail}"
-                                                               TextTrimming="CharacterEllipsis" />
-                                                </StackPanel>
-
-                                                <c:OutlineButton Grid.Column="1"
-                                                                 Padding="10,4"
-                                                                 VerticalAlignment="Center"
-                                                                 Content="删除"
-                                                                 FontSize="12"
-                                                                 Tag="{Binding}"
-                                                                 Tone="Danger"
-                                                                 Click="OnRemoveFriendClick" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </ScrollViewer>
+                                             Click="OnRefreshTunnelsClick" />
                         </Grid>
-                    </c:SurfaceCard>
-                </StackPanel>
-            </ScrollViewer>
 
-            <!-- ===================== 大厅广场 ===================== -->
-            <ScrollViewer x:Name="PanHall"
-                          HorizontalScrollBarVisibility="Disabled"
-                          VerticalScrollBarVisibility="Auto"
-                          Visibility="Collapsed">
-                <StackPanel>
-                    <c:SurfaceCard Title="大厅状态" UseShadow="False">
+                        <TextBlock x:Name="LabNoTunnels"
+                                   Margin="0,10,0,0"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   TextWrapping="Wrap"
+                                   Text="还没有隧道。先点「验证并加载」，再到下面新建一条。" />
+
+                        <ScrollViewer x:Name="ScrollTunnels"
+                                      MaxHeight="150"
+                                      Margin="0,4,0,0"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      VerticalScrollBarVisibility="Auto"
+                                      Visibility="Collapsed">
+                            <ItemsControl x:Name="PanTunnels">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                                                <TextBlock FontSize="12.5"
+                                                           Foreground="{DynamicResource Text.Primary}"
+                                                           Text="{Binding Title}"
+                                                           TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Margin="0,2,0,0"
+                                                           FontSize="11"
+                                                           Foreground="{DynamicResource Text.Tertiary}"
+                                                           Text="{Binding Detail}"
+                                                           TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+
+                                            <c:OutlineButton Grid.Column="1"
+                                                             Padding="12,5"
+                                                             VerticalAlignment="Center"
+                                                             Content="启动"
+                                                             FontSize="12.5"
+                                                             Tag="{Binding}"
+                                                             Tone="Solid"
+                                                             Click="OnStartTunnelClick" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </StackPanel>
+                </c:SurfaceCard>
+
+                <c:SurfaceCard Margin="0,12,0,0" Title="新建 UDP 隧道" UseShadow="False">
+                    <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
-                            <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                                <TextBlock x:Name="LabHallState"
-                                           FontSize="13"
-                                           Foreground="{DynamicResource Text.Primary}"
-                                           Text="未进入大厅" />
-                                <TextBlock Margin="0,6,0,0"
-                                           FontSize="11.5"
-                                           Foreground="{DynamicResource Text.Tertiary}"
-                                           TextWrapping="Wrap"
-                                           Text="大厅是公开广场：所有装了本启动器的人都能看到你的昵称、房间名、房间虚拟 IP 与所用节点。房间密码不会公开。" />
+                            <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                <TextBlock FontSize="12" Foreground="{DynamicResource Text.Secondary}" Text="隧道名" />
+                                <Border Height="34"
+                                        Margin="0,8,0,0"
+                                        Padding="10,0"
+                                        Background="{DynamicResource Surface.Sunken}"
+                                        BorderBrush="{DynamicResource Border.Default}"
+                                        BorderThickness="1"
+                                        CornerRadius="{StaticResource Radius.Button}">
+                                    <TextBox x:Name="TxtTunnelName"
+                                             VerticalContentAlignment="Center"
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             CaretBrush="{DynamicResource Text.Primary}"
+                                             Foreground="{DynamicResource Text.Primary}" />
+                                </Border>
                             </StackPanel>
 
-                            <StackPanel Grid.Column="1"
-                                        VerticalAlignment="Center"
-                                        Orientation="Horizontal">
-                                <c:OutlineButton x:Name="BtnHallEnter"
-                                                 Tone="Solid"
-                                                 Click="OnHallEnterClick" />
-                                <c:OutlineButton x:Name="BtnHallLeave"
-                                                 Margin="8,0,0,0"
-                                                 Content="离开大厅"
-                                                 IsEnabled="False"
-                                                 Click="OnHallLeaveClick" />
-                            </StackPanel>
+                            <c:OutlineButton x:Name="BtnLoadNodes"
+                                             Grid.Column="1"
+                                             Margin="0,28,0,0"
+                                             Padding="12,5"
+                                             Content="加载节点"
+                                             FontSize="12.5"
+                                             Click="OnLoadNodesClick" />
                         </Grid>
-                    </c:SurfaceCard>
 
-                    <c:SurfaceCard x:Name="CardHallPeers"
-                                   Margin="0,12,0,0"
-                                   Title="在线玩家"
-                                   UseShadow="False">
-                        <Grid>
-                            <TextBlock x:Name="LabNoHallPeers"
-                                       FontSize="12"
-                                       Foreground="{DynamicResource Text.Tertiary}"
-                                       TextWrapping="Wrap"
-                                       Text="大厅里还没有其他人。" />
-                            <ScrollViewer x:Name="ScrollHallPeers"
-                                          MaxHeight="130"
-                                          HorizontalScrollBarVisibility="Disabled"
-                                          VerticalScrollBarVisibility="Auto"
-                                          Visibility="Collapsed">
-                                <ItemsControl x:Name="PanHallPeers">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid Margin="0,3">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="LabNoNodes"
+                                   Margin="0,10,0,0"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   TextWrapping="Wrap"
+                                   Text="点「加载节点」列出可用于星露谷的节点（要求：允许建隧道 + 允许 UDP + 在线）。" />
 
-                                                <TextBlock Grid.Column="0"
-                                                           FontSize="12.5"
+                        <ScrollViewer x:Name="ScrollSakuraNodes"
+                                      MaxHeight="140"
+                                      Margin="0,4,0,0"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      VerticalScrollBarVisibility="Auto"
+                                      Visibility="Collapsed">
+                            <ItemsControl x:Name="PanSakuraNodes">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <c:OutlineButton Margin="0,0,0,6"
+                                                         Padding="12,8"
+                                                         HorizontalContentAlignment="Stretch"
+                                                         Tag="{Binding}"
+                                                         Tone="{Binding Tone}"
+                                                         Click="OnSakuraNodeClick">
+                                            <StackPanel>
+                                                <TextBlock FontSize="13"
                                                            Foreground="{DynamicResource Text.Primary}"
-                                                           Text="{Binding Nickname}"
+                                                           Text="{Binding Title}"
                                                            TextTrimming="CharacterEllipsis" />
-                                                <TextBlock Grid.Column="1"
-                                                           Margin="12,0,0,0"
-                                                           FontSize="11.5"
+                                                <TextBlock Margin="0,2,0,0"
+                                                           FontSize="11"
                                                            Foreground="{DynamicResource Text.Tertiary}"
-                                                           Text="{Binding OnlineText}" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </ScrollViewer>
-                        </Grid>
-                    </c:SurfaceCard>
+                                                           Text="{Binding Detail}"
+                                                           TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+                                        </c:OutlineButton>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
 
-                    <c:SurfaceCard x:Name="CardHallRooms"
-                                   Margin="0,12,0,0"
-                                   Title="公开房间"
-                                   UseShadow="False">
-                        <Grid>
-                            <TextBlock x:Name="LabNoHallRooms"
-                                       FontSize="12"
-                                       Foreground="{DynamicResource Text.Tertiary}"
-                                       TextWrapping="Wrap"
-                                       Text="大厅里还没有人公开房间。开启联机后，你的房间也会出现在别人的列表里。" />
-                            <ScrollViewer x:Name="ScrollHallRooms"
-                                          MaxHeight="200"
-                                          HorizontalScrollBarVisibility="Disabled"
-                                          VerticalScrollBarVisibility="Auto"
-                                          Visibility="Collapsed">
-                                <ItemsControl x:Name="PanHallRooms">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid Margin="0,4">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
+                        <c:OutlineButton x:Name="BtnCreateTunnel"
+                                         Margin="0,10,0,0"
+                                         Padding="12,6"
+                                         HorizontalAlignment="Left"
+                                         Content="创建 UDP 隧道（本地端口 24642）"
+                                         FontSize="12.5"
+                                         Tone="Solid"
+                                         Click="OnCreateTunnelClick" />
+                    </StackPanel>
+                </c:SurfaceCard>
 
-                                                <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock FontSize="13"
-                                                                   FontWeight="SemiBold"
-                                                                   Foreground="{DynamicResource Text.Primary}"
-                                                                   Text="{Binding Room}"
-                                                                   TextTrimming="CharacterEllipsis" />
-                                                        <Border Margin="8,0,0,0"
-                                                                Padding="7,1"
-                                                                VerticalAlignment="Center"
-                                                                Background="{DynamicResource Status.WarnSoft}"
-                                                                CornerRadius="{StaticResource Radius.Pill}"
-                                                                Visibility="{Binding LockedVisibility}">
-                                                            <TextBlock FontSize="10"
-                                                                       FontWeight="SemiBold"
-                                                                       Foreground="{DynamicResource Status.Warn}"
-                                                                       Text="有密码" />
-                                                        </Border>
-                                                    </StackPanel>
-                                                    <TextBlock Margin="0,3,0,0"
-                                                               FontSize="11.5"
-                                                               Foreground="{DynamicResource Text.Tertiary}"
-                                                               Text="{Binding Meta}"
-                                                               TextTrimming="CharacterEllipsis" />
-                                                </StackPanel>
+                <c:SurfaceCard x:Name="CardTunnelRunning"
+                               Margin="0,12,0,0"
+                               Title="隧道运行中"
+                               UseShadow="False"
+                               Visibility="Collapsed">
+                    <StackPanel>
+                        <TextBlock x:Name="LabTunnelAddress"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource Accent.Base}"
+                                   TextWrapping="Wrap"
+                                   Text="正在等待连接地址…" />
 
-                                                <c:OutlineButton Grid.Column="1"
-                                                                 Padding="12,5"
-                                                                 VerticalAlignment="Center"
-                                                                 Content="加入"
-                                                                 FontSize="12.5"
-                                                                 Tag="{Binding}"
-                                                                 Tone="Solid"
-                                                                 Click="OnJoinRoomClick" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </ScrollViewer>
-                        </Grid>
-                    </c:SurfaceCard>
-                </StackPanel>
-            </ScrollViewer>
-        </Grid>
+                        <TextBlock Margin="0,6,0,0"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   TextWrapping="Wrap"
+                                   Text="朋友在游戏里：合作 → 加入局域网游戏 → 输入这个地址。原版没有密码保护，不联机时记得停掉隧道。" />
+
+                        <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
+                            <c:OutlineButton x:Name="BtnCopyTunnelAddress"
+                                             Padding="12,5"
+                                             Content="复制地址"
+                                             FontSize="12.5"
+                                             Click="OnCopyTunnelAddressClick" />
+                            <c:OutlineButton x:Name="BtnStopTunnel"
+                                             Margin="8,0,0,0"
+                                             Padding="12,5"
+                                             Content="停止隧道"
+                                             FontSize="12.5"
+                                             Tone="Danger"
+                                             Click="OnStopTunnelClick" />
+                        </StackPanel>
+                    </StackPanel>
+                </c:SurfaceCard>
+            </StackPanel>
+        </ScrollViewer>
 
         <!-- 运行日志 -->
-        <c:SurfaceCard Grid.Row="3"
+        <c:SurfaceCard Grid.Row="2"
                        Margin="0,12,0,0"
                        Title="运行日志"
                        UseShadow="False">

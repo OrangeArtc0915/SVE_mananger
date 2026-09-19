@@ -26,15 +26,6 @@
     <Resource Include="Assets\Art\AppIconSource.jpg" />
   </ItemGroup>
 
-  <!--
-    EasyTier 组网工具（约 33 MB）。作为嵌入资源随单文件 exe 一起分发，
-    首次使用联机功能时由 EasyTierAssets 自解压到数据目录。
-    不能放进上面的 Resource 组：那会进 .g.resources，运行时取不出来。
-  -->
-  <ItemGroup>
-    <EmbeddedResource Include="Assets\EasyTier\*" />
-  </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\StardewLauncher.Core\StardewLauncher.Core.csproj" />
   </ItemGroup>

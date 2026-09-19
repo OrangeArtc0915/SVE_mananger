@@ -10,13 +10,13 @@
   </compatibility>
 
   <!--
-    联机功能要装虚拟网卡（EasyTier 走 wintun 建 TUN 适配器），装驱动必须管理员权限，
-    所以整个程序声明为 requireAdministrator，双击时弹一次 UAC。
+    联机走樱花FRP 的 frpc 客户端，它只是普通用户态进程，不装网卡也不装驱动，
+    所以按最低权限运行即可，双击不会弹 UAC。
   -->
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
     <security>
       <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
-        <requestedExecutionLevel level="requireAdministrator" uiAccess="false" />
+        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
       </requestedPrivileges>
     </security>
   </trustInfo>

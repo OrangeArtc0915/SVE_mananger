@@ -121,38 +121,6 @@ public sealed class Settings
 
     public long MaxLogFileSize { get; set; } = 8 * 1024 * 1024;
 
-    // ————— 联机大厅 —————
-
-    /// <summary>联机时显示的昵称，会广播给同一房间的其他人。</summary>
-    public string MultiplayerNickname { get; set; } = string.Empty;
-
-    /// <summary>联机房间名，对应 EasyTier 的网络名（network-name）。</summary>
-    public string MultiplayerRoom { get; set; } = string.Empty;
-
-    /// <summary>联机房间密码，对应 EasyTier 的网络密钥（network-secret）。</summary>
-    public string MultiplayerKey { get; set; } = string.Empty;
-
-    /// <summary>EasyTier 公共节点地址。默认走实测可用的 UDP 节点。</summary>
-    public string MultiplayerNode { get; set; } = "udp://39.108.52.138:11010";
-
-    /// <summary>虚拟 IP 分配方式：false = 自动（DHCP），true = 使用下面的固定 IP。</summary>
-    public bool MultiplayerManualIp { get; set; }
-
-    /// <summary>
-    /// 固定虚拟 IP，仅在 <see cref="MultiplayerManualIp"/> 为 true 时使用。
-    /// 必须落在 EasyTier 的默认地址池 10.126.126.0/24 内，否则会和自动分配的人不在同一网段。
-    /// </summary>
-    public string MultiplayerFixedIp { get; set; } = "10.126.126.66";
-
-    /// <summary>历史房间名，供界面下拉快速切换。</summary>
-    public List<string> MultiplayerRecentRooms { get; set; } = [];
-
-    /// <summary>用户自定义的 EasyTier 节点地址，追加在内置节点之后。</summary>
-    public List<string> MultiplayerCustomNodes { get; set; } = [];
-
-    /// <summary>收藏的队友。纯本地，不上传。</summary>
-    public List<FriendRecord> MultiplayerFriends { get; set; } = [];
-
     // ————— 樱花FRP —————
 
     /// <summary>
@@ -184,22 +152,4 @@ public sealed class Settings
     /// 保证直接铺在背景上的页面标题仍然看得清。
     /// </summary>
     public int BackgroundDim { get; set; } = 45;
-}
-
-/// <summary>
-/// 收藏的一位队友。以昵称为主键——EasyTier 的虚拟 IP 每次开房都会变，当不了主键，
-/// 所以 IP / 房间名只作为「上次见到时的样子」留着做参考。
-/// </summary>
-public sealed class FriendRecord
-{
-    public string Nickname { get; set; } = string.Empty;
-
-    public string LastIp { get; set; } = string.Empty;
-
-    public string LastRoom { get; set; } = string.Empty;
-
-    /// <summary>一起联机过多少次。</summary>
-    public int Times { get; set; }
-
-    public DateTime LastSeenUtc { get; set; }
 }
