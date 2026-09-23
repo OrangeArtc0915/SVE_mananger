@@ -3,6 +3,7 @@
 
 // 导入 Icon 组件，用于显示图标
 import Icon from "@iconify/svelte";
+import "@utils/local-icons";
 import { onDestroy, onMount } from "svelte";
 import { slide } from "svelte/transition";
 // 从配置文件中导入音乐播放器配置

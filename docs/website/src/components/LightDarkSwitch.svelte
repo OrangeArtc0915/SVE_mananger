@@ -1,6 +1,7 @@
 <script lang="ts">
 import { DARK_MODE, LIGHT_MODE } from "@constants/constants.ts";
 import Icon from "@iconify/svelte";
+import "@utils/local-icons";
 import {
 	getStoredTheme,
 	setTheme,

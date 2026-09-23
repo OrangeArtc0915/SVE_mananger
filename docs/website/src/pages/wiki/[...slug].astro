@@ -1,11 +1,11 @@
 ---
-import { getCollection, render } from "astro:content";
+import { getCollection, getEntry, render } from "astro:content";
 import { Icon } from "astro-icon/components";
 import Markdown from "@components/misc/Markdown.astro";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { url } from "@utils/url-utils";
 
-const categories = ["入门", "使用", "疑难排查"];
+const categories = ["入门", "使用", "疑难排查", "关于"];
 
 export async function getStaticPaths() {
 	const entries = await getCollection("wiki");
@@ -16,7 +16,11 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const { Content, headings } = await render(entry);
+
+// 正文可以直接写在 wiki 里，也可以用 ref 指到别处（例如赞助说明与 /helpus/ 共用一份）
+const [refCollection, refSlug] = (entry.data.ref ?? "").split("/");
+const refEntry = refCollection && refSlug ? await getEntry(refCollection as "spec", refSlug) : undefined;
+const { Content, headings } = refEntry ? await render(refEntry) : await render(entry);
 
 // 与目录页用同一套排序，用来算上一页 / 下一页
 const all = (await getCollection("wiki"))
@@ -46,7 +50,7 @@ const next = current >= 0 && current < all.length - 1 ? all[current + 1] : undef
 			<div class="flex flex-wrap items-center gap-2 text-sm text-50 mb-5 onload-animation">
 				<a href={url("/wiki/")} class="transition hover:text-[var(--primary)] flex items-center gap-1">
 					<Icon name="material-symbols:menu-book-rounded" class="text-[1.05rem]" />
-					<span>使用手册</span>
+					<span>Wiki</span>
 				</a>
 				<Icon name="material-symbols:chevron-right-rounded" class="text-[1.05rem] opacity-60" />
 				<span class="text-75">{entry.data.category}</span>

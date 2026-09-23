@@ -6,7 +6,6 @@ import SideBar from "@components/widget/SideBar.astro";
 import type { MarkdownHeading } from "astro";
 import { Icon } from "astro-icon/components";
 import FullscreenWallpaper from "../components/misc/FullscreenWallpaper.astro";
-import IconifyLoader from "../components/misc/IconifyLoader.astro";
 import ImageWrapper from "../components/misc/ImageWrapper.astro";
 import TypewriterText from "../components/TypewriterText.astro";
 import TOC from "../components/widget/TOC.astro";
@@ -181,9 +180,6 @@ const transparentClass = shouldEnableTransparency
 	<FullscreenWallpaper config={fullscreenWallpaperConfig} />
 )}
 
-<!-- 全局图标加载器 -->
-<IconifyLoader />
-
 <!-- 为全屏壁纸模式添加body类 -->
 {shouldEnableTransparency && (
 	<script>
@@ -232,6 +228,7 @@ const transparentClass = shouldEnableTransparency
                                     position={siteConfig.banner.position}
                                     loading={index === 0 ? "eager" : "lazy"}
                                     fetchpriority={index === 0 ? "high" : "low"}
+                                    defer={index > 0}
                                 />
                             )}
                             <!-- Desktop: use desktop-specific images -->
@@ -243,6 +240,7 @@ const transparentClass = shouldEnableTransparency
                                     position={siteConfig.banner.position}
                                     loading={index === 0 ? "eager" : "lazy"}
                                     fetchpriority={index === 0 ? "high" : "low"}
+                                    defer={index > 0}
                                 />
                             )}
                         </li>
@@ -422,6 +420,24 @@ const transparentClass = shouldEnableTransparency
     </div>
 </div>
 </Layout>
+
+<!-- 横幅里非首图先不下发 src，等首屏加载完再补上，避免和首屏抢带宽 -->
+<script is:inline>
+	(() => {
+		const fillDeferredImages = () => {
+			for (const img of document.querySelectorAll("img[data-defer-src]")) {
+				const src = img.getAttribute("data-defer-src");
+				if (src) img.setAttribute("src", src);
+				img.removeAttribute("data-defer-src");
+			}
+		};
+		if (document.readyState === "complete") {
+			fillDeferredImages();
+		} else {
+			window.addEventListener("load", fillDeferredImages, { once: true });
+		}
+	})();
+</script>
 
 <style>
 /* Banner text styles */

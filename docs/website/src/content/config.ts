@@ -33,7 +33,7 @@ const postsCollection = defineCollection({
 const specCollection = defineCollection({
 	schema: z.object({}),
 });
-// 使用手册（/wiki/）：按 category 分组、按 order 排序
+// Wiki（/wiki/）：按 category 分组、按 order 排序
 const wikiCollection = defineCollection({
 	schema: z.object({
 		title: z.string(),
@@ -41,6 +41,8 @@ const wikiCollection = defineCollection({
 		category: z.string(),
 		order: z.number().optional().default(0),
 		updated: z.date().optional(),
+		// 正文复用别处的文档，写「集合/文件名」，例如 spec/helpus
+		ref: z.string().optional(),
 	}),
 });
 export const collections = {

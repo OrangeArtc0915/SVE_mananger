@@ -37,6 +37,9 @@ export default defineConfig({
 	integrations: [
 		tailwind({
 			nesting: true,
+			// Tailwind 的产物由 src/styles/main.css 统一引入（Layout 里 import 一次），
+			// 关掉官方默认的「每页再注入一份 base.css」，避免同一份 Tailwind 输出被重复打包
+			applyBaseStyles: false,
 		}),
 		swup({
 			theme: false,

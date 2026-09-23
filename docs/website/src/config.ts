@@ -99,7 +99,7 @@ export const siteConfig: SiteConfig = {
 
 		homeText: {
 			enable: true, // 在主页显示自定义文本
-			title: "把游戏、SMAPI、Mod 和存档，都收进一个窗口里", // 主页横幅主标题
+			title: "星露谷启动器", // 主页横幅主标题
 
 			subtitle: [
 				"一站式管理游戏实例、SMAPI 与 Mod",
@@ -169,7 +169,7 @@ export const navBarConfig: NavBarConfig = {
 		LinkPreset.Home,
 		LinkPreset.Archive,
 		LinkPreset.About,
-		{ name: "使用手册", url: "/wiki/", icon: "material-symbols:menu-book-rounded" },
+		{ name: "Wiki", url: "/wiki/", icon: "material-symbols:menu-book-rounded" },
 		{ name: "赞助", url: "/helpus/", icon: "material-symbols:favorite-rounded" },
 		{
 			name: "源码与发行",
@@ -187,7 +187,7 @@ export const navBarConfig: NavBarConfig = {
 
 export const profileConfig: ProfileConfig = {
 	avatar: "/assets/images/avatar.webp",
-	name: "星露谷启动器",
+	name: "mmm",
 	bio: "把游戏、SMAPI、Mod 和存档收进一个窗口里",
 	typewriter: {
 		enable: true,

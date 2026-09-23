@@ -6,7 +6,7 @@ import "@fontsource/roboto/700.css";
 import ConfigCarrier from "@components/ConfigCarrier.astro";
 import MusicPlayer from "@components/widget/MusicPlayer.svelte";
 import Pio from "@components/widget/Pio.svelte"; // 使用 Svelte 版本的 Pio 组件
-import { profileConfig, siteConfig } from "@/config";
+import { musicPlayerConfig, profileConfig, siteConfig } from "@/config";
 import { widgetConfigs } from "../config";
 import { umamiConfig } from "../config.ts";
 import {
@@ -22,7 +22,7 @@ import { defaultFavicons } from "../constants/icon";
 import type { Favicon, SakuraConfig } from "../types/config";
 import { pathsEqual, url } from "../utils/url-utils";
 
-import "katex/dist/katex.css";
+import "../styles/main.css";
 import "../styles/mobile-navbar.css";
 import "../styles/wallpaper-navbar-transparent.css";
 import "../styles/fancybox-custom.css";
@@ -261,7 +261,7 @@ const umamiScripts = umamiConfig.scripts || ""; // 获取Umami scripts配置
 		<slot />
 		
 		<!-- Music Player -->
-		<MusicPlayer client:load />
+		{musicPlayerConfig.enable && <MusicPlayer client:load />}
 		
 		<!-- Pio 看板娘组件 -->
 		<!-- 注意：Pio 组件需要放在 body 标签内，但要在其他内容之前 -->

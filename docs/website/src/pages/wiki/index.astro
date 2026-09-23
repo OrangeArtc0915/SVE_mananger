@@ -4,7 +4,7 @@ import { Icon } from "astro-icon/components";
 import MainGridLayout from "../../layouts/MainGridLayout.astro";
 import { url } from "../../utils/url-utils";
 
-const categories = ["入门", "使用", "疑难排查"];
+const categories = ["入门", "使用", "疑难排查", "关于"];
 
 const entries = await getCollection("wiki");
 
@@ -38,15 +38,15 @@ if (others.length > 0) groups.push({ category: "其他", items: others });
 ---
 
 <MainGridLayout
-	title="使用手册"
-	description="星露谷启动器使用手册：安装与快速上手、游戏实例、SMAPI、Mod 管理、樱花 FRP 联机、设置详解与故障排查。"
+	title="Wiki"
+	description="星露谷启动器 Wiki：安装与快速上手、游戏实例、SMAPI、Mod 管理、樱花 FRP 联机、设置详解与故障排查。"
 >
 	<div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
 		<div class="card-base z-10 px-6 md:px-9 py-6 relative w-full">
 			<div class="flex flex-col items-start justify-center mb-6">
 				<div class="flex items-center gap-2 mb-2">
 					<Icon name="material-symbols:menu-book-rounded" class="text-4xl text-[var(--primary)]" />
-					<h1 class="text-4xl font-bold text-black/90 dark:text-white/90">使用手册</h1>
+					<h1 class="text-4xl font-bold text-black/90 dark:text-white/90">Wiki</h1>
 				</div>
 				<p class="text-75 text-sm leading-relaxed">
 					从下载安装到联机开房，把启动器的每个功能讲清楚。遇到问题先看
