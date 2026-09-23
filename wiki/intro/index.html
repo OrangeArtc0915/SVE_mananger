@@ -111,17 +111,21 @@ const configHue = 45;
 
 
 
-<table><thead><tr><th>没有它的时候</th><th>有了它之后</th></tr></thead><tbody><tr><td>想同时保留原版存档和 Mod 存档，得手动备份、改名、来回搬</td><td>一套「原版」+ 多套「Mod 端」实例并存，Mod 目录、存档目录、SMAPI 配置各自独立</td></tr><tr><td>装 SMAPI 要自己找下载页、解压、认安装器、记版本</td><td>在「资源中心」一键安装，装完自动校验版本</td></tr><tr><td>Mod 压缩包格式五花八门，装错位置游戏就报错</td><td>直接吃 <code>zip</code> / <code>rar</code> / <code>7z</code> / <code>tar</code> / <code>gz</code>，自动识别安装方式</td></tr><tr><td>覆盖了游戏原始文件，出问题只能重装游戏</td><td>覆盖前自动备份，装错了可以退回来</td></tr><tr><td>Mod 不生效时不知道缺了哪个前置</td><td>递归解析 <code>manifest.json</code>，缺哪个一键补齐</td></tr><tr><td>想联机要自己折腾端口映射</td><td>填上樱花 FRP 访问密钥，建一条 UDP 隧道并把连接地址复制给朋友</td></tr></tbody></table></section>
+<table><thead><tr><th>没有它的时候</th><th>有了它之后</th></tr></thead><tbody><tr><td>想同时保留原版存档和 Mod 存档，得手动备份、改名、来回搬</td><td>建多个实例各选游戏目录与启动方式；存档在「存档」页一键备份与回滚，不用手动搬文件</td></tr><tr><td>装 SMAPI 要自己找下载页、解压、认安装器、记版本</td><td>在「资源中心」一键安装，装完自动校验版本</td></tr><tr><td>Mod 压缩包格式五花八门，装错位置游戏就报错</td><td>直接吃 <code>zip</code> / <code>rar</code> / <code>7z</code> / <code>tar</code> / <code>gz</code>，自动识别安装方式</td></tr><tr><td>覆盖了游戏原始文件，出问题只能重装游戏</td><td>覆盖前自动备份，装错了可以退回来</td></tr><tr><td>Mod 不生效时不知道缺了哪个前置</td><td>递归解析 <code>manifest.json</code>，缺哪个一键补齐</td></tr><tr><td>想联机要自己折腾端口映射</td><td>填上樱花 FRP 访问密钥，建一条 UDP 隧道并把连接地址复制给朋友</td></tr></tbody></table></section>
 <section><h2 id="功能总览">功能总览<a class="anchor" href="#功能总览"><span class="anchor-icon" data-pagefind-ignore="">#</span></a></h2><ul>
-<li><strong>实例管理</strong>：一套原版 + 多套 Mod 端，互不干扰</li>
+<li><strong>实例管理</strong>：一套原版 + 多套 Mod 端，各自选游戏目录与启动方式</li>
 <li><strong>Mod 管理</strong>：导入、启用停用、标签分类、Mod 库</li>
+<li><strong>Mod 配置档</strong>：把当前的启停组合存成一档，一键切回「美化包」「剧情包」这类组合</li>
+<li><strong>拖拽安装</strong>：把压缩包或一个 Mod 文件夹拖到窗口任意位置，自动开始导入</li>
 <li><strong>安装规划</strong>：动手前先列出「会发生什么」（覆盖哪些文件、替换哪些 XNB、装到哪个目录）</li>
 <li><strong>依赖检查</strong>：递归检查前置关系，可一键补齐</li>
 <li><strong>一键装 SMAPI</strong>：官方与云端镜像两条线路</li>
 <li><strong>资源中心</strong>：在线浏览多个 Mod 站点，Nexus 页面上点「Mod Manager Download」即可在启动器内下载（非会员也能用）</li>
+<li><strong>存档管理</strong>：列出游戏存档摘要（进度、金钱、游玩时长、技能、体积），一键备份、按需回滚；备份放在启动器数据目录里</li>
 <li><strong>樱花 FRP 联机</strong>：建 UDP 隧道、一键复制连接地址，页面内嵌官方管理面板</li>
 <li><strong>运行日志</strong>：启动器操作与游戏输出分两个标签，切走页面也不丢</li>
-<li><strong>现实天气与月历</strong>：接现实时间与天气，不是游戏内存档</li>
+<li><strong>使用手册</strong>：侧栏在内嵌浏览器里直接打开官网 Wiki，右上角可改用系统浏览器</li>
+<li><strong>现实天气与月历</strong>：接现实时间与天气，不是游戏内存档；主页小组件还能拖动排序、勾选显隐</li>
 <li><strong>个性化背景与主题</strong>：自己的图片 / GIF 当背景，四套配色 + 深浅色</li>
 </ul></section>
 <section><h2 id="运行环境">运行环境<a class="anchor" href="#运行环境"><span class="anchor-icon" data-pagefind-ignore="">#</span></a></h2>

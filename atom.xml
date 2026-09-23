@@ -5,7 +5,7 @@
   <link href="https://orangeartc0915.github.io/" rel="alternate" type="text/html"/>
   <link href="https://orangeartc0915.github.io/atom.xml" rel="self" type="application/atom+xml"/>
   <id>https://orangeartc0915.github.io/</id>
-  <updated>2026-09-23T13:32:42.763Z</updated>
+  <updated>2026-09-23T14:17:09.817Z</updated>
   <language>zh_CN</language>
   <entry>
     <title>v1.4.0 更新说明</title>
@@ -62,7 +62,7 @@
 <li>想要纯净体验：选<strong>原版</strong>，直接拉起 <code>Stardew Valley.exe</code></li>
 <li>想玩 Mod：选 <strong>Mod 端</strong>，走 SMAPI 启动，Mod 管理功能只对这个实例生效</li>
 </ul>
-<p>一套原版 + 多套 Mod 端可以同时存在，各自的 Mod 目录、存档目录与 SMAPI 配置互不干扰。</p>
+<p>一套原版 + 多套 Mod 端可以同时存在，各自选自己的游戏目录与启动方式；Mod 与存档跟着游戏目录走，不随实例隔离。</p>
 <h2>第二步：先装 SMAPI，再装 Mod</h2>
 <p>在「资源中心」点「下载 SMAPI」，官方与启动器云端镜像两条线路任选：</p>
 <table>

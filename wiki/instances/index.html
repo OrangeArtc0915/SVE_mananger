@@ -77,12 +77,10 @@ const configHue = 45;
         before:w-1 before:h-4 before:rounded-md before:bg-[var(--primary)]
         before:absolute before:left-[-16px] before:top-[5.5px]" data-astro-cid-ucso7hve style="">v1.4.0 已发布</div> <div id="announcement" class="collapse-wrapper px-4 overflow-hidden" data-astro-cid-ucso7hve style="">  <div> <!-- 公告栏内容 --> <div class="text-neutral-600 dark:text-neutral-300 leading-relaxed mb-3"> 联机功能改为只走樱花 FRP，并新增多连接分片下载与运行日志页。 </div> <!-- 可选链接和关闭按钮 --> <div class="flex items-center justify-between gap-3"> <div> <a href="https://github.com/OrangeArtc0915/SVE_mananger/releases" target="_self" class="btn-regular rounded-lg px-3 py-1.5 text-sm font-medium active:scale-95 transition-transform"> 看发行说明 </a> </div> <button class="btn-regular rounded-lg h-8 w-8 text-sm hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors" onclick="closeAnnouncement()" aria-label="关闭"> <svg width="0.75em" height="1em" class="text-sm" data-icon="fa6-solid:xmark">   <symbol id="ai:fa6-solid:xmark" viewBox="0 0 384 512"><path fill="currentColor" d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7L86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256L41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3l105.4 105.3c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256z"/></symbol><use href="#ai:fa6-solid:xmark"></use>  </svg> </button> </div> </div>  </div>  </widget-layout>  <script type="module">class d extends HTMLElement{constructor(){if(super(),this.dataset.isCollapsed!=="true")return;const e=this.dataset.id,t=this.querySelector(".expand-btn"),s=this.querySelector(`#${e}`);t.addEventListener("click",()=>{s.classList.remove("collapsed"),t.classList.add("hidden")})}}customElements.get("widget-layout")||customElements.define("widget-layout",d);</script> <script type="module">function n(){const e=document.querySelector('widget-layout[data-id="announcement"]');e&&(e.style.display="none",localStorage.setItem("announcementClosed","true"))}document.addEventListener("DOMContentLoaded",function(){const e=document.querySelector('widget-layout[data-id="announcement"]');e&&localStorage.getItem("announcementClosed")==="true"&&(e.style.display="none")});window.closeAnnouncement=n;</script> </div> <!-- 粘性组件区域 -->  </div> <!-- 响应式样式和JavaScript -->  <script type="module" src="/SVE_mananger/_astro/SideBar.astro_astro_type_script_index_0_lang.DJipfUIn.js"></script> <main id="swup-container" class="transition-swup-fade overflow-hidden w-full col-span-2 md:col-start-2 md:col-end-3 lg:col-start-2 lg:col-end-3 transition-main" data-astro-cid-haiuh7kc> <div id="content-wrapper" class="onload-animation transition-leaving" data-astro-cid-haiuh7kc> <!-- the overflow-hidden here prevent long text break the layout--> <!-- make id different from windows.swup global property -->  <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4"> <div class="card-base z-10 px-6 md:px-9 pt-6 pb-8 relative w-full"> <!-- 面包屑 --> <div class="flex flex-wrap items-center gap-2 text-sm text-50 mb-5 onload-animation"> <a href="/SVE_mananger/wiki/" class="transition hover:text-[var(--primary)] flex items-center gap-1"> <svg width="1em" height="1em" viewBox="0 0 24 24" class="text-[1.05rem]" data-icon="material-symbols:menu-book-rounded">   <use href="#ai:material-symbols:menu-book-rounded"></use>  </svg> <span>Wiki</span> </a> <svg width="1em" height="1em" viewBox="0 0 24 24" class="text-[1.05rem] opacity-60" data-icon="material-symbols:chevron-right-rounded">   <use href="#ai:material-symbols:chevron-right-rounded"></use>  </svg> <span class="text-75">使用</span> </div> <!-- 标题 --> <h1 class="transition w-full block font-bold mb-3 text-3xl md:text-[2.25rem]/[2.75rem] text-black/90 dark:text-white/90
                        relative md:before:w-1 before:h-5 before:rounded-md before:bg-[var(--primary)]
-                       before:absolute before:top-[0.75rem] before:left-[-1.125rem] onload-animation"> 游戏实例 </h1> <p class="text-75 text-[0.95rem] leading-relaxed mb-6 onload-animation"> 原版与 Mod 端、目录定位、多实例并存、存档位置。 </p> <div class="border-[var(--line-divider)] border-dashed border-b-[1px] mb-6"></div> <div data-pagefind-body class="prose dark:prose-invert prose-base !max-w-none custom-md mb-2 markdown-content onload-animation"> <!--<div class="prose dark:prose-invert max-w-none custom-md">--> <!--<div class="max-w-none custom-md">-->  <section><h2 id="实例是什么">实例是什么<a class="anchor" href="#实例是什么"><span class="anchor-icon" data-pagefind-ignore="">#</span></a></h2><p>一个「实例」= 一套互不干扰的游戏运行配置。它记录：</p><ul>
-<li>用哪种方式启动（原版 / SMAPI）</li>
-<li>用哪个 Mods 目录</li>
-<li>用哪个存档目录</li>
-<li>该实例自己的 SMAPI 配置</li>
-</ul></section>
+                       before:absolute before:top-[0.75rem] before:left-[-1.125rem] onload-animation"> 游戏实例 </h1> <p class="text-75 text-[0.95rem] leading-relaxed mb-6 onload-animation"> 原版与 Mod 端、目录定位、多实例并存、存档位置。 </p> <div class="border-[var(--line-divider)] border-dashed border-b-[1px] mb-6"></div> <div data-pagefind-body class="prose dark:prose-invert prose-base !max-w-none custom-md mb-2 markdown-content onload-animation"> <!--<div class="prose dark:prose-invert max-w-none custom-md">--> <!--<div class="max-w-none custom-md">-->  <section><h2 id="实例是什么">实例是什么<a class="anchor" href="#实例是什么"><span class="anchor-icon" data-pagefind-ignore="">#</span></a></h2><p>一个「实例」= 「用哪个游戏本体 + 哪种启动方式」的组合。它记录两件事：</p><ul>
+<li>用哪个游戏目录（含 <code>Stardew Valley.exe</code> 的那一层）</li>
+<li>用哪种方式启动：原版直启，还是经 SMAPI 启动</li>
+</ul><p>实例<strong>不复制游戏本体</strong>，也不给每个实例单独准备 Mods 或存档目录 —— Mod 放在游戏目录下的 <code>Mods\</code>，存档是游戏全局的那一份（详见下面的「多实例并存」）。</p></section>
 <section><h2 id="两种类型">两种类型<a class="anchor" href="#两种类型"><span class="anchor-icon" data-pagefind-ignore="">#</span></a></h2>
 
 
@@ -109,17 +107,19 @@ const configHue = 45;
 <li>从 Steam 的安装信息里找：注册表 + <code>libraryfolders.vdf</code> 里的库目录</li>
 </ol><p>自动定位失败时，到「设置 → 游戏与实例」手动指到游戏根目录 —— 也就是含 <code>Stardew Valley.exe</code> 的那一层。</p></section>
 <section><h2 id="多实例并存">多实例并存<a class="anchor" href="#多实例并存"><span class="anchor-icon" data-pagefind-ignore="">#</span></a></h2><p>可以同时存在一套原版与多套 Mod 端，例如：</p><ul>
-<li><code>原版</code>：纯净体验，存档不动</li>
+<li><code>原版</code>：纯净体验，直接跑游戏主程序</li>
 <li><code>日常 Mod 端</code>：平时玩的 Mod 组合</li>
 <li><code>试验 Mod 端</code>：想试新 Mod、怕搞坏存档时用这个</li>
-</ul><p>实例数据都在 <code>Data\instances\</code> 下：<code>&#x3C;id>.json</code> 是配置，<code>&#x3C;id>\</code> 里是该实例的 <code>Mods\</code> 与 <code>Saves\</code>。也就是说，<strong>每个实例的存档是分开的</strong>。</p><blockquote>
-<p>想让实例的 Mod 目录放到别的盘（比如 Mod 很多放 D 盘），在新建实例时可以指定 Mod 库根目录；也可以在设置里改「Mod 库目录」的默认位置。</p>
+</ul><p>但要说明白：实例之间<strong>并不隔离 Mod 目录与存档</strong>。一个实例就是「用哪个游戏目录 + 是否走 SMAPI」的组合 —— Mod 目录固定跟着游戏目录（也就是游戏目录下的 <code>Mods\</code>），存档则是游戏全局的 <code>%APPDATA%\StardewValley\Saves</code>。所以想让两套 Mod 互不干扰，得让它们指向<strong>不同的游戏目录</strong>。</p><p>实例定义都是 <code>Data\instances\</code> 下的 <code>&#x3C;id>.json</code>，里面存的就是游戏目录、启动方式这些信息。</p><blockquote>
+<p>Mod 库（已下载 / 已解压、还没装进游戏的 Mod 集合）是<strong>全局的一个目录</strong>，位置在「设置 → Mod 与存储」里改，不随实例走。</p>
 </blockquote></section>
-<section><h2 id="存档">存档<a class="anchor" href="#存档"><span class="anchor-icon" data-pagefind-ignore="">#</span></a></h2><ul>
-<li>游戏自身的存档默认在 <code>%appdata%\StardewValley\Saves</code></li>
-<li>启动器读取这个路径做展示与备份，<strong>不会主动删改你的存档</strong></li>
-<li>如果同时开着 Steam 云同步，建议不要让两个工具同时改写同一份存档</li>
-</ul></section>
+<section><h2 id="存档">存档<a class="anchor" href="#存档"><span class="anchor-icon" data-pagefind-ignore="">#</span></a></h2><p>存档的查看与备份现在由侧栏的「存档」页负责：</p><ul>
+<li>页面读的是游戏自己的存档目录 <code>%APPDATA%\StardewValley\Saves</code></li>
+<li>启动器只读取摘要、把备份放到自己的 <code>Data\save-backups\</code> 里，<strong>不会删改你的存档</strong></li>
+<li>详细用法见 <a href="/SVE_mananger/wiki/saves/">存档管理</a></li>
+</ul><blockquote>
+<p>如果同时开着 Steam 云同步，建议不要让两个工具同时改写同一份存档。</p>
+</blockquote></section>
 <section><h2 id="切实例">切实例<a class="anchor" href="#切实例"><span class="anchor-icon" data-pagefind-ignore="">#</span></a></h2><p>在「游戏实例」页选中某个实例即可，顶部与启动按钮会跟着变。启动前启动器会再校验一次该实例的 Mod 与前置依赖，缺东西会先提示。</p></section>  </div> <script type="module">document.addEventListener("click",function(i){const c=i.target;if(c&&c.classList.contains("copy-btn")){const l=c.closest("pre")?.querySelector("code");let s="";if(l){const t=l.querySelectorAll("span.line");if(t.length>0){const o=[];for(let e=0;e<t.length;e++){const r=t[e].textContent||"";o.push(r)}s=o.join(`
 `)}else{const o=l.querySelectorAll(".code:not(summary *)");if(o.length>0){const e=[];for(let n=0;n<o.length;n++){const a=o[n].textContent||"";e.push(a)}s=e.join(`
 `)}else s=l.textContent||""}}s=s.replace(/\n\n\n+/g,function(t){const e=t.length-1;let n;return e%2===0?n=e/2:n=Math.floor((e+1)/2),n<1&&(n=1),`

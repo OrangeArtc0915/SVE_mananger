@@ -33,7 +33,7 @@
 &lt;li&gt;想要纯净体验：选&lt;strong&gt;原版&lt;/strong&gt;，直接拉起 &lt;code&gt;Stardew Valley.exe&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;想玩 Mod：选 &lt;strong&gt;Mod 端&lt;/strong&gt;，走 SMAPI 启动，Mod 管理功能只对这个实例生效&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;一套原版 + 多套 Mod 端可以同时存在，各自的 Mod 目录、存档目录与 SMAPI 配置互不干扰。&lt;/p&gt;
+&lt;p&gt;一套原版 + 多套 Mod 端可以同时存在，各自选自己的游戏目录与启动方式；Mod 与存档跟着游戏目录走，不随实例隔离。&lt;/p&gt;
 &lt;h2&gt;第二步：先装 SMAPI，再装 Mod&lt;/h2&gt;
 &lt;p&gt;在「资源中心」点「下载 SMAPI」，官方与启动器云端镜像两条线路任选：&lt;/p&gt;
 &lt;table&gt;
