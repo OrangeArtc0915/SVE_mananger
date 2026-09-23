@@ -20,16 +20,19 @@ import { pluginCustomCopyButton } from "./src/plugins/expressive-code/custom-cop
 import { pluginLanguageBadge } from "./src/plugins/expressive-code/language-badge.ts";
 import { AdmonitionComponent } from "./src/plugins/rehype-component-admonition.mjs";
 import { GithubCardComponent } from "./src/plugins/rehype-component-github-card.mjs";
+import { rehypeBasePath } from "./src/plugins/rehype-base-path.js";
 import { rehypeMermaid } from "./src/plugins/rehype-mermaid.mjs";
 import { parseDirectiveNode } from "./src/plugins/remark-directive-rehype.js";
 import { remarkExcerpt } from "./src/plugins/remark-excerpt.js";
 import { remarkMermaid } from "./src/plugins/remark-mermaid.js";
 import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
+// GitHub Pages 项目页部署在子路径下，Markdown 内的根相对链接要靠这个前缀补齐
+const siteBase = "/SVE_mananger/";
 // https://astro.build/config
 export default defineConfig({
 	site: "https://orangeartc0915.github.io",
 
-	base: "/SVE_mananger/",
+	base: siteBase,
 	trailingSlash: "always",
 	integrations: [
 		tailwind({
@@ -126,6 +129,7 @@ export default defineConfig({
 			remarkMermaid,
 		],
 		rehypePlugins: [
+			[rehypeBasePath, { base: siteBase }],
 			rehypeKatex,
 			rehypeSlug,
 			rehypeMermaid,

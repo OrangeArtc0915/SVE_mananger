@@ -169,6 +169,7 @@ export const navBarConfig: NavBarConfig = {
 		LinkPreset.Home,
 		LinkPreset.Archive,
 		LinkPreset.About,
+		{ name: "使用手册", url: "/wiki/", icon: "material-symbols:menu-book-rounded" },
 		{ name: "赞助", url: "/helpus/", icon: "material-symbols:favorite-rounded" },
 		{
 			name: "源码与发行",

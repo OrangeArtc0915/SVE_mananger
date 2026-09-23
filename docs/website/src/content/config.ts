@@ -33,7 +33,18 @@ const postsCollection = defineCollection({
 const specCollection = defineCollection({
 	schema: z.object({}),
 });
+// 使用手册（/wiki/）：按 category 分组、按 order 排序
+const wikiCollection = defineCollection({
+	schema: z.object({
+		title: z.string(),
+		description: z.string().optional().default(""),
+		category: z.string(),
+		order: z.number().optional().default(0),
+		updated: z.date().optional(),
+	}),
+});
 export const collections = {
 	posts: postsCollection,
 	spec: specCollection,
+	wiki: wikiCollection,
 };
