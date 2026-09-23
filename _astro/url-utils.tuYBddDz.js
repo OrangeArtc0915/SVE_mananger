@@ -1,1 +1,0 @@
-import"./config.BM5SQxuL.js";import"./zh_TW.Jbo5k0IW.js";function u(n,o){const r=n.replace(/^\/|\/$/g,"").toLowerCase(),t=o.replace(/^\/|\/$/g,"").toLowerCase();return r===t}function e(...n){return n.join("/").replace(/\/+/g,"/")}function c(n){return a(`/posts/${n}/`)}function a(n){return e("","/SVE_mananger/",n)}export{c as g,u as p,a as u};

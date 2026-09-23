@@ -5,7 +5,7 @@
   <link href="https://orangeartc0915.github.io/" rel="alternate" type="text/html"/>
   <link href="https://orangeartc0915.github.io/atom.xml" rel="self" type="application/atom+xml"/>
   <id>https://orangeartc0915.github.io/</id>
-  <updated>2026-09-23T12:55:40.129Z</updated>
+  <updated>2026-09-23T13:32:42.763Z</updated>
   <language>zh_CN</language>
   <entry>
     <title>v1.4.0 更新说明</title>
@@ -45,7 +45,7 @@
 </blockquote>
 ]]></content>
     <author>
-      <name>星露谷启动器</name>
+      <name>mmm</name>
     </author>
     <category term="更新日志"></category>
   </entry>
@@ -93,7 +93,7 @@
 <p>想和朋友一起种地，就到「联机功能」开一条 UDP 隧道 —— 详见<a href="/posts/multiplayer/">用樱花 FRP 和朋友联机</a>。</p>
 ]]></content>
     <author>
-      <name>星露谷启动器</name>
+      <name>mmm</name>
     </author>
     <category term="使用文档"></category>
   </entry>
@@ -121,7 +121,7 @@
 </ul>
 ]]></content>
     <author>
-      <name>星露谷启动器</name>
+      <name>mmm</name>
     </author>
     <category term="使用文档"></category>
   </entry>
@@ -163,7 +163,7 @@
 </ul>
 ]]></content>
     <author>
-      <name>星露谷启动器</name>
+      <name>mmm</name>
     </author>
     <category term="使用文档"></category>
   </entry>
@@ -215,7 +215,7 @@ LICENSE               MIT 许可证
 </blockquote>
 ]]></content>
     <author>
-      <name>星露谷启动器</name>
+      <name>mmm</name>
     </author>
     <category term="使用文档"></category>
   </entry>
@@ -244,7 +244,7 @@ LICENSE               MIT 许可证
 <p>存档默认在 <code>%appdata%\StardewValley\Saves</code>。启动器只读取路径信息，不会主动删改存档；如果同时开着 Steam 云同步，建议不要让两个工具同时改写同一份存档。</p>
 ]]></content>
     <author>
-      <name>星露谷启动器</name>
+      <name>mmm</name>
     </author>
     <category term="使用文档"></category>
   </entry>
