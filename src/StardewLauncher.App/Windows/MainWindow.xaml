@@ -163,13 +163,19 @@
                                            GroupName="MainNav"
                                            Icon="lucide/network"
                                            Tag="4"
-                                           Text="樱花联机"
+                                           Text="联机功能"
                                            Checked="OnNavChecked" />
                                 <c:NavItem x:Name="NavSetup"
                                            GroupName="MainNav"
                                            Icon="lucide/settings"
                                            Tag="5"
                                            Text="设置"
+                                           Checked="OnNavChecked" />
+                                <c:NavItem x:Name="NavLog"
+                                           GroupName="MainNav"
+                                           Icon="lucide/scroll-text"
+                                           Tag="6"
+                                           Text="运行日志"
                                            Checked="OnNavChecked" />
                             </StackPanel>
 

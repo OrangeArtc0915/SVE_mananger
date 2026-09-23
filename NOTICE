@@ -107,5 +107,24 @@ wintun.dll、WinDivert64.sys 与 Packet.dll（Npcap，闭源、不允许再分�
 自 v1.4.0 起联机功能改为只走樱花FRP，上述组件已**全部从项目与发行包中移除**，
 本发行包不再包含任何第三方闭源二进制。
 
+十一、官方网站
+--------------
+官方网站的源码位于 docs/website/，是一个独立的 Astro 项目，
+界面基于开源模板 Mizuki（作者 saicaca，MIT License）定制：
+https://github.com/saicaca/Mizuki
+
+在模板基础上的改动：
+
+  - 移除模板中硬编码的第三方统计脚本（Google Tag Manager 容器 GTM-KRX3XGVH、
+    Microsoft Clarity 项目 tjr3vkhj8i，均为模板作者自己的统计账号），
+    本站在页面里不加载任何第三方统计或广告脚本
+  - 移除了模板自带的示例文章、示例相册、音乐播放器、看板娘等与本站无关的内容与素材
+  - 替换了横幅壁纸、作者头像与站点图标（图标取自本项目的程序图标 AppIcon.png）
+  - 站点地址与子路径按本项目的 GitHub Pages 配置（astro.config.mjs 的 site / base）
+  - 页面文字、文章与图片均为本项目自己的内容
+
+模板本身以 MIT 发布，本项目对 docs/website/ 的使用与修改同样遵循 MIT License，
+并保留模板的许可证声明与页脚署名。
+
 
 

@@ -300,6 +300,9 @@ public partial class PageLaunch : LauncherPage
 
     private void AppendLine(GameLogLine line)
     {
+        // 同一份日志也进全局缓冲：侧栏「运行日志」页的游戏日志标签要能随时看到
+        ActivityLog.Write(LogSource.Game, line.Text, ToActivityLevel(line.Level));
+
         if (PanLogLines is null) return;
 
         if (!_logHasContent)
@@ -334,6 +337,14 @@ public partial class PageLaunch : LauncherPage
         GameLogLevel.Warn => "Status.Warn",
         GameLogLevel.Info => "Text.Secondary",
         _ => "Text.Tertiary"
+    };
+
+    /// <summary>把游戏日志的级别映射到全局日志的三个档次（只用来决定文字颜色）。</summary>
+    private static ActivityLevel ToActivityLevel(GameLogLevel level) => level switch
+    {
+        GameLogLevel.Fatal or GameLogLevel.Error => ActivityLevel.Error,
+        GameLogLevel.Warn => ActivityLevel.Warn,
+        _ => ActivityLevel.Info
     };
 
     private static string FormatDuration(long seconds)

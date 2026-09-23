@@ -1,10 +1,10 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using StardewLauncher.App.Controls;
 using StardewLauncher.App.Windows;
 using StardewLauncher.Core.App;
+using StardewLauncher.Core.Logging;
 using StardewLauncher.Core.Multiplayer;
 
 namespace StardewLauncher.App.Pages;
@@ -32,10 +32,10 @@ public sealed class SakuraTunnelRow
 }
 
 /// <summary>
-/// 联机页：只有樱花FRP 一条路。
-/// 流程是「填访问密钥 → 在可用节点上建一条 UDP 24642 隧道 → 启动隧道 → 把连接地址发给朋友」，
-/// 朋友在游戏里按局域网联机输入地址即可。隧道由樱花FRP 官方 frpc 客户端维持，
-/// 首次使用时下载到数据目录；本页不装任何驱动，也不需要管理员权限。
+/// 联机功能页：左边是樱花FRP 的操作流程（填访问密钥 → 在可用节点上建一条 UDP 24642 隧道 →
+/// 启动隧道 → 把连接地址发给朋友，朋友在游戏里按局域网联机输入地址），右边内嵌官方网页版面板，
+/// 改名、删除隧道、改端口都在那块面板里做，不用切出去。
+/// 隧道由樱花FRP 官方 frpc 客户端维持，首次使用时下载到数据目录；本页不装任何驱动，也不需要管理员权限。
 /// </summary>
 public partial class PageMultiplayer : LauncherPage
 {
@@ -48,7 +48,8 @@ public partial class PageMultiplayer : LauncherPage
     private bool _sakuraBusy;
     private bool _hostHooked;
     private bool _autoVerified;
-    private string _tunnelAddress = string.Empty;
+    private string _domainAddress = string.Empty;
+    private string _ipAddress = string.Empty;
 
     public PageMultiplayer()
     {
@@ -89,7 +90,7 @@ public partial class PageMultiplayer : LauncherPage
         _ = VerifySakuraAsync();
     }
 
-    /// <summary>程序退出时收掉 frpc，别把隧道留在后台。</summary>
+    /// <summary>程序退出时收掉 frpc，别把隧道留在后台；内嵌面板也一并释放。</summary>
     private void OnHostClosed(object? sender, EventArgs e)
     {
         _frpc?.Dispose();
@@ -97,6 +98,8 @@ public partial class PageMultiplayer : LauncherPage
 
         _sakura?.Dispose();
         _sakura = null;
+
+        SakuraPanel?.Shutdown();
     }
 
     // ————— 设置读写 —————
@@ -309,15 +312,25 @@ public partial class PageMultiplayer : LauncherPage
         runner.Started += () => Dispatcher.BeginInvoke(() =>
             AppendLog("隧道启动成功，把连接地址发给朋友即可。"));
 
-        runner.AddressFound += address => Dispatcher.BeginInvoke(() =>
-        {
-            _tunnelAddress = address;
-            LabTunnelAddress.Text = address;
-            CardTunnelRunning.Visibility = Visibility.Visible;
-        });
+        runner.AddressesUpdated += () => Dispatcher.BeginInvoke(ApplyAddresses);
 
         _frpc = runner;
         return runner;
+    }
+
+    /// <summary>把 frpc 认出来的两个地址铺到界面上；还没出来的那一栏显示等待文案。</summary>
+    private void ApplyAddresses()
+    {
+        var domain = _frpc?.DomainAddress ?? string.Empty;
+        var ip = _frpc?.IpAddress ?? string.Empty;
+
+        if (domain.Length > 0) _domainAddress = domain;
+        if (ip.Length > 0) _ipAddress = ip;
+
+        LabDomainAddress.Text = _domainAddress.Length > 0 ? _domainAddress : "等待 frpc 输出…";
+        LabIpAddress.Text = _ipAddress.Length > 0 ? _ipAddress : "等待 frpc 输出…";
+
+        CardTunnelRunning.Visibility = Visibility.Visible;
     }
 
     private async void OnRefreshTunnelsClick(object sender, RoutedEventArgs e)
@@ -451,8 +464,10 @@ public partial class PageMultiplayer : LauncherPage
                 return;
             }
 
-            _tunnelAddress = string.Empty;
-            LabTunnelAddress.Text = "正在等待连接地址…";
+            _domainAddress = string.Empty;
+            _ipAddress = string.Empty;
+            LabDomainAddress.Text = "等待 frpc 输出…";
+            LabIpAddress.Text = "等待 frpc 输出…";
             CardTunnelRunning.Visibility = Visibility.Visible;
 
             var started = runner.Start(TxtSakuraKey.Text.Trim(), row.Source.Id);
@@ -463,12 +478,12 @@ public partial class PageMultiplayer : LauncherPage
                 return;
             }
 
-            // 先用接口信息拼一个兜底地址；frpc 日志里出现真实地址后会覆盖它
+            // 先用接口信息拼一个域名形式的兜底地址；frpc 日志里出现真实地址后会覆盖它
             var fallback = SakuraFrpApi.BuildAddress(row.Source, _sakuraNodes);
-            if (fallback.Length > 0 && _tunnelAddress.Length == 0)
+            if (fallback.Length > 0 && _domainAddress.Length == 0)
             {
-                _tunnelAddress = fallback;
-                LabTunnelAddress.Text = fallback;
+                _domainAddress = fallback;
+                LabDomainAddress.Text = fallback;
             }
 
             SettingsStore.Current.SakuraTunnelId = row.Source.Id;
@@ -486,24 +501,29 @@ public partial class PageMultiplayer : LauncherPage
     {
         _frpc?.Stop();
 
-        _tunnelAddress = string.Empty;
+        _domainAddress = string.Empty;
+        _ipAddress = string.Empty;
         CardTunnelRunning.Visibility = Visibility.Collapsed;
 
         AppendLog("已停止樱花FRP 隧道。");
     }
 
-    private void OnCopyTunnelAddressClick(object sender, RoutedEventArgs e)
+    private void OnCopyDomainClick(object sender, RoutedEventArgs e) => CopyAddress(_domainAddress, "域名地址");
+
+    private void OnCopyIpClick(object sender, RoutedEventArgs e) => CopyAddress(_ipAddress, "IP 地址");
+
+    private void CopyAddress(string address, string label)
     {
-        if (_tunnelAddress.Length == 0)
+        if (address.Length == 0)
         {
-            AppendLog("还没有拿到连接地址，等 frpc 连上节点后再复制。", warn: true);
+            AppendLog($"还没拿到{label}，等 frpc 输出后再复制。", warn: true);
             return;
         }
 
         try
         {
-            Clipboard.SetText(_tunnelAddress);
-            AppendLog($"已复制连接地址：{_tunnelAddress}");
+            Clipboard.SetText(address);
+            AppendLog($"已复制{label}：{address}");
         }
         catch (Exception ex)
         {
@@ -524,23 +544,7 @@ public partial class PageMultiplayer : LauncherPage
     private void OnLaunchGameClick(object sender, RoutedEventArgs e)
         => (Window.GetWindow(this) as MainWindow)?.SwitchToPage(NavPages.Launch);
 
-    private void AppendLog(string message, bool warn = false)
-    {
-        LabLogEmpty.Visibility = Visibility.Collapsed;
-        ScrollLog.Visibility = Visibility.Visible;
-
-        PanLogLines.Children.Add(new TextBlock
-        {
-            Margin = new Thickness(0, 1, 0, 1),
-            FontSize = 11.5,
-            Foreground = (Brush)FindResource(warn ? "Status.Warn" : "Text.Secondary"),
-            Text = $"[{DateTime.Now:HH:mm:ss}] {message}",
-            TextWrapping = TextWrapping.Wrap
-        });
-
-        // 长时间挂机时日志会一直涨，留最近 400 行就够排查了
-        while (PanLogLines.Children.Count > 400) PanLogLines.Children.RemoveAt(0);
-
-        ScrollLog.ScrollToEnd();
-    }
+    /// <summary>日志统一写进 ActivityLog，由侧栏的「运行日志」页展示，本页不再占一块地方。</summary>
+    private static void AppendLog(string message, bool warn = false)
+        => ActivityLog.Write(LogSource.App, $"联机：{message}", warn ? ActivityLevel.Warn : ActivityLevel.Info);
 }

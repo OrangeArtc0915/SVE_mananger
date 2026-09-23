@@ -28,7 +28,6 @@ public sealed partial class FrpcRunner : IDisposable
 
     private readonly object _gate = new();
     private readonly List<string> _output = [];
-    private readonly HashSet<string> _addresses = new(StringComparer.OrdinalIgnoreCase);
 
     private Process? _process;
 
@@ -39,17 +38,20 @@ public sealed partial class FrpcRunner : IDisposable
 
     public bool IsRunning => _process is { HasExited: false };
 
-    /// <summary>从 frpc 日志里认出来的连接地址（域名:端口 或 IP:端口）。</summary>
-    public IReadOnlyList<string> Addresses
-    {
-        get { lock (_gate) return [.. _addresses]; }
-    }
+    /// <summary>
+    /// 域名形式的连接地址（形如 frp-xxx.com:10086）。
+    /// 官方日志会同时给出域名与 IP 两种写法，任选其一都能连，所以分开存、让用户自己挑。
+    /// </summary>
+    public string DomainAddress { get; private set; } = string.Empty;
+
+    /// <summary>IP 形式的连接地址（形如 114.51.4.191:10086）。</summary>
+    public string IpAddress { get; private set; } = string.Empty;
 
     /// <summary>frpc 打出来的日志行（已过滤过纯噪音）。</summary>
     public event Action<string>? Log;
 
-    /// <summary>识别到新的连接地址。</summary>
-    public event Action<string>? AddressFound;
+    /// <summary>认出了新的连接地址（域名或 IP）。</summary>
+    public event Action? AddressesUpdated;
 
     /// <summary>隧道启动成功。</summary>
     public event Action? Started;
@@ -198,7 +200,8 @@ public sealed partial class FrpcRunner : IDisposable
             lock (_gate)
             {
                 _output.Clear();
-                _addresses.Clear();
+                DomainAddress = string.Empty;
+                IpAddress = string.Empty;
             }
 
             var psi = new ProcessStartInfo
@@ -274,16 +277,7 @@ public sealed partial class FrpcRunner : IDisposable
 
                 if (line.Contains("隧道启动成功")) Started?.Invoke();
 
-                foreach (var address in ExtractAddresses(line))
-                {
-                    lock (_gate)
-                    {
-                        if (!_addresses.Add(address)) continue;
-                    }
-
-                    LogLine($"连接地址：{address}");
-                    AddressFound?.Invoke(address);
-                }
+                foreach (var address in ExtractAddresses(line)) ReportAddress(address);
 
                 // frpc 的启动横幅（版本号、赞助信息）对用户没意义，过滤掉
                 if (IsNoise(line)) continue;
@@ -316,6 +310,38 @@ public sealed partial class FrpcRunner : IDisposable
 
     [GeneratedRegex(@">>\s*([^<>]{3,80}?)\s*<<", RegexOptions.CultureInvariant)]
     private static partial Regex BracketedAddress();
+
+    /// <summary>记下一个连接地址：按主机部分是 IP 还是域名分开放，重复的丢弃。</summary>
+    private void ReportAddress(string address)
+    {
+        var isIp = IsIpAddress(address);
+
+        lock (_gate)
+        {
+            if (isIp)
+            {
+                if (string.Equals(IpAddress, address, StringComparison.OrdinalIgnoreCase)) return;
+                IpAddress = address;
+            }
+            else
+            {
+                if (string.Equals(DomainAddress, address, StringComparison.OrdinalIgnoreCase)) return;
+                DomainAddress = address;
+            }
+        }
+
+        LogLine($"连接地址（{(isIp ? "IP" : "域名")}）：{address}");
+        AddressesUpdated?.Invoke();
+    }
+
+    /// <summary>形如 114.51.4.191:10086 视为 IP 地址，其余当域名。</summary>
+    private static bool IsIpAddress(string address)
+    {
+        var colon = address.LastIndexOf(':');
+        if (colon <= 0) return false;
+
+        return System.Net.IPAddress.TryParse(address[..colon], out _);
+    }
 
     private void LogLine(string message) => Log?.Invoke($"[樱花FRP] {message}");
 }

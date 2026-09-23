@@ -151,6 +151,7 @@ public partial class MainWindow : Window
             NavPages.Resource => new PageResource(),
             NavPages.Multiplayer => new PageMultiplayer(),
             NavPages.Setup => new PageSetup(),
+            NavPages.Log => new PageLog(),
             _ => new PageLaunch()
         };
 
@@ -169,6 +170,7 @@ public partial class MainWindow : Window
         NavResource.IsChecked = page == NavPages.Resource;
         NavMultiplayer.IsChecked = page == NavPages.Multiplayer;
         NavSetup.IsChecked = page == NavPages.Setup;
+        NavLog.IsChecked = page == NavPages.Log;
 
         _suppressNavCheck = false;
     }

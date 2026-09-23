@@ -16,35 +16,28 @@
             <TextBlock Margin="0,4,0,0"
                        FontSize="12"
                        Foreground="{DynamicResource Text.Secondary}"
-                       Text="下载 Mod、安装 SMAPI，或在内嵌浏览器里直接浏览各 Mod 站点" />
+                       Text="安装 SMAPI，或在内嵌浏览器里直接浏览各 Mod 站点下载" />
         </StackPanel>
 
         <!-- 功能分区切换 -->
         <StackPanel Grid.Row="1"
                     Margin="0,14,0,0"
                     Orientation="Horizontal">
-            <c:OutlineButton x:Name="BtnTabDownload"
-                             Content="下载 Mod"
+            <c:OutlineButton x:Name="BtnTabSmapi"
+                             Content="SMAPI"
                              Tag="0"
                              Tone="Solid"
-                             Click="OnTabClick" />
-            <c:OutlineButton x:Name="BtnTabSmapi"
-                             Margin="8,0,0,0"
-                             Content="SMAPI"
-                             Tag="1"
-                             Tone="Outline"
                              Click="OnTabClick" />
             <c:OutlineButton x:Name="BtnTabBrowse"
                              Margin="8,0,0,0"
                              Content="在线浏览"
-                             Tag="2"
+                             Tag="1"
                              Tone="Outline"
                              Click="OnTabClick" />
         </StackPanel>
 
         <Grid Grid.Row="2" Margin="0,12,0,0">
-            <v:DownloadCenterView x:Name="ViewDownload" />
-            <v:SmapiInstallView x:Name="ViewSmapi" Visibility="Collapsed" />
+            <v:SmapiInstallView x:Name="ViewSmapi" />
 
             <!-- 内嵌浏览器较重，切到该分区时才创建 -->
             <Grid x:Name="PanBrowse" Visibility="Collapsed" />

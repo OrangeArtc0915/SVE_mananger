@@ -14,4 +14,6 @@ public static class NavPages
     public const int Multiplayer = 4;
 
     public const int Setup = 5;
+
+    public const int Log = 6;
 }

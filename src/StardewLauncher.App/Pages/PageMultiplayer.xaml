@@ -1,13 +1,13 @@
 <c:LauncherPage x:Class="StardewLauncher.App.Pages.PageMultiplayer"
                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                xmlns:c="clr-namespace:StardewLauncher.App.Controls">
+                xmlns:c="clr-namespace:StardewLauncher.App.Controls"
+                xmlns:v="clr-namespace:StardewLauncher.App.Views">
 
     <Grid Margin="24,20,24,16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <!-- 标题与主操作 -->
@@ -20,11 +20,11 @@
             <StackPanel Grid.Column="0"
                         Margin="0,0,12,0"
                         VerticalAlignment="Center">
-                <TextBlock FontSize="18" FontWeight="Bold" Text="联机（樱花FRP）" />
+                <TextBlock FontSize="18" FontWeight="Bold" Text="联机功能" />
                 <TextBlock Margin="0,4,0,0"
                            FontSize="12"
                            Foreground="{DynamicResource Text.Secondary}"
-                           Text="用樱花FRP 把本地 UDP 24642 穿透出去，把连接地址发给朋友，他们在游戏里按局域网联机加入"
+                           Text="用樱花FRP 把本地 UDP 24642 穿透出去；右边是官方面板，建隧道、改名都在那里"
                            TextTrimming="CharacterEllipsis" />
             </StackPanel>
 
@@ -38,12 +38,17 @@
             </StackPanel>
         </Grid>
 
-        <!-- 樱花FRP -->
-        <ScrollViewer x:Name="PanSakura"
-                      Grid.Row="1"
-                      Margin="0,12,0,0"
-                      HorizontalScrollBarVisibility="Disabled"
-                      VerticalScrollBarVisibility="Auto">
+        <!-- 左：隧道操作；右：樱花FRP 官方面板（内嵌，不开系统浏览器） -->
+        <Grid Grid.Row="1" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MinWidth="320" />
+                <ColumnDefinition Width="440" />
+            </Grid.ColumnDefinitions>
+
+            <ScrollViewer x:Name="PanSakura"
+                          Grid.Column="0"
+                          HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto">
             <StackPanel>
                 <c:SurfaceCard Title="账号" UseShadow="False">
                     <StackPanel>
@@ -132,14 +137,15 @@
                                        FontSize="11.5"
                                        Foreground="{DynamicResource Text.Tertiary}"
                                        TextWrapping="Wrap"
-                                       Text="只有 UDP 隧道能用于星露谷联机。启动后把连接地址发给朋友即可。" />
+                                       Text="只有 UDP 隧道能用于星露谷联机。启动后把连接地址发给朋友即可；改名与删除要在网页版管理面板里做。" />
 
-                            <c:OutlineButton x:Name="BtnRefreshTunnels"
-                                             Grid.Column="1"
-                                             Padding="12,5"
-                                             Content="刷新"
-                                             FontSize="12.5"
-                                             Click="OnRefreshTunnelsClick" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <c:OutlineButton x:Name="BtnRefreshTunnels"
+                                                 Padding="12,5"
+                                                 Content="刷新"
+                                                 FontSize="12.5"
+                                                 Click="OnRefreshTunnelsClick" />
+                            </StackPanel>
                         </Grid>
 
                         <TextBlock x:Name="LabNoTunnels"
@@ -283,56 +289,89 @@
                                UseShadow="False"
                                Visibility="Collapsed">
                     <StackPanel>
-                        <TextBlock x:Name="LabTunnelAddress"
-                                   FontSize="16"
-                                   FontWeight="Bold"
-                                   Foreground="{DynamicResource Accent.Base}"
-                                   TextWrapping="Wrap"
-                                   Text="正在等待连接地址…" />
+                        <TextBlock FontSize="12"
+                                   Foreground="{DynamicResource Text.Secondary}"
+                                   Text="域名地址" />
+                        <Grid Margin="0,6,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
 
-                        <TextBlock Margin="0,6,0,0"
+                            <TextBlock x:Name="LabDomainAddress"
+                                       Grid.Column="0"
+                                       Margin="0,0,12,0"
+                                       VerticalAlignment="Center"
+                                       FontSize="15"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource Accent.Base}"
+                                       TextWrapping="Wrap"
+                                       Text="等待 frpc 输出…" />
+
+                            <c:OutlineButton x:Name="BtnCopyDomain"
+                                             Grid.Column="1"
+                                             Padding="12,5"
+                                             Content="复制"
+                                             FontSize="12.5"
+                                             Tone="Solid"
+                                             Click="OnCopyDomainClick" />
+                        </Grid>
+
+                        <TextBlock Margin="0,14,0,0"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource Text.Secondary}"
+                                   Text="IP 地址" />
+                        <Grid Margin="0,6,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock x:Name="LabIpAddress"
+                                       Grid.Column="0"
+                                       Margin="0,0,12,0"
+                                       VerticalAlignment="Center"
+                                       FontSize="15"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource Accent.Base}"
+                                       TextWrapping="Wrap"
+                                       Text="等待 frpc 输出…" />
+
+                            <c:OutlineButton x:Name="BtnCopyIp"
+                                             Grid.Column="1"
+                                             Padding="12,5"
+                                             Content="复制"
+                                             FontSize="12.5"
+                                             Tone="Solid"
+                                             Click="OnCopyIpClick" />
+                        </Grid>
+
+                        <TextBlock Margin="0,12,0,0"
                                    FontSize="11.5"
                                    Foreground="{DynamicResource Text.Tertiary}"
                                    TextWrapping="Wrap"
-                                   Text="朋友在游戏里：合作 → 加入局域网游戏 → 输入这个地址。原版没有密码保护，不联机时记得停掉隧道。" />
+                                   Text="两个地址给朋友填哪个都行：游戏里走「合作 → 加入局域网游戏 → 输入地址」。房主的存档要有联机小屋，否则对方会卡在角色选择界面；原版没有密码保护，不联机时记得停掉隧道。" />
 
-                        <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
-                            <c:OutlineButton x:Name="BtnCopyTunnelAddress"
-                                             Padding="12,5"
-                                             Content="复制地址"
-                                             FontSize="12.5"
-                                             Click="OnCopyTunnelAddressClick" />
-                            <c:OutlineButton x:Name="BtnStopTunnel"
-                                             Margin="8,0,0,0"
-                                             Padding="12,5"
-                                             Content="停止隧道"
-                                             FontSize="12.5"
-                                             Tone="Danger"
-                                             Click="OnStopTunnelClick" />
-                        </StackPanel>
+                        <c:OutlineButton x:Name="BtnStopTunnel"
+                                         Margin="0,10,0,0"
+                                         Padding="12,5"
+                                         HorizontalAlignment="Left"
+                                         Content="停止隧道"
+                                         FontSize="12.5"
+                                         Tone="Danger"
+                                         Click="OnStopTunnelClick" />
                     </StackPanel>
                 </c:SurfaceCard>
             </StackPanel>
-        </ScrollViewer>
+            </ScrollViewer>
 
-        <!-- 运行日志 -->
-        <c:SurfaceCard Grid.Row="2"
-                       Margin="0,12,0,0"
-                       Title="运行日志"
-                       UseShadow="False">
-            <Grid>
-                <TextBlock x:Name="LabLogEmpty"
-                           FontSize="12"
-                           Foreground="{DynamicResource Text.Tertiary}"
-                           Text="还没有联机记录" />
-                <ScrollViewer x:Name="ScrollLog"
-                              Height="120"
-                              HorizontalScrollBarVisibility="Disabled"
-                              VerticalScrollBarVisibility="Auto"
-                              Visibility="Collapsed">
-                    <StackPanel x:Name="PanLogLines" />
-                </ScrollViewer>
-            </Grid>
-        </c:SurfaceCard>
+            <c:SurfaceCard Grid.Column="1"
+                           Margin="12,0,0,0"
+                           Title="樱花FRP 面板"
+                           UseShadow="False"
+                           HasHoverEffect="False">
+                <v:SakuraPanelView x:Name="SakuraPanel" />
+            </c:SurfaceCard>
+        </Grid>
     </Grid>
 </c:LauncherPage>

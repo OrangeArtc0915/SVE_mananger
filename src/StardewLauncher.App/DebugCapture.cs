@@ -131,8 +131,9 @@ internal static class DebugCapture
             (Index: NavPages.Mod, Name: "Mod 管理"),
             (Index: NavPages.Instance, Name: "游戏实例"),
             (Index: NavPages.Resource, Name: "资源中心"),
-            (Index: NavPages.Multiplayer, Name: "樱花联机"),
-            (Index: NavPages.Setup, Name: "设置")
+            (Index: NavPages.Multiplayer, Name: "联机功能"),
+            (Index: NavPages.Setup, Name: "设置"),
+            (Index: NavPages.Log, Name: "运行日志")
         };
 
         // 等界面与数据（Mod 扫描等）稳定下来，再开始扫描
