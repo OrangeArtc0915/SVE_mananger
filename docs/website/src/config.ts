@@ -46,7 +46,7 @@ export const siteConfig: SiteConfig = {
 		// 顶栏标题文本
 		text: "星露谷启动器",
 		// 顶栏标题图标路径，默认使用 public/assets/home/home.png
-		icon: "assets/brand/appicon.png",
+		icon: "assets/brand/appicon.webp",
 	},
 
 	bangumi: {
@@ -70,8 +70,8 @@ export const siteConfig: SiteConfig = {
 
 		// 支持单张图片或图片数组，当数组长度 > 1 时自动启用轮播
 				src: {
-			desktop: ["/assets/banner/1.jpg", "/assets/banner/2.jpg"],
-			mobile: ["/assets/banner/1.jpg", "/assets/banner/2.jpg"],
+			desktop: ["/assets/banner/1.webp", "/assets/banner/2.webp"],
+			mobile: ["/assets/banner/1-mobile.webp", "/assets/banner/2-mobile.webp"],
 		}, // 使用本地横幅图片
 
 		position: "center", // 等同于 object-position，仅支持 'top', 'center', 'bottom'。默认为 'center'
@@ -79,7 +79,7 @@ export const siteConfig: SiteConfig = {
 		carousel: {
 			enable: true, // 为 true 时：为多张图片启用轮播。为 false 时：从数组中随机显示一张图片
 
-			interval: 1.5, // 轮播间隔时间（秒）
+			interval: 6, // 轮播间隔时间（秒）
 		},
 
 		waves: {
@@ -133,8 +133,8 @@ export const siteConfig: SiteConfig = {
 	},
 	generateOgImages: false, // 启用生成OpenGraph图片功能,注意开启后要渲染很长时间，不建议本地调试的时候开启
 	favicon: [
-		{ src: "/favicon/icon.png", theme: "light", sizes: "256x256" },
-		{ src: "/favicon/icon.png", theme: "dark", sizes: "256x256" },
+		{ src: "/favicon/icon-32.png", sizes: "32x32" },
+		{ src: "/favicon/icon-96.png", sizes: "96x96" },
 	],
 
 	// 字体配置
@@ -151,8 +151,8 @@ export const siteConfig: SiteConfig = {
 export const fullscreenWallpaperConfig: FullscreenWallpaperConfig = {
 	enable: false, // 启用全屏壁纸功能,非Banner模式下生效
 			src: {
-			desktop: ["/assets/banner/1.jpg", "/assets/banner/2.jpg"],
-			mobile: ["/assets/banner/1.jpg", "/assets/banner/2.jpg"],
+			desktop: ["/assets/banner/1.webp", "/assets/banner/2.webp"],
+			mobile: ["/assets/banner/1-mobile.webp", "/assets/banner/2-mobile.webp"],
 		}, // 使用本地横幅图片
 	position: "center", // 壁纸位置，等同于 object-position
 	carousel: {
@@ -185,7 +185,7 @@ export const navBarConfig: NavBarConfig = {
 };
 
 export const profileConfig: ProfileConfig = {
-	avatar: "/assets/images/avatar.jpg",
+	avatar: "/assets/images/avatar.webp",
 	name: "星露谷启动器",
 	bio: "把游戏、SMAPI、Mod 和存档收进一个窗口里",
 	typewriter: {

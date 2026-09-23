@@ -81,9 +81,13 @@ const generatePostList = () => {
 	postItems = items;
 };
 
+// 站点可能部署在子路径（如 GitHub Pages 项目页），用与 base 归一化后的比较替代写死的 "/"
+const normalizePath = (p: string) => p.replace(/^\/|\/$/g, "").toLowerCase();
+
 const checkIsHomePage = () => {
 	isHomePage =
-		window.location.pathname === "/" || window.location.pathname === "";
+		normalizePath(window.location.pathname) ===
+		normalizePath(import.meta.env.BASE_URL || "/");
 };
 
 const scrollToHeading = (id: string) => {

@@ -113,6 +113,22 @@ if (siteConfig.generateOgImages && postSlug) {
 const favicons: Favicon[] =
 	siteConfig.favicon.length > 0 ? siteConfig.favicon : defaultFavicons;
 
+// 首屏横幅图预加载：让最大的那张图与 CSS/JS 并行开始下载，减少首屏空白时间
+const bannerSrcConfig = siteConfig.banner.src as
+	| string
+	| string[]
+	| { desktop?: string | string[]; mobile?: string | string[] };
+const pickFirst = (v: string | string[] | undefined) =>
+	Array.isArray(v) ? v[0] : (v ?? "");
+const firstBannerImage = (() => {
+	if (typeof bannerSrcConfig === "string") return bannerSrcConfig;
+	if (Array.isArray(bannerSrcConfig)) return bannerSrcConfig[0] ?? "";
+	return (
+		pickFirst(bannerSrcConfig?.desktop) || pickFirst(bannerSrcConfig?.mobile)
+	);
+})();
+const isHomePageForBanner = isHomePage;
+
 // const siteLang = siteConfig.lang.replace('_', '-')
 if (!lang) {
 	lang = `${siteConfig.lang}`;
@@ -173,6 +189,11 @@ const umamiScripts = umamiConfig.scripts || ""; // 获取Umami scripts配置
 				  media={favicon.theme && `(prefers-color-scheme: ${favicon.theme})`}
 			/>
 		))}
+
+		{/* 首屏横幅图预加载：首页才需要，其他页面不浪费带宽 */}
+		{siteConfig.banner.enable && isHomePageForBanner && firstBannerImage && (
+			<link rel="preload" as="image" href={url(firstBannerImage)} fetchpriority="high" />
+		)}
 
 		<!-- Set the theme before the page is rendered to avoid a flash -->
 		<script is:inline define:vars={{DEFAULT_THEME, LIGHT_MODE, DARK_MODE, BANNER_HEIGHT_EXTEND, PAGE_WIDTH, configHue}}>
