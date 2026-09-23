@@ -13,5 +13,9 @@ public static class AppInfo
     public const string GitHubUrl = "https://github.com/OrangeArtc0915/SVE_mananger";
     public const string GiteeUrl = "https://gitee.com/orangearc655743/SVE_mananger_File";
     public const string WebsiteUrl = "https://orangeartc0915.github.io/SVE_mananger/";
+
+    /// <summary>官网的使用手册（Wiki）入口。</summary>
+    public const string WikiUrl = "https://orangeartc0915.github.io/SVE_mananger/wiki/";
+
     public const string QqGroup = "1034243331";
 }

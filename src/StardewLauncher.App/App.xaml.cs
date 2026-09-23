@@ -57,6 +57,7 @@ public partial class App : Application
         InstanceStore.Load();
         ModTagStore.Load();
         InstallPlanStore.Load();
+        ModProfileStore.Load();
         NotifyNoInstance();
 
         ThemeService.Initialize(SettingsStore.Current.Theme, SettingsStore.Current.AccentTheme);

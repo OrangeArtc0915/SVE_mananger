@@ -16,4 +16,6 @@ public static class NavPages
     public const int Setup = 5;
 
     public const int Log = 6;
+
+    public const int Saves = 7;
 }

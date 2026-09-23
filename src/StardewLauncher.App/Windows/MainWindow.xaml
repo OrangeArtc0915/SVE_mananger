@@ -42,7 +42,11 @@
                                   Color="{DynamicResource Shadow.Tint}" />
             </Border.Effect>
 
-            <Grid x:Name="PanForm" Background="{DynamicResource Brush.WindowBackground}">
+            <Grid x:Name="PanForm"
+                  AllowDrop="True"
+                  Background="{DynamicResource Brush.WindowBackground}"
+                  DragOver="OnGlobalDragOver"
+                  Drop="OnGlobalDrop">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="44" />
                     <RowDefinition Height="*" />
@@ -165,6 +169,12 @@
                                            Tag="4"
                                            Text="联机功能"
                                            Checked="OnNavChecked" />
+                                <c:NavItem x:Name="NavSaves"
+                                           GroupName="MainNav"
+                                           Icon="lucide/save"
+                                           Tag="7"
+                                           Text="存档"
+                                           Checked="OnNavChecked" />
                                 <c:NavItem x:Name="NavSetup"
                                            GroupName="MainNav"
                                            Icon="lucide/settings"
@@ -181,6 +191,11 @@
 
                             <StackPanel Margin="0,0,0,12" VerticalAlignment="Bottom">
                                 <!-- 单独分组，避免与主页面导航互斥；点击后弹独立窗口，不参与页面切换 -->
+                                <c:NavItem x:Name="NavWiki"
+                                           GroupName="AboutNav"
+                                           Icon="lucide/book-marked"
+                                           Text="使用手册"
+                                           Click="OnWikiNavClick" />
                                 <c:NavItem x:Name="NavAbout"
                                            GroupName="AboutNav"
                                            Icon="lucide/info"

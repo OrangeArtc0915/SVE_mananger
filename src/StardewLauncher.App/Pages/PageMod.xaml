@@ -108,6 +108,7 @@
                     </StackPanel>
                 </c:OutlineButton>
                 <c:OutlineButton Margin="8,0,0,0" Content="导入 Mod" Click="OnImportClick" />
+                <c:OutlineButton Margin="8,0,0,0" Content="配置档" Click="OnProfilesClick" />
                 <c:OutlineButton Margin="8,0,0,0" Content="全部启用" Click="OnEnableAllClick" />
                 <c:OutlineButton Margin="8,0,0,0" Content="打开 Mods 目录" Click="OnOpenModsClick" />
                 <c:OutlineButton Margin="8,0,0,0" Content="刷新" Click="OnRefreshClick" />

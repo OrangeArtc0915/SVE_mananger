@@ -121,6 +121,14 @@ public sealed class Settings
 
     public long MaxLogFileSize { get; set; } = 8 * 1024 * 1024;
 
+    // ————— 存档备份 —————
+
+    /// <summary>每个存档最多保留多少份备份，超出后自动删掉最旧的。默认 10。</summary>
+    public int SaveBackupKeepCount { get; set; } = 10;
+
+    /// <summary>恢复存档前是否自动给当前存档打一份快照。默认开启，保证恢复也能反悔。</summary>
+    public bool SnapshotBeforeRestore { get; set; } = true;
+
     // ————— 樱花FRP —————
 
     /// <summary>
@@ -152,4 +160,15 @@ public sealed class Settings
     /// 保证直接铺在背景上的页面标题仍然看得清。
     /// </summary>
     public int BackgroundDim { get; set; } = 45;
+
+    // ————— 主页小组件 —————
+
+    /// <summary>
+    /// 主页小组件的先后顺序，存 widget id（calendar / weather / quote）。
+    /// 留空表示用内置顺序；没提到的按内置顺序排在有记录的后面。
+    /// </summary>
+    public List<string> HomepageWidgetOrder { get; set; } = [];
+
+    /// <summary>被用户收起的主页小组件 id。</summary>
+    public List<string> HomepageHiddenWidgets { get; set; } = [];
 }

@@ -41,15 +41,15 @@ LICENSE               MIT 许可证
 ```
 Data\
   Settings.json               所有设置（含各种密钥，见下）
-  instances\                  实例：每个实例一个 json + 一个同名目录
-    <id>.json                 实例配置
-    <id>\Mods\                该实例启用的 Mod
-    <id>\Saves\               该实例的存档
+  instances\                  实例定义：每个实例一个 json
+    <id>.json                 实例配置（用哪个游戏目录、是否走 SMAPI）
+  save-backups\               存档备份：每个存档一份目录，里面按时间排
+  profiles\                   Mod 配置档：一档一个 json
   Cache\                      缓存
   Log\                        落盘日志
   Background\                 你导入的背景素材副本
   SakuraFrp\                  frpc 客户端（用到联机时才下载）
-  WebView2\  WebView2-Sakura\ 内嵌浏览器的缓存
+  WebView2\  WebView2-Sakura\  WebView2-Wiki\  内嵌浏览器的缓存
 ```
 
 还有两处数据在数据目录之外：

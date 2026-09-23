@@ -152,6 +152,7 @@ public partial class MainWindow : Window
             NavPages.Multiplayer => new PageMultiplayer(),
             NavPages.Setup => new PageSetup(),
             NavPages.Log => new PageLog(),
+            NavPages.Saves => new PageSaves(),
             _ => new PageLaunch()
         };
 
@@ -169,6 +170,7 @@ public partial class MainWindow : Window
         NavInstance.IsChecked = page == NavPages.Instance;
         NavResource.IsChecked = page == NavPages.Resource;
         NavMultiplayer.IsChecked = page == NavPages.Multiplayer;
+        NavSaves.IsChecked = page == NavPages.Saves;
         NavSetup.IsChecked = page == NavPages.Setup;
         NavLog.IsChecked = page == NavPages.Log;
 
@@ -256,6 +258,41 @@ public partial class MainWindow : Window
 
     private void OnMinimizeClick(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
 
+    // ————— 拖拽安装 —————
+    // 挂在 PanForm 上：窗口里只有这一层铺满且带背景（Background 为 null 的元素不参与命中测试，
+    // 挂到 RootGrid / PanContent 上会收不到 Drop）。事件冒泡，子元素不处理就落到这里。
+
+    private void OnGlobalDragOver(object sender, DragEventArgs e)
+    {
+        e.Effects = TryGetDroppedPaths(e).Count > 0 ? DragDropEffects.Copy : DragDropEffects.None;
+        e.Handled = true;
+    }
+
+    private void OnGlobalDrop(object sender, DragEventArgs e)
+    {
+        var paths = TryGetDroppedPaths(e);
+        if (paths.Count == 0) return;
+
+        e.Handled = true;
+
+        // 切到 Mod 页，导入的格式校验、进度与结果汇总都由那一页负责，这里不重复实现
+        SwitchToPage(NavPages.Mod);
+
+        if (GetPage(NavPages.Mod) is PageMod page)
+        {
+            Log.Info($"拖入 {paths.Count} 个文件，交给 Mod 页导入");
+            _ = page.ImportArchivesAsync(paths);
+        }
+    }
+
+    private static IReadOnlyList<string> TryGetDroppedPaths(DragEventArgs e)
+    {
+        if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return [];
+        if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths) return [];
+
+        return paths.Where(path => !string.IsNullOrWhiteSpace(path)).ToList();
+    }
+
     private void OnCloseClick(object sender, RoutedEventArgs e) => Close();
 
     /// <summary>标题栏问号按钮：在默认浏览器里打开项目 GitHub 仓库。</summary>
@@ -275,5 +312,14 @@ public partial class MainWindow : Window
 
         var about = new AboutWindow { Owner = this };
         about.ShowDialog();
+    }
+
+    /// <summary>侧栏「使用手册」：在启动器内嵌的浏览器里打开官网 Wiki。</summary>
+    private void OnWikiNavClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is NavItem item) item.IsChecked = false;
+
+        var wiki = new WikiWindow { Owner = this };
+        wiki.Show();
     }
 }

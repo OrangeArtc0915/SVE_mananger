@@ -1,0 +1,240 @@
+<c:LauncherPage x:Class="StardewLauncher.App.Pages.PageSaves"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:c="clr-namespace:StardewLauncher.App.Controls"
+                xmlns:svg="clr-namespace:StardewLauncher.App.Controls.Svg">
+
+    <Grid Margin="24,20,24,16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- 工具栏：标题占剩余宽度、工具组固定靠右 -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+                <TextBlock FontSize="18" FontWeight="Bold" Text="存档" />
+                <TextBlock Margin="0,4,0,0"
+                           FontSize="12"
+                           Foreground="{DynamicResource Text.Secondary}"
+                           Text="读取游戏自身的存档目录，摘要与备份都在这里；备份放在启动器数据目录里，不会混进游戏文件夹"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="1"
+                        VerticalAlignment="Top"
+                        Orientation="Horizontal">
+                <c:OutlineButton x:Name="BtnOpenDir"
+                                 Content="打开存档目录"
+                                 Tone="Outline"
+                                 Click="OnOpenSavesDirClick" />
+                <c:OutlineButton x:Name="BtnBackupAll"
+                                 Margin="8,0,0,0"
+                                 Content="全部备份一次"
+                                 Tone="Outline"
+                                 Click="OnBackupAllClick" />
+                <c:OutlineButton x:Name="BtnRefresh"
+                                 Margin="8,0,0,0"
+                                 Content="刷新"
+                                 Tone="Solid"
+                                 Click="OnRefreshClick" />
+            </StackPanel>
+        </Grid>
+
+        <!-- 路径与备份目录 -->
+        <TextBlock x:Name="LabPaths"
+                   Grid.Row="1"
+                   Margin="0,8,0,0"
+                   FontSize="11"
+                   Foreground="{DynamicResource Text.Tertiary}"
+                   TextWrapping="Wrap" />
+
+        <!-- 提示条：游戏运行中 / 操作结果 -->
+        <Border x:Name="BarNotice"
+                Grid.Row="2"
+                Margin="0,10,0,0"
+                Padding="12,10"
+                Background="{DynamicResource Accent.Faint}"
+                CornerRadius="{StaticResource Radius.Item}"
+                Visibility="Collapsed">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <svg:SvgIcon x:Name="IconNotice"
+                             Grid.Column="0"
+                             Width="16"
+                             Height="16"
+                             Margin="0,1,0,0"
+                             VerticalAlignment="Top"
+                             Icon="lucide/info"
+                             IconBrush="{DynamicResource Accent.Base}" />
+
+                <TextBlock x:Name="LabNotice"
+                           Grid.Column="1"
+                           Margin="10,0,8,0"
+                           VerticalAlignment="Center"
+                           FontSize="12"
+                           Foreground="{DynamicResource Text.Primary}"
+                           TextWrapping="Wrap" />
+
+                <c:RoundIconButton Grid.Column="2"
+                                   VerticalAlignment="Center"
+                                   Icon="lucide/x"
+                                   IconSize="13"
+                                   Tone="Plain"
+                                   Click="OnDismissNoticeClick" />
+            </Grid>
+        </Border>
+
+        <!-- 存档列表 / 空状态 -->
+        <Grid Grid.Row="3" Margin="0,14,0,0">
+            <ScrollViewer x:Name="ScrollSaves"
+                          HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <ItemsControl x:Name="PanSaves">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <c:MasonryPanel Mode="AutoFit"
+                                                ColumnGap="14"
+                                                ItemWidth="340"
+                                                RowGap="14" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <c:SurfaceCard Padding="0"
+                                               UseShadow="False">
+                                    <Grid Margin="16,14,16,14">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <!-- 0 玩家名 + 农场名 + 备份数 -->
+                                        <Grid Grid.Row="0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock FontSize="15"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource Text.Primary}"
+                                                           Text="{Binding DisplayName}"
+                                                           TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Margin="0,2,0,0"
+                                                           FontSize="12"
+                                                           Foreground="{DynamicResource Text.Secondary}"
+                                                           Text="{Binding FarmText}"
+                                                           TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+
+                                            <Border Grid.Column="1"
+                                                    Padding="7,2"
+                                                    VerticalAlignment="Top"
+                                                    Background="{DynamicResource Surface.Sunken}"
+                                                    CornerRadius="{StaticResource Radius.Pill}">
+                                                <TextBlock FontSize="11"
+                                                           Foreground="{DynamicResource Text.Secondary}"
+                                                           Text="{Binding BackupText}" />
+                                            </Border>
+                                        </Grid>
+
+                                        <!-- 1 日期 · 金钱 · 游玩时长 -->
+                                        <TextBlock Grid.Row="1"
+                                                   Margin="0,10,0,0"
+                                                   FontSize="12"
+                                                   Foreground="{DynamicResource Text.Secondary}"
+                                                   Text="{Binding Summary}"
+                                                   TextWrapping="Wrap" />
+
+                                        <!-- 2 技能 -->
+                                        <TextBlock Grid.Row="2"
+                                                   Margin="0,4,0,0"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource Text.Tertiary}"
+                                                   Text="{Binding SkillsText}"
+                                                   TextWrapping="Wrap" />
+
+                                        <!-- 3 最后保存 · 体积 · 完整性 -->
+                                        <StackPanel Grid.Row="3"
+                                                    Margin="0,4,0,0"
+                                                    Orientation="Horizontal">
+                                            <TextBlock FontSize="11"
+                                                       Foreground="{DynamicResource Text.Tertiary}"
+                                                       Text="{Binding MetaText}" />
+                                            <TextBlock Margin="8,0,0,0"
+                                                       FontSize="11"
+                                                       Foreground="{DynamicResource Status.Danger}"
+                                                       Text="主存档缺失，别用这份恢复">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding HasMainFile}" Value="False">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+
+                                        <!-- 4 操作 -->
+                                        <StackPanel Grid.Row="4"
+                                                    Margin="0,12,0,0"
+                                                    Orientation="Horizontal">
+                                            <c:OutlineButton Content="备份"
+                                                             Tag="{Binding}"
+                                                             Tone="Solid"
+                                                             Click="OnBackupClick" />
+                                            <c:OutlineButton Margin="8,0,0,0"
+                                                             Content="备份与回滚…"
+                                                             Tag="{Binding}"
+                                                             Tone="Outline"
+                                                             Click="OnManageBackupsClick" />
+                                            <c:OutlineButton Margin="8,0,0,0"
+                                                             Content="打开目录"
+                                                             Tag="{Binding}"
+                                                             Tone="Plain"
+                                                             Click="OnOpenSaveDirClick" />
+                                        </StackPanel>
+                                    </Grid>
+                                </c:SurfaceCard>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- 空状态 -->
+                    <c:SurfaceCard x:Name="CardEmpty"
+                                   Margin="0,4,0,0"
+                                   Title="没有找到存档"
+                                   UseShadow="False"
+                                   Visibility="Collapsed">
+                        <TextBlock x:Name="LabEmpty"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource Text.Secondary}"
+                                   TextWrapping="Wrap" />
+                    </c:SurfaceCard>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</c:LauncherPage>

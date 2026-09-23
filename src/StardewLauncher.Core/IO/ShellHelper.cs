@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO;
+using Microsoft.VisualBasic.FileIO;
 using StardewLauncher.Core.Logging;
 
 namespace StardewLauncher.Core.IO;
@@ -38,6 +39,38 @@ public static class ShellHelper
         catch (Exception ex)
         {
             Log.Warn($"打开目录失败 {path}：{ex.Message}");
+        }
+    }
+
+    /// <summary>删除整个目录。toRecycleBin 为真时送进回收站，用户还能捞回来。</summary>
+    public static bool TryDeleteDirectory(string path, bool toRecycleBin, out string? error)
+    {
+        error = null;
+
+        if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
+        {
+            error = $"目录不存在：{path}";
+            return false;
+        }
+
+        try
+        {
+            if (toRecycleBin)
+            {
+                FileSystem.DeleteDirectory(path, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+            }
+            else
+            {
+                Directory.Delete(path, true);
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            error = $"删除失败：{ex.Message}";
+            Log.Warn($"删除目录失败 {path}：{ex.Message}");
+            return false;
         }
     }
 }

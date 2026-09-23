@@ -1050,22 +1050,32 @@ public partial class PageMod : LauncherPage
         if (dialog.ShowDialog() == true) _ = ScanAsync();
     }
 
-    // ————— 导入 —————
+    // ————— 配置档 —————
 
-    private async void OnImportClick(object sender, RoutedEventArgs e)
+    private void OnProfilesClick(object sender, RoutedEventArgs e)
     {
-        var target = _modsDirectory;
-        if (string.IsNullOrWhiteSpace(target))
+        if (string.IsNullOrWhiteSpace(_modsDirectory))
         {
             ShowNotice("还没有可用的 Mods 目录，请先创建游戏实例。", true);
             return;
         }
 
+        var window = new ModProfileWindow(_modsDirectory) { Owner = Window.GetWindow(this) };
+        window.ShowDialog();
+
+        // 应用过配置档就重扫，否则列表上的启停状态会和磁盘不一致
+        if (window.Applied) _ = ScanAsync();
+    }
+
+    // ————— 导入 —————
+
+    private async void OnImportClick(object sender, RoutedEventArgs e)
+    {
         var dialog = new OpenFileDialog
         {
             Title = "选择要导入的 Mod 压缩包",
             Filter = "Mod 压缩包 (*.zip;*.rar;*.7z;*.tar;*.gz)|*.zip;*.rar;*.7z;*.tar;*.gz|所有文件 (*.*)|*.*",
-            Multiselect = false,
+            Multiselect = true,
             CheckFileExists = true
         };
 
@@ -1073,34 +1083,99 @@ public partial class PageMod : LauncherPage
         var confirmed = owner is null ? dialog.ShowDialog() : dialog.ShowDialog(owner);
         if (confirmed != true) return;
 
-        var source = dialog.FileName;
-        var progress = new Progress<double>(value =>
-            LabNotice.Text = $"正在导入… {(int)Math.Round(value * 100)}%");
+        await ImportArchivesAsync(dialog.FileNames);
+    }
 
-        ShowNotice("正在导入… 0%", false);
-
-        ImportResult result;
-        try
+    /// <summary>
+    /// 导入一个或多个压缩包（也支持直接给文件夹）。窗口级的拖拽安装走的就是这里，
+    /// 所以格式校验、进度提示与结果汇总只有一份。
+    /// </summary>
+    public async Task ImportArchivesAsync(IReadOnlyList<string> sources)
+    {
+        if (string.IsNullOrWhiteSpace(_modsDirectory))
         {
-            result = await Task.Run(() => ModImporter.Import(source, target, backupExisting: true, progress));
-        }
-        catch (Exception ex)
-        {
-            Log.Error($"导入 Mod 失败：{source}", ex);
-            ShowNotice($"导入失败：{ex.Message}", true);
-            ShowMessage($"导入失败：{ex.Message}", "导入 Mod", MessageBoxImage.Error);
+            ShowNotice("还没有可用的 Mods 目录，请先创建游戏实例。", true);
+            ShowMessage("还没有可用的 Mods 目录。\n\n先到「游戏实例」建一个 Mod 端实例，再来导入 Mod。",
+                "导入 Mod", MessageBoxImage.Warning);
             return;
         }
 
-        ShowNotice($"导入完成：成功 {result.InstalledCount} 个，警告 {result.Warnings.Count} 条，错误 {result.Errors.Count} 条。",
-            result.Errors.Count > 0);
+        if (_busy)
+        {
+            ShowNotice("上一个操作还没结束，稍等一下再试。", true);
+            return;
+        }
 
-        MessageBox.Show(
-            Window.GetWindow(this)!,
-            BuildImportMessage(source, result),
-            "导入完成",
-            MessageBoxButton.OK,
-            result.Errors.Count > 0 ? MessageBoxImage.Warning : MessageBoxImage.Information);
+        var accepted = new List<string>();
+        var skipped = new List<string>();
+
+        foreach (var source in sources)
+        {
+            if (string.IsNullOrWhiteSpace(source)) continue;
+
+            if (Directory.Exists(source)) accepted.Add(source);
+            else if (File.Exists(source) && ArchiveExtractor.IsSupportedArchive(source)) accepted.Add(source);
+            else skipped.Add(Path.GetFileName(source));
+        }
+
+        if (accepted.Count == 0)
+        {
+            ShowMessage($"拖进来的 {skipped.Count} 个文件都不是能识别的 Mod 包。\n\n支持 zip / rar / 7z / tar / gz，也可以直接拖一个 Mod 文件夹。",
+                "导入 Mod", MessageBoxImage.Warning);
+            return;
+        }
+
+        var progress = new Progress<double>(value =>
+            LabNotice.Text = $"正在导入… {(int)Math.Round(value * 100)}%");
+
+        ShowNotice($"正在导入 {accepted.Count} 个包… 0%", false);
+
+        _busy = true;
+
+        var ok = 0;
+        var failed = 0;
+        var installed = 0;
+        var report = new StringBuilder();
+
+        try
+        {
+            foreach (var source in accepted)
+            {
+                try
+                {
+                    var result = await Task.Run(() =>
+                        ModImporter.Import(source, _modsDirectory, backupExisting: true, progress));
+
+                    installed += result.InstalledCount;
+
+                    if (result.Errors.Count > 0) failed++;
+                    else ok++;
+
+                    report.AppendLine(BuildImportMessage(source, result));
+                    report.AppendLine();
+                }
+                catch (Exception ex)
+                {
+                    failed++;
+                    Log.Error($"导入 Mod 失败：{source}", ex);
+                    report.AppendLine($"来源：{source}");
+                    report.AppendLine($"失败：{ex.Message}");
+                    report.AppendLine();
+                }
+            }
+        }
+        finally
+        {
+            _busy = false;
+        }
+
+        if (skipped.Count > 0)
+            report.AppendLine($"跳过（不是支持的格式）：{string.Join("、", skipped)}");
+
+        ShowNotice($"导入完成：共 {accepted.Count} 个包，成功 {ok} 个、失败 {failed} 个，装入 {installed} 个 Mod。", failed > 0);
+
+        ShowMessage(report.ToString().TrimEnd(), "导入完成",
+            failed > 0 ? MessageBoxImage.Warning : MessageBoxImage.Information);
 
         await ScanAsync();
     }

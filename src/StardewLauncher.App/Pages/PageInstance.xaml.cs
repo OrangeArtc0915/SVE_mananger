@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using StardewLauncher.App.Controls;
 using StardewLauncher.App.Windows;
+using StardewLauncher.Core.Games;
 using StardewLauncher.Core.Instances;
 using StardewLauncher.Core.IO;
 using StardewLauncher.Core.Logging;
@@ -12,9 +13,6 @@ namespace StardewLauncher.App.Pages;
 
 public partial class PageInstance : LauncherPage
 {
-    /// <summary>游戏运行中时用于提示的进程名。</summary>
-    private static readonly string[] GameProcessNames = ["StardewModdingAPI", "Stardew Valley"];
-
     private bool _subscribed;
     private bool _gameRunning;
 
@@ -156,33 +154,7 @@ public partial class PageInstance : LauncherPage
 
     // ————— 进程检测 —————
 
-    private static bool IsGameRunning()
-    {
-        foreach (var name in GameProcessNames)
-        {
-            Process[] processes;
-            try
-            {
-                processes = Process.GetProcessesByName(name);
-            }
-            catch (Exception ex)
-            {
-                Log.Warn($"枚举进程 {name} 失败：{ex.Message}");
-                continue;
-            }
-
-            try
-            {
-                if (processes.Length > 0) return true;
-            }
-            finally
-            {
-                foreach (var process in processes) process.Dispose();
-            }
-        }
-
-        return false;
-    }
+    private static bool IsGameRunning() => GameProcess.IsRunning();
 
     // ————— 视觉树查找 —————
 
