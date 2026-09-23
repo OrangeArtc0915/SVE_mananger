@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>星露谷启动器</title>
+  <subtitle>把游戏、SMAPI、Mod 和存档收进一个窗口里</subtitle>
+  <link href="https://orangeartc0915.github.io/" rel="alternate" type="text/html"/>
+  <link href="https://orangeartc0915.github.io/atom.xml" rel="self" type="application/atom+xml"/>
+  <id>https://orangeartc0915.github.io/</id>
+  <updated>2026-09-23T12:18:25.525Z</updated>
+  <language>zh_CN</language>
+  <entry>
+    <title>v1.4.0 更新说明</title>
+    <link href="https://orangeartc0915.github.io/posts/v140/" rel="alternate" type="text/html"/>
+    <id>https://orangeartc0915.github.io/posts/v140/</id>
+    <published>2026-09-19T00:00:00.000Z</published>
+    <updated>2026-09-19T00:00:00.000Z</updated>
+    <summary>联机改为只走樱花 FRP、新增多连接分片下载与运行日志页，并补上明暗主题与个性化背景。</summary>
+    <content type="html"><![CDATA[<h2>这一版做了什么</h2>
+<h3>联机功能：只保留樱花 FRP</h3>
+<p>原来的双方案（EasyTier 组网 + 樱花 FRP）改为<strong>只走樱花 FRP</strong>：</p>
+<ul>
+<li>填自己的访问密钥、选节点，启动器帮你建一条 <strong>UDP 24642</strong> 隧道并拉起官方 frpc</li>
+<li>启动后同时给出<strong>域名地址</strong>与 <strong>IP 地址</strong>，各自一键复制，任选其一发给朋友</li>
+<li>页面右侧<strong>内嵌官方网页版面板</strong>，建隧道、改名、删除都在启动器里完成，不再弹系统浏览器</li>
+<li>顺手解决了 EasyTier 携带 Npcap <code>Packet.dll</code> 的再分发问题：<strong>发行包不再包含任何第三方闭源二进制</strong></li>
+</ul>
+<h3>下载：多连接分片</h3>
+<p>服务器支持 Range 且文件较大时，自动切成最多 <strong>6 个连接</strong>同时下载；进度按分片记录，断网、暂停、手动取消后都能从各自的断点接着下。服务器不支持分片时自动退回单连接。</p>
+<h3>新增「运行日志」页</h3>
+<p>侧栏新增独立页面，把<strong>启动器操作记录</strong>与<strong>游戏进程输出</strong>分成两个标签。日志收在内存里（最近 500 条），切走页面再回来历史还在；落盘日志仍在 <code>Data\Log</code>。</p>
+<h3>界面</h3>
+<ul>
+<li>新增跟随系统的<strong>深色模式</strong>，四套强调色可切，导航栏可随手调主题色相</li>
+<li>支持把<strong>自己的图片 / GIF</strong> 设为窗口背景，界面改为半透明玻璃质感</li>
+<li>首页欢迎卡与每日一言重做</li>
+</ul>
+<h3>其它</h3>
+<ul>
+<li>「资源中心」只保留 <strong>SMAPI 安装</strong>与<strong>在线浏览</strong>，Mod 管理页保留入口</li>
+<li>侧栏「联机大厅」更名为「<strong>联机功能</strong>」</li>
+<li>启动器<strong>不再需要管理员权限</strong>（樱花 FRP 不装驱动、不装网卡）</li>
+</ul>
+<hr />
+<blockquote>
+<p>完整变更见 <a href="https://github.com/OrangeArtc0915/SVE_mananger/releases">GitHub Releases</a>；遇到问题欢迎到 QQ 群 <strong>1034243331</strong> 反馈。</p>
+</blockquote>
+]]></content>
+    <author>
+      <name>星露谷启动器</name>
+    </author>
+    <category term="更新日志"></category>
+  </entry>
+  <entry>
+    <title>三步开种：从安装到进游戏</title>
+    <link href="https://orangeartc0915.github.io/posts/get-started/" rel="alternate" type="text/html"/>
+    <id>https://orangeartc0915.github.io/posts/get-started/</id>
+    <published>2026-09-18T00:00:00.000Z</published>
+    <updated>2026-09-18T00:00:00.000Z</updated>
+    <summary>新建实例 → 装 SMAPI → 点启动，第一次用跟着走一遍就好。</summary>
+    <content type="html"><![CDATA[<h2>第一步：新建实例并选择游戏目录</h2>
+<p>在「游戏实例」里新建一个实例，指向你的《星露谷物语》安装目录。</p>
+<ul>
+<li>想要纯净体验：选<strong>原版</strong>，直接拉起 <code>Stardew Valley.exe</code></li>
+<li>想玩 Mod：选 <strong>Mod 端</strong>，走 SMAPI 启动，Mod 管理功能只对这个实例生效</li>
+</ul>
+<p>一套原版 + 多套 Mod 端可以同时存在，各自的 Mod 目录、存档目录与 SMAPI 配置互不干扰。</p>
+<h2>第二步：先装 SMAPI，再装 Mod</h2>
+<p>在「资源中心」点「下载 SMAPI」，官方与启动器云端镜像两条线路任选：</p>
+<table>
+<thead>
+<tr>
+<th>线路</th>
+<th>来源</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>官方</td>
+<td>GitHub Releases（Pathoschild/SMAPI）</td>
+<td>总是取最新版</td>
+</tr>
+<tr>
+<td>云端镜像</td>
+<td>本项目 resource 分支</td>
+<td>国内可达性更好，可选 Gitee 源</td>
+</tr>
+</tbody>
+</table>
+<p>装的过程中会<strong>弹出一个黑色控制台窗口</strong>，那是 SMAPI 官方安装器自己的窗口，不要关掉它，几秒后会自动关闭。</p>
+<p>装完启动器会校验游戏目录里的 <code>StardewModdingAPI.exe</code> 与 <code>smapi-internal</code>，并显示当前版本。之后把 Mod 压缩包导入 Mod 库（支持 <code>zip</code> / <code>rar</code> / <code>7z</code> / <code>tar</code> / <code>gz</code>），或直接在「在线浏览」里下载安装；缺前置会顺手提醒。</p>
+<h2>第三步：点启动</h2>
+<p>回到启动页按下按钮即可。启动前会校验 Mod 与前置依赖，游戏日志实时显示在下方面板里。</p>
+<p>想和朋友一起种地，就到「联机功能」开一条 UDP 隧道 —— 详见<a href="/posts/multiplayer/">用樱花 FRP 和朋友联机</a>。</p>
+]]></content>
+    <author>
+      <name>星露谷启动器</name>
+    </author>
+    <category term="使用文档"></category>
+  </entry>
+  <entry>
+    <title>Mod 管理与依赖检查</title>
+    <link href="https://orangeartc0915.github.io/posts/mods/" rel="alternate" type="text/html"/>
+    <id>https://orangeartc0915.github.io/posts/mods/</id>
+    <published>2026-09-17T00:00:00.000Z</published>
+    <updated>2026-09-17T00:00:00.000Z</updated>
+    <summary>扫描、启用、停用、导入、安装规划与前置补齐，都在 Mod 管理页里。</summary>
+    <content type="html"><![CDATA[<h2>装 Mod 的三种方式</h2>
+<ol>
+<li><strong>导入压缩包</strong>：直接把 <code>zip</code> / <code>rar</code> / <code>7z</code> / <code>tar</code> / <code>gz</code> 拖进 Mod 管理页，启动器会自动识别安装方式</li>
+<li><strong>在线下载</strong>：到「资源中心 → 在线浏览」，在 Nexus 页面上点「Mod Manager Download」即可在启动器内下载，<strong>非会员也能用</strong></li>
+<li><strong>从 Mod 库补齐</strong>：缺前置时，直接从本地 Mod 库一键补齐</li>
+</ol>
+<h2>安装规划：动手前先看清会发生什么</h2>
+<p>Content 覆盖、XNB 替换、Reshade 这类非标准包，启动器会先列出一份计划：<strong>覆盖哪些文件、替换哪些 XNB、装到哪个目录</strong>。确认之后才动手，并在覆盖前自动备份，装错了随时能退回来。</p>
+<h2>依赖检查</h2>
+<p>启动器会递归解析每个 Mod 的 <code>manifest.json</code>，把前置关系展开：谁缺前置、缺哪一个，列表里一目了然。</p>
+<h2>常见坑</h2>
+<ul>
+<li><strong>Mod 装了没生效</strong>：先确认实例选的是「Mod 端」而不是「原版」；再看该 Mod 是不是被禁用了（名字前缀带点号）；最后跑一次依赖检查</li>
+<li><strong>游戏目录找不到</strong>：到「设置 → 游戏与实例」手动指定，或确认游戏是 Steam 版且至少启动过一次</li>
+</ul>
+]]></content>
+    <author>
+      <name>星露谷启动器</name>
+    </author>
+    <category term="使用文档"></category>
+  </entry>
+  <entry>
+    <title>用樱花 FRP 和朋友一起种地</title>
+    <link href="https://orangeartc0915.github.io/posts/multiplayer/" rel="alternate" type="text/html"/>
+    <id>https://orangeartc0915.github.io/posts/multiplayer/</id>
+    <published>2026-09-16T00:00:00.000Z</published>
+    <updated>2026-09-16T00:00:00.000Z</updated>
+    <summary>开一条 UDP 24642 隧道，把连接地址发给朋友即可；面板、改名、删除都在启动器里。</summary>
+    <content type="html"><![CDATA[<p>《星露谷物语》原版联机走 UDP，主机需要把自己的端口暴露到公网。启动器用<strong>樱花 FRP</strong> 帮你完成这一步。</p>
+<h2>开房</h2>
+<ol>
+<li>到「联机功能」页，把樱花 FRP 面板里的<strong>访问密钥</strong>填进来，点「验证并加载」
+<ul>
+<li>免费账号也能开隧道；密钥等价于账号密码，只存在本机 <code>Data\Settings.json</code></li>
+</ul>
+</li>
+<li>点「准备 frpc」，从樱花 FRP 官方接口下载官方客户端（只下一次，带 MD5 校验）</li>
+<li>填隧道名 → 「加载节点」挑一个可用节点 → 「创建 UDP 隧道（本地端口 24642）」</li>
+<li>在「我的 UDP 隧道」里点「启动」，等页面出现连接地址</li>
+</ol>
+<h2>把地址发给朋友</h2>
+<p>启动成功后页面会同时给出两种写法：</p>
+<ul>
+<li><strong>域名地址</strong>，形如 <code>frp-xxx.com:10086</code></li>
+<li><strong>IP 地址</strong>，形如 <code>114.51.4.191:10086</code></li>
+</ul>
+<p>两者任选其一，各有一个「复制」按钮。朋友在游戏里走 <strong>合作 → 加入局域网游戏 → 输入地址</strong>。</p>
+<blockquote>
+<p>房主的存档需要有<strong>联机小屋</strong>，否则朋友进来会卡在角色选择界面。</p>
+</blockquote>
+<h2>面板就在启动器里</h2>
+<p>页面右侧内嵌了樱花 FRP 的<strong>官方网页版面板</strong>：建隧道、改名、改端口、删除，登录一次之后都在里面做，不用切到浏览器。</p>
+<h2>两个注意点</h2>
+<ul>
+<li>只有 <strong>UDP</strong> 隧道能用于星露谷，TCP 隧道用不了</li>
+<li><strong>原版没有密码保护</strong>，不联机时记得点「停止隧道」</li>
+</ul>
+]]></content>
+    <author>
+      <name>星露谷启动器</name>
+    </author>
+    <category term="使用文档"></category>
+  </entry>
+  <entry>
+    <title>下载渠道与提速说明</title>
+    <link href="https://orangeartc0915.github.io/posts/download/" rel="alternate" type="text/html"/>
+    <id>https://orangeartc0915.github.io/posts/download/</id>
+    <published>2026-09-15T00:00:00.000Z</published>
+    <updated>2026-09-15T00:00:00.000Z</updated>
+    <summary>GitHub / Gitee 两个渠道，包里有什么、怎么用，以及为什么下载慢不一定是启动器的问题。</summary>
+    <content type="html"><![CDATA[<h2>两个下载渠道</h2>
+<table>
+<thead>
+<tr>
+<th>渠道</th>
+<th>地址</th>
+<th>适合</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GitHub Releases</td>
+<td><a href="https://github.com/OrangeArtc0915/SVE_mananger/releases">github.com/OrangeArtc0915/SVE_mananger/releases</a></td>
+<td>海外线路，更新最先到这里</td>
+</tr>
+<tr>
+<td>Gitee 发行版</td>
+<td><a href="https://gitee.com/orangearc655743/SVE_mananger_File/releases">gitee.com/orangearc655743/SVE_mananger_File/releases</a></td>
+<td>国内镜像，包的内容完全一样</td>
+</tr>
+</tbody>
+</table>
+<h2>包里有什么</h2>
+<pre><code>StardewLauncher.exe   启动器本体（单文件、自带 .NET 8 运行时）
+README.md             说明文档
+NOTICE                第三方依赖与参考来源说明
+LICENSE               MIT 许可证
+</code></pre>
+<p>解压到任意目录，双击 <code>StardewLauncher.exe</code> 即可。首次运行会在同目录生成 <code>Data\</code>；联机用的 frpc 由启动器在你要用时从樱花 FRP 官方接口下载。</p>
+<h2>下载提速：多连接分片</h2>
+<p>在启动器内下载 Mod 时：</p>
+<ul>
+<li>服务器支持 Range 且文件较大 → 自动切成最多 <strong>6 个连接</strong>同时下，Mod 包越大越明显</li>
+<li>进度按分片记录 → 断网、暂停、手动取消，下次都从各自的断点接着下，不用重头来</li>
+<li>服务器不支持分片 → 自动退回单连接，不会因此失败</li>
+</ul>
+<blockquote>
+<p>但速度上限仍取决于你的网络与站点线路：<strong>启动器不缓存也不加速</strong>。如果实在慢，可以先在浏览器里下好，再用「导入」把压缩包放进 Mod 库，效果一样。</p>
+</blockquote>
+]]></content>
+    <author>
+      <name>星露谷启动器</name>
+    </author>
+    <category term="使用文档"></category>
+  </entry>
+  <entry>
+    <title>常见问题</title>
+    <link href="https://orangeartc0915.github.io/posts/faq/" rel="alternate" type="text/html"/>
+    <id>https://orangeartc0915.github.io/posts/faq/</id>
+    <published>2026-09-14T00:00:00.000Z</published>
+    <updated>2026-09-14T00:00:00.000Z</updated>
+    <summary>成就、SMAPI 黑窗口、下载慢、联机连不上、存档安全……常被问到的几件事。</summary>
+    <content type="html"><![CDATA[<h2>启动器会不会影响成就？</h2>
+<p>启动器本身只负责启动游戏、管理文件和显示日志，不会修改存档或成就数据。不过要注意：装了 Mod 之后，游戏内的成就就是「有 Mod 的存档」的正常逻辑，这一点和启动器无关。</p>
+<h2>怎么让 Mod 生效？</h2>
+<p>需要先装好 SMAPI，并用 <strong>Mod 端实例</strong>启动游戏。装 SMAPI 不用出启动器：到「资源中心」点「下载 SMAPI」，选好游戏实例后一键安装即可。</p>
+<h2>装 SMAPI 时冒出一个黑窗口，是不是出问题了？</h2>
+<p>不是。那是 SMAPI 官方安装器自己的控制台窗口，它必须依赖真实控制台才能运行，启动器无法也不该把它藏起来。等它自己关掉就好。</p>
+<h2>为什么下载很慢？</h2>
+<p>下载走多连接分片（服务器支持时最多 6 个连接同时下，中断了还能接着下），但速度上限仍取决于你的网络与站点线路 —— 启动器不缓存也不加速。如果实在太慢，可以先用浏览器下载好，再用「导入」把压缩包放进 Mod 库安装。</p>
+<h2>樱花 FRP 要花钱吗？</h2>
+<p>需要你自己在樱花 FRP 面板拿一个访问密钥，免费账号也能开隧道。星露谷联机走 UDP，隧道要建 <strong>UDP 类型</strong>（本地端口 24642），TCP 隧道用不了。</p>
+<h2>开了隧道，朋友却连不上？</h2>
+<p>先确认隧道是 UDP 类型、已经启动，并且页面上出现了域名地址或 IP 地址（没出现说明 frpc 还没连上节点）。把地址原样发给对方，对方在游戏里走「合作 → 加入局域网游戏 → 输入地址」。</p>
+<h2>能把视频设成背景吗？</h2>
+<p>可以，但视频背景依赖系统自带的 Windows Media Player 组件。部分精简系统（如 Windows 10 LTSC）没有这个组件，此时请改用图片或 GIF 动图。</p>
+<h2>存档在哪？会不会丢？</h2>
+<p>存档默认在 <code>%appdata%\StardewValley\Saves</code>。启动器只读取路径信息，不会主动删改存档；如果同时开着 Steam 云同步，建议不要让两个工具同时改写同一份存档。</p>
+]]></content>
+    <author>
+      <name>星露谷启动器</name>
+    </author>
+    <category term="使用文档"></category>
+  </entry>
+</feed>
