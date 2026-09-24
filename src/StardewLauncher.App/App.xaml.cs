@@ -51,6 +51,15 @@ public partial class App : Application
 
         InitializeLogging();
 
+        // 门锁要在主窗口创建之前过：StartupUri 的窗口是在 OnStartup 返回后才建的，
+        // 这里判定不通过就直接退出，用户不会看到半截界面。
+        if (!EnsureSurvive())
+        {
+            StartupUri = null;
+            Shutdown(1);
+            return;
+        }
+
         DetectModLibrary();
         EnsureDownloadFolder();
 
@@ -77,6 +86,54 @@ public partial class App : Application
 #endif
 
         DispatcherUnhandledException += OnUnhandledException;
+    }
+
+    /// <summary>
+    /// 远端门锁：survive 分支上的 SVE_M_survive 为 false，或三个源都读不到有效配置时，
+    /// 提示并终止启动。这里刻意选了"拿不到就不放行"，所以断网时启动器同样打不开。
+    /// </summary>
+    private static bool EnsureSurvive()
+    {
+        // 每次启动都要联网确认，整轮最多等这么久（三个源分摊）
+        var budget = TimeSpan.FromMilliseconds(4500);
+
+        SurviveResult result;
+
+        try
+        {
+            // 必须丢到后台线程再等：直接在这等会把 UI 线程占住，
+            // 而 HttpDownloader 里的 await 要回 UI 线程才能继续 —— 死锁。
+            result = Task.Run(() => SurviveGate.CheckAsync(budget)).GetAwaiter().GetResult();
+        }
+        catch (Exception ex)
+        {
+            Log.Error("门锁校验异常", ex);
+            result = new SurviveResult(SurviveState.Unreachable, ex.Message);
+        }
+
+        if (result.Allowed)
+        {
+            Log.Info($"门锁通过：{result.Detail}");
+            return true;
+        }
+
+        Log.Warn($"门锁拦截：{result.Code}（{result.Detail}）");
+        ShowSurviveBlocked(result);
+        return false;
+    }
+
+    private static void ShowSurviveBlocked(SurviveResult result)
+    {
+        var message = result.State == SurviveState.Denied
+            ? "此版本星露谷启动器暂停支持！请联系域管理员！"
+              + $"\n\n错误代码：{result.Code}"
+            : "无法校验启动权限，启动器已停止运行。"
+              + $"\n\n{result.Detail}"
+              + $"\n\n错误代码：{result.Code}"
+              + "\n请联系域管理员。";
+
+        MessageBox.Show(message, $"{AppInfo.Name} {AppInfo.VersionDisplay}",
+            MessageBoxButton.OK, MessageBoxImage.Stop);
     }
 
     private static void InitializeLogging()

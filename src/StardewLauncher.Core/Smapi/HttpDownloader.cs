@@ -58,6 +58,17 @@ public static class HttpDownloader
             {
                 using var request = CreateRequest(url, userAgent);
                 using var response = await Client.SendAsync(request, HttpCompletionOption.ResponseContentRead, token);
+
+                var status = (int)response.StatusCode;
+
+                // 4xx 是对方的明确答复（文件不存在、没权限），再问几次也是同样结果，
+                // 直接返回可以让调用方把时间留给别的地址。408 / 429 例外，属于等一下可能就好。
+                if (status is >= 400 and < 500 and not (408 or 429))
+                {
+                    Log.Warn($"请求被拒绝：{url}（{status} {response.ReasonPhrase}）");
+                    return null;
+                }
+
                 response.EnsureSuccessStatusCode();
 
                 var text = await response.Content.ReadAsStringAsync(token);
