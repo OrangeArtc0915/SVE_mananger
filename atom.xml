@@ -5,8 +5,58 @@
   <link href="https://orangeartc0915.github.io/" rel="alternate" type="text/html"/>
   <link href="https://orangeartc0915.github.io/atom.xml" rel="self" type="application/atom+xml"/>
   <id>https://orangeartc0915.github.io/</id>
-  <updated>2026-09-23T14:17:09.817Z</updated>
+  <updated>2026-09-24T10:10:48.464Z</updated>
   <language>zh_CN</language>
+  <entry>
+    <title>v1.5.0 更新说明</title>
+    <link href="https://orangeartc0915.github.io/posts/v150/" rel="alternate" type="text/html"/>
+    <id>https://orangeartc0915.github.io/posts/v150/</id>
+    <published>2026-09-23T00:00:00.000Z</published>
+    <updated>2026-09-23T00:00:00.000Z</updated>
+    <summary>新增工具箱（存档管理）、Mod 配置档、拖拽安装、内嵌使用手册，首页小组件也能自己排了。</summary>
+    <content type="html"><![CDATA[<h2>这一版做了什么</h2>
+<p>这一版主要补上"启动器之外还得手动做的事"：存档要自己备份、Mod 组合要来回勾、压缩包要一层层点进来。</p>
+<h3>新增「工具箱」，第一个工具是存档管理</h3>
+<p>侧栏多了一个<strong>工具箱</strong>，点进去是「存档管理」：</p>
+<ul>
+<li>列出游戏自己的存档目录（<code>%APPDATA%\StardewValley\Saves</code>）里的每一份存档：玩家名、农场名、进度、金钱、游玩时长、五项技能、最后保存时间与体积</li>
+<li>每份存档可以<strong>一键备份</strong>，也可以「全部备份一次」</li>
+<li>「备份与回滚…」里能选任意一份备份<strong>回滚</strong>，而且<strong>回滚前会先自动给当前存档打一份快照</strong>，所以回滚本身也能反悔</li>
+<li>备份存在启动器自己的 <code>Data\save-backups\</code> 里，<strong>不往游戏存档目录塞文件</strong>，免得被 Steam 云同步带走</li>
+<li>游戏运行中只允许备份（会提示这时候备份的是上次保存的状态），<strong>回滚会先要求你退出游戏</strong></li>
+</ul>
+<blockquote>
+<p>启动器只读存档、只写自己的备份目录，<strong>不会删改你的任何存档文件</strong>。</p>
+</blockquote>
+<h3>Mod 配置档：一套组合一键切</h3>
+<p>调好想要的 Mod 启停组合（比如"美化包 / 剧情包 / 只留性能优化"），点「配置档 → 保存当前状态」存下来，之后一键切换。支持覆盖、重命名、导出成 json、从 json 导入。</p>
+<p>配置档只记录<strong>启停状态</strong>、只改文件夹名开头的点，不动任何 Mod 文件；对应关系用的是 Mod 的 UniqueId，所以禁用改名之后不会错乱。</p>
+<h3>拖拽安装</h3>
+<p>把 <code>zip</code> / <code>rar</code> / <code>7z</code> / <code>tar</code> / <code>gz</code> 直接<strong>拖到启动器窗口任意位置</strong>，就会自动切到 Mod 管理页开始导入；拖一个 Mod 文件夹进去也可以。「导入 Mod」按钮现在也支持一次选多个包。</p>
+<h3>侧栏「使用手册」</h3>
+<p>启动器里就能翻官网的使用手册（Wiki），不用再开浏览器；右上角留了「用浏览器打开」的退路。</p>
+<h3>首页小组件可自定义</h3>
+<p>主页的月历 / 现实天气 / 每日一言：</p>
+<ul>
+<li>按住卡片就能<strong>拖动调整顺序</strong></li>
+<li>右上角「自定义」菜单可以勾选显示 / 隐藏，或者恢复默认顺序</li>
+<li>顺序与显隐会记住，下次打开还是你排的样子</li>
+</ul>
+<h3>其它</h3>
+<ul>
+<li>官网 Wiki 补了「存档管理」与「Mod 配置档」两篇，并修正了此前与实现不符的说明（实例并不隔离 Mod 与存档目录）</li>
+<li>启动器自身的进程检测与目录删除逻辑做了收敛，<code>SideBar</code> 里一处会导致控制台报错的脚本问题一并修掉</li>
+</ul>
+<hr />
+<blockquote>
+<p>完整变更见 <a href="https://github.com/OrangeArtc0915/SVE_mananger/releases">GitHub Releases</a>；遇到问题欢迎到 QQ 群 <strong>1034243331</strong> 反馈。</p>
+</blockquote>
+]]></content>
+    <author>
+      <name>mmm</name>
+    </author>
+    <category term="更新日志"></category>
+  </entry>
   <entry>
     <title>v1.4.0 更新说明</title>
     <link href="https://orangeartc0915.github.io/posts/v140/" rel="alternate" type="text/html"/>
