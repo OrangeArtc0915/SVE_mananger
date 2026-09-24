@@ -1,5 +1,5 @@
 # 星露谷启动器门锁配置
 # SVE_M_survive: true  = 允许启动
 # SVE_M_survive: false = 停止支持，启动器会提示并退出
-# 读取顺序：Gitee -> jsDelivr -> GitHub raw（都取本分支的 survive.txt）
+# 读取顺序：Gitee -> jsDelivr -> GitHub raw（都取各自仓库 survive 分支的 survive.txt）
 SVE_M_survive: true
