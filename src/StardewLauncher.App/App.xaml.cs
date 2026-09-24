@@ -94,8 +94,10 @@ public partial class App : Application
     /// </summary>
     private static bool EnsureSurvive()
     {
-        // 每次启动都要联网确认，整轮最多等这么久（三个源分摊）
-        var budget = TimeSpan.FromMilliseconds(4500);
+        // 每次启动都要联网确认，整轮最多等这么久（三个源平分）。
+        // 给得偏宽是因为冷启动那次 HTTPS 握手本身就要 1 秒多，掐太紧会把能通的源误判成不通，
+        // 而误判的结果是用户完全打不开启动器。正常情况下第一个源 2 秒内就有结果，等不到这个上限。
+        var budget = TimeSpan.FromMilliseconds(9000);
 
         SurviveResult result;
 
