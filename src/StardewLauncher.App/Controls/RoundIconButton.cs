@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 using StardewLauncher.App.Animation;
 using StardewLauncher.App.Controls.Svg;
 using StardewLauncher.App.Theme;
@@ -16,6 +17,8 @@ public class RoundIconButton : Button
     private Border? _hit;
     private SvgIcon? _icon;
     private ScaleTransform? _scale;
+    private ScaleTransform? _iconScale;
+    private RipplePlayer? _ripple;
 
     public static readonly DependencyProperty IconProperty = DependencyProperty.Register(
         nameof(Icon), typeof(string), typeof(RoundIconButton),
@@ -66,8 +69,21 @@ public class RoundIconButton : Button
             _hit.RenderTransform = _scale;
         }
 
+        if (_icon is not null)
+        {
+            _icon.RenderTransformOrigin = new Point(0.5, 0.5);
+            _iconScale = new ScaleTransform(1, 1);
+            _icon.RenderTransform = _iconScale;
+        }
+
+        _ripple = new RipplePlayer(GetTemplateChild("RippleLayer") as Canvas,
+            GetTemplateChild("Ripple") as Ellipse, $"ripple:{GetHashCode()}");
+
         SyncIcon();
         ApplyRestingState();
+
+        // 填色用不透明色，淡出靠波纹元素自己的不透明度
+        _ripple?.UseFill(Tone is ButtonTone.Solid or ButtonTone.Danger ? "Text.OnAccent" : "Accent.Base");
     }
 
     protected override void OnMouseEnter(MouseEventArgs e)
@@ -76,6 +92,9 @@ public class RoundIconButton : Button
         if (_hit is null || !IsEnabled) return;
 
         AnimationEngine.Color(_hit, Border.BackgroundProperty, HoverColor(), 150, Ease.OutFluent);
+
+        // 图标比背景稍稍慢一点、幅度更大一点，悬停时更有"被点亮"的感觉
+        if (_iconScale is not null) AnimationEngine.Scale(_iconScale, 1.14, 220, Ease.OutBack);
     }
 
     protected override void OnMouseLeave(MouseEventArgs e)
@@ -86,12 +105,18 @@ public class RoundIconButton : Button
         var key = RestingKeys().Background;
         AnimationEngine.Color(_hit, Border.BackgroundProperty, RestingColor(), 200, Ease.OutFluent,
             () => _hit?.SetResourceReference(Border.BackgroundProperty, key));
+
+        if (_iconScale is not null) AnimationEngine.Scale(_iconScale, 1, 160, Ease.OutFluent);
     }
 
     protected override void OnPreviewMouseLeftButtonDown(MouseButtonEventArgs e)
     {
         base.OnPreviewMouseLeftButtonDown(e);
-        if (_scale is null || !IsEnabled) return;
+        if (!IsEnabled) return;
+
+        if (_hit is not null) _ripple?.Play(e.GetPosition(_hit));
+
+        if (_scale is null) return;
 
         AnimationEngine.ScaleX(_scale, 0.85, 80, t => Ease.OutFluent(t, 5));
         AnimationEngine.ScaleY(_scale, 0.85, 80, t => Ease.OutFluent(t, 5));

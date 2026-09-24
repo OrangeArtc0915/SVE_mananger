@@ -192,10 +192,23 @@
                             BorderThickness="1"
                             CornerRadius="{StaticResource Radius.Button}"
                             SnapsToDevicePixels="True">
-                        <ContentPresenter Margin="{TemplateBinding Padding}"
-                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                          VerticalAlignment="Center"
-                                          RecognizesAccessKey="True" />
+                        <Grid>
+                            <!-- 点击水波纹层。静止时整层不可见，动画收尾后把自己收起来，自检也就不会捡到它 -->
+                            <Canvas x:Name="RippleLayer"
+                                    ClipToBounds="True"
+                                    IsHitTestVisible="False">
+                                <Ellipse x:Name="Ripple"
+                                         Width="1"
+                                         Height="1"
+                                         Opacity="0"
+                                         Visibility="Collapsed" />
+                            </Canvas>
+
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center"
+                                              RecognizesAccessKey="True" />
+                        </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsEnabled" Value="False">
@@ -222,11 +235,23 @@
                     <Border x:Name="Hit"
                             Background="{DynamicResource Common.Transparent}"
                             CornerRadius="{StaticResource Radius.Pill}">
-                        <svg:SvgIcon x:Name="IconElement"
-                                     Width="{TemplateBinding IconSize}"
-                                     Height="{TemplateBinding IconSize}"
-                                     HorizontalAlignment="Center"
-                                     VerticalAlignment="Center" />
+                        <Grid>
+                            <Canvas x:Name="RippleLayer"
+                                    ClipToBounds="True"
+                                    IsHitTestVisible="False">
+                                <Ellipse x:Name="Ripple"
+                                         Width="1"
+                                         Height="1"
+                                         Opacity="0"
+                                         Visibility="Collapsed" />
+                            </Canvas>
+
+                            <svg:SvgIcon x:Name="IconElement"
+                                         Width="{TemplateBinding IconSize}"
+                                         Height="{TemplateBinding IconSize}"
+                                         HorizontalAlignment="Center"
+                                         VerticalAlignment="Center" />
+                        </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsEnabled" Value="False">

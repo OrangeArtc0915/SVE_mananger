@@ -17,8 +17,12 @@ public class SurfaceCard : ContentControl
     private const double IdleShadowOpacity = 0.10;
     private const double HoverShadowOpacity = 0.24;
 
+    /// <summary>悬停时整张卡片抬起的高度。投影是卡片自己的 Effect，会跟着一起上移。</summary>
+    private const double HoverLiftY = -3;
+
     private TextBlock? _titleElement;
     private Border? _cardBorder;
+    private TranslateTransform? _lift;
     private Effect? _templateShadow;
     private DropShadowEffect? _shadow;
 
@@ -69,6 +73,12 @@ public class SurfaceCard : ContentControl
         _cardBorder = GetTemplateChild("CardBorder") as Border;
         _templateShadow = _cardBorder?.Effect;
 
+        if (_cardBorder is not null)
+        {
+            _lift = new TranslateTransform();
+            _cardBorder.RenderTransform = _lift;
+        }
+
         SyncShadow();
         SyncTitle();
     }
@@ -100,6 +110,10 @@ public class SurfaceCard : ContentControl
         if (!HasHoverEffect) return;
 
         AnimateShadow(HoverShadowOpacity);
+
+        // 抬起用带一点回弹的缓动，落回则平滑收住，避免鼠标在卡片间扫过时一顿一顿
+        if (_lift is not null) AnimationEngine.TranslateY(_lift, HoverLiftY, 240, Ease.OutBack);
+
         _titleElement?.SetResourceReference(TextBlock.ForegroundProperty, "Accent.Base");
     }
 
@@ -109,6 +123,9 @@ public class SurfaceCard : ContentControl
         if (!HasHoverEffect) return;
 
         AnimateShadow(IdleShadowOpacity);
+
+        if (_lift is not null) AnimationEngine.TranslateY(_lift, 0, 200, Ease.OutFluent);
+
         _titleElement?.SetResourceReference(TextBlock.ForegroundProperty, "Text.Primary");
     }
 

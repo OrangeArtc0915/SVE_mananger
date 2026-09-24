@@ -3,20 +3,33 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              IsHitTestVisible="False">
     <Grid ClipToBounds="True">
-        <!-- 静态图 / 动图共用这一个 Image：动图靠换 Source 逐帧播放 -->
-        <Image x:Name="ImgBackground"
-               Stretch="UniformToFill"
-               Visibility="Collapsed" />
+        <!--
+            图片与视频都放在这一层里统一变换：缓慢推拉负责"活起来"，鼠标视差负责景深。
+            推拉的基础缩放大于 1，视差平移才不会把边缘的黑边露出来。
+        -->
+        <Grid x:Name="PanDrift" RenderTransformOrigin="0.5,0.5">
+            <Grid.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform x:Name="DriftZoom" ScaleX="1" ScaleY="1" />
+                    <TranslateTransform x:Name="DriftShift" X="0" Y="0" />
+                </TransformGroup>
+            </Grid.RenderTransform>
 
-        <MediaElement x:Name="VidBackground"
-                      IsMuted="True"
-                      LoadedBehavior="Manual"
-                      MediaEnded="OnVideoEnded"
-                      MediaFailed="OnVideoFailed"
-                      MediaOpened="OnVideoOpened"
-                      Stretch="UniformToFill"
-                      UnloadedBehavior="Manual"
-                      Visibility="Collapsed" />
+            <!-- 静态图 / 动图共用这一个 Image：动图靠换 Source 逐帧播放 -->
+            <Image x:Name="ImgBackground"
+                   Stretch="UniformToFill"
+                   Visibility="Collapsed" />
+
+            <MediaElement x:Name="VidBackground"
+                          IsMuted="True"
+                          LoadedBehavior="Manual"
+                          MediaEnded="OnVideoEnded"
+                          MediaFailed="OnVideoFailed"
+                          MediaOpened="OnVideoOpened"
+                          Stretch="UniformToFill"
+                          UnloadedBehavior="Manual"
+                          Visibility="Collapsed" />
+        </Grid>
 
         <!-- 压暗/压淡层：背景直接铺在页面标题下面，不压一层标题会看不清 -->
         <Border x:Name="OverlayDim" Background="#00000000" />

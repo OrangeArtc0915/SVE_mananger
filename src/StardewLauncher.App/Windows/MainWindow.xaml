@@ -46,7 +46,9 @@
                   AllowDrop="True"
                   Background="{DynamicResource Brush.WindowBackground}"
                   DragOver="OnGlobalDragOver"
-                  Drop="OnGlobalDrop">
+                  Drop="OnGlobalDrop"
+                  MouseLeave="OnPointerLeft"
+                  MouseMove="OnPointerMoved">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="44" />
                     <RowDefinition Height="*" />
@@ -61,7 +63,8 @@
                 <views:BackgroundLayer x:Name="BackgroundView" Grid.RowSpan="2" />
 
                 <!-- 标题栏：暖色面板 + 底部分隔线，不使用整条强调色底 -->
-                <Grid Grid.Row="0"
+                <Grid x:Name="PanTitle"
+                      Grid.Row="0"
                       Background="{DynamicResource Surface.PanelGlass}"
                       MouseLeftButtonDown="OnTitleBarMouseDown">
                     <Grid.ColumnDefinitions>

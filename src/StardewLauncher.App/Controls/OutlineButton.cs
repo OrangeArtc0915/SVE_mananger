@@ -1,6 +1,8 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
+using System.Windows.Shapes;
 using StardewLauncher.App.Animation;
 using StardewLauncher.App.Theme;
 
@@ -27,12 +29,22 @@ public enum ButtonTone
 /// </summary>
 public class OutlineButton : Button
 {
+    /// <summary>呼吸外发光的强弱两端与单程时长。</summary>
+    private const double GlowIdleOpacity = 0.22;
+    private const double GlowPeakOpacity = 0.62;
+    private const double GlowHalfCycleMs = 900;
+
     private Border? _face;
     private ScaleTransform? _scale;
+    private RipplePlayer? _ripple;
 
     public static readonly DependencyProperty ToneProperty = DependencyProperty.Register(
         nameof(Tone), typeof(ButtonTone), typeof(OutlineButton),
         new PropertyMetadata(ButtonTone.Outline, OnToneChanged));
+
+    public static readonly DependencyProperty GlowPulseProperty = DependencyProperty.Register(
+        nameof(GlowPulse), typeof(bool), typeof(OutlineButton),
+        new PropertyMetadata(false, OnGlowPulseChanged));
 
     public ButtonTone Tone
     {
@@ -40,8 +52,26 @@ public class OutlineButton : Button
         set => SetValue(ToneProperty, value);
     }
 
+    /// <summary>
+    /// 持续呼吸的外发光。只给各页面里的「主操作」按钮用（比如启动页的启动游戏），
+    /// 每个按钮都发光会失去重点。窗口最小化时由动画引擎统一叫停。
+    /// </summary>
+    public bool GlowPulse
+    {
+        get => (bool)GetValue(GlowPulseProperty);
+        set => SetValue(GlowPulseProperty, value);
+    }
+
     private static void OnToneChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        => ((OutlineButton)d).ApplyRestingState();
+    {
+        var button = (OutlineButton)d;
+        button.ApplyRestingState();
+        button.SyncRippleFill();
+        button.SyncGlow();
+    }
+
+    private static void OnGlowPulseChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        => ((OutlineButton)d).SyncGlow();
 
     public override void OnApplyTemplate()
     {
@@ -55,7 +85,45 @@ public class OutlineButton : Button
             _face.RenderTransform = _scale;
         }
 
+        _ripple = new RipplePlayer(GetTemplateChild("RippleLayer") as Canvas,
+            GetTemplateChild("Ripple") as Ellipse, $"ripple:{GetHashCode()}");
+
         ApplyRestingState();
+        SyncRippleFill();
+        SyncGlow();
+
+        // 主题换了要重新取一次发光颜色：Effect 的 Color 不是资源引用，不会自己跟着变。
+        // 同时把呼吸动效的起停绑到可视树：页面切走后看不见了，没必要还占着每帧渲染。
+        Loaded += (_, _) =>
+        {
+            ThemeService.ThemeChanged -= OnThemeChanged;
+            ThemeService.ThemeChanged += OnThemeChanged;
+
+            if (GlowPulse) SyncGlow();
+        };
+
+        Unloaded += (_, _) =>
+        {
+            ThemeService.ThemeChanged -= OnThemeChanged;
+            AnimationEngine.StopAmbient($"glow:{GetHashCode()}");
+        };
+
+        // 禁用状态（比如还没有实例时的启动按钮）不该闪着光
+        IsEnabledChanged += (_, _) =>
+        {
+            if (IsEnabled)
+            {
+                if (GlowPulse) SyncGlow();
+                return;
+            }
+
+            AnimationEngine.StopAmbient($"glow:{GetHashCode()}");
+        };
+    }
+
+    private void OnThemeChanged()
+    {
+        if (GlowPulse) SyncGlow();
     }
 
     protected override void OnMouseEnter(System.Windows.Input.MouseEventArgs e)
@@ -78,7 +146,11 @@ public class OutlineButton : Button
     protected override void OnPreviewMouseLeftButtonDown(System.Windows.Input.MouseButtonEventArgs e)
     {
         base.OnPreviewMouseLeftButtonDown(e);
-        if (_scale is null || !IsEnabled) return;
+        if (!IsEnabled) return;
+
+        if (_face is not null) _ripple?.Play(e.GetPosition(_face));
+
+        if (_scale is null) return;
 
         AnimationEngine.ScaleX(_scale, 0.975, 80, t => Ease.OutFluent(t, 5));
         AnimationEngine.ScaleY(_scale, 0.975, 80, t => Ease.OutFluent(t, 5));
@@ -117,6 +189,46 @@ public class OutlineButton : Button
             () => _face?.SetResourceReference(Border.BorderBrushProperty, borderKey));
         AnimationEngine.Color(this, ForegroundProperty, foreground, 200, Ease.OutFluent,
             () => SetResourceReference(ForegroundProperty, foregroundKey));
+    }
+
+    /// <summary>
+    /// 水波纹颜色跟着按钮配色走。填色用不透明色，淡出全靠波纹元素自己的不透明度——
+    /// 颜色再带一层透明度的话，两层一乘就淡到看不见了。
+    /// </summary>
+    private void SyncRippleFill() => _ripple?.UseFill(
+        Tone is ButtonTone.Solid or ButtonTone.Danger ? "Text.OnAccent" : "Accent.Base");
+
+    /// <summary>
+    /// 呼吸外发光。模糊半径固定、只动不透明度：逐帧改模糊半径要重算整张效果图，贵得多。
+    /// </summary>
+    private void SyncGlow()
+    {
+        if (_face is null) return;
+
+        if (!GlowPulse || !IsEnabled)
+        {
+            if (_face.Effect is DropShadowEffect) _face.Effect = null;
+            return;
+        }
+
+        if (_face.Effect is not DropShadowEffect glow)
+        {
+            glow = new DropShadowEffect
+            {
+                BlurRadius = 18,
+                ShadowDepth = 0,
+                Direction = 270,
+                Opacity = GlowIdleOpacity
+            };
+
+            _face.Effect = glow;
+        }
+
+        // 颜色每次都重新取：Tone 会变（启动按钮跑起来时变成危险色），主题也会变
+        glow.Color = Tone is ButtonTone.Danger ? ThemeColors.Danger(this) : ThemeColors.AccentBright(this);
+
+        AnimationEngine.StartAmbient(_face, $"glow:{GetHashCode()}",
+            GlowIdleOpacity, GlowPeakOpacity, GlowHalfCycleMs, Ease.InOutFluent, v => glow.Opacity = v);
     }
 
     private (string Background, string Border, string Foreground) RestingKeys() => Tone switch

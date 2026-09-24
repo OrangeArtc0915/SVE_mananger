@@ -23,7 +23,8 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- 图标方块：直接用程序自己的图标，和标题栏、任务栏保持一致 -->
-                    <Border Grid.Column="0"
+                    <Border x:Name="BorAppIcon"
+                            Grid.Column="0"
                             Width="64"
                             Height="64"
                             Margin="0,0,18,0"
@@ -125,6 +126,7 @@
                                          HorizontalAlignment="Stretch"
                                          Click="OnLaunchClick"
                                          Content="▶  启动游戏"
+                                         GlowPulse="True"
                                          Tone="Solid" />
 
                         <Grid Margin="0,8,0,0">

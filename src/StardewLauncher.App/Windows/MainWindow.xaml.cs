@@ -21,7 +21,21 @@ public partial class MainWindow : Window
     /// <summary>进入页面时每个内容块的错峰间隔与最大延迟。</summary>
     private const double StaggerStepMs = 22;
     private const double StaggerMaxDelayMs = 220;
-    private const double EnterOffsetY = 16;
+    private const double EnterOffsetY = 14;
+
+    /// <summary>内容块入场时由略小放大到实际大小，收尾要有"浮上来"的感觉。</summary>
+    private const double EnterScaleFrom = 0.985;
+    private const double EnterDurationMs = 300;
+
+    /// <summary>切页时新页从侧面滑入的距离（旧页往相反方向退出，形成方向感）。</summary>
+    private const double PageSlideX = 22;
+
+    /// <summary>开场动画：整个面板从略小放大到实际大小，同时侧栏逐项滑入。</summary>
+    private const double OpenScaleFrom = 0.965;
+    private const double OpenDurationMs = 360;
+    private const double OpenSlideMs = 320;
+    private const double NavIntroStepMs = 30;
+    private const double NavIntroDelayMs = 70;
 
     /// <summary>
     /// 侧栏导航项：id 用于读写设置，顺序即默认顺序。
@@ -47,6 +61,9 @@ public partial class MainWindow : Window
     private bool _glassEnabled;
     private bool _suppressNavCheck;
 
+    /// <summary>页面错峰动画的整体延迟。开场那一下用它把内容入场推到面板放大之后。</summary>
+    private double _staggerDelayOffsetMs;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -59,7 +76,15 @@ public partial class MainWindow : Window
         Loaded += (_, _) =>
         {
             ApplyNavLayout();
+
+            // 开场：面板由小放大淡入、侧栏逐项滑入；内容错峰整体推迟到开场之后，
+            // 两层叠在一起会糊成一团，看不出层次
+            RunOpenAnimation();
+
+            _staggerDelayOffsetMs = OpenDurationMs * 0.45;
             SwitchToPage(NavPages.Launch);
+            _staggerDelayOffsetMs = 0;
+
             ApplyBackground();
 
             // 主题变了要重铺一次：压暗层在深色主题用黑、浅色主题用白
@@ -72,8 +97,71 @@ public partial class MainWindow : Window
 
         Closed += (_, _) => ThemeService.ThemeChanged -= ApplyBackground;
 
-        // 最小化时停掉视频与动图，别白烧 CPU
-        StateChanged += (_, _) => BackgroundView.SetPaused(WindowState == WindowState.Minimized);
+        // 最小化时停掉视频与动图，别白烧 CPU；环境动效（呼吸光、缓慢推拉）一并叫停
+        StateChanged += (_, _) =>
+        {
+            var minimized = WindowState == WindowState.Minimized;
+            BackgroundView.SetPaused(minimized);
+            AnimationEngine.SetAmbientEnabled(!minimized);
+        };
+    }
+
+    /// <summary>
+    /// 开场动画：整个面板从略小放大到实际大小并淡入，标题栏从上方落下，侧栏导航逐项滑入。
+    /// 缩放刻意不过冲——窗口外圈是自绘投影的留白，过冲会闪出桌面。
+    /// </summary>
+    private void RunOpenAnimation()
+    {
+        if (!AnimationEngine.IsEnabled)
+        {
+            PanBack.Opacity = 1;
+            return;
+        }
+
+        PanBack.RenderTransformOrigin = new Point(0.5, 0.5);
+        var scale = new ScaleTransform(OpenScaleFrom, OpenScaleFrom);
+        PanBack.RenderTransform = scale;
+
+        AnimationEngine.Start("open:opacity", 0, 1, OpenDurationMs * 0.7, Ease.OutFluent,
+            v => PanBack.Opacity = v);
+
+        AnimationEngine.Start("open:scale", OpenScaleFrom, 1, OpenDurationMs, t => Ease.OutFluent(t, 4),
+            v =>
+            {
+                scale.ScaleX = v;
+                scale.ScaleY = v;
+            });
+
+        var titleOffset = new TranslateTransform();
+        PanTitle.RenderTransform = titleOffset;
+        AnimationEngine.TranslateY(titleOffset, 0, OpenSlideMs, Ease.OutBack);
+
+        RunNavIntro();
+    }
+
+    /// <summary>侧栏导航逐项从左侧滑入。只在开场跑一次，设置页重排导航时不重复播。</summary>
+    private void RunNavIntro()
+    {
+        var index = 0;
+
+        foreach (var child in PanNav.Children)
+        {
+            if (child is not NavItem item) continue;
+
+            var delay = NavIntroDelayMs + index * NavIntroStepMs;
+            var offset = new TranslateTransform(-16, 0);
+
+            item.RenderTransform = offset;
+            item.Opacity = 0.2;
+
+            AnimationEngine.Start($"navIntro:{item.GetHashCode()}", 0, 1, OpenSlideMs, Ease.OutBack, v =>
+            {
+                offset.X = -16 * (1 - v);
+                item.Opacity = 0.2 + 0.8 * Math.Min(1, v);
+            }, delayMs: delay);
+
+            index++;
+        }
     }
 
     /// <summary>按设置铺内容区背景。设置页改完直接调这里，不用重启。</summary>
@@ -122,13 +210,16 @@ public partial class MainWindow : Window
         SwitchToPage(page);
     }
 
-    /// <summary>切换到指定页面。页面会缓存，切换时做淡出 + 错峰进入动画。</summary>
+    /// <summary>切换到指定页面。页面会缓存，切换时做带方向感的交接 + 内容错峰进入。</summary>
     public void SwitchToPage(int page)
     {
         if (_currentPage == page) return;
 
         var target = GetPage(page);
         var previous = PanContent.Child as LauncherPage;
+
+        // 侧栏里更靠下的页面从右边进、更靠上的从左边进，方向与点导航的手感一致
+        var direction = TransitionDirection(_currentPage, page);
 
         void Swap()
         {
@@ -138,6 +229,13 @@ public partial class MainWindow : Window
             // 页面容器本身必须设为不透明，淡入交给下面的错峰动画逐块完成
             target.Opacity = 1;
             target.OnEnter();
+
+            // 页面整体从侧面滑到位；块级错峰只负责上移与淡入，两者分工不重叠
+            var slide = target.RenderTransform as TranslateTransform ?? new TranslateTransform();
+            target.RenderTransform = slide;
+            slide.X = PageSlideX * direction;
+            AnimationEngine.TranslateX(slide, 0, 320, Ease.OutFluent);
+
             RunEnterAnimation(target);
         }
 
@@ -151,7 +249,38 @@ public partial class MainWindow : Window
             return;
         }
 
-        AnimationEngine.Opacity(previous, 0, 90, Ease.OutFluent, Swap);
+        // 旧页往相反方向退出，和进来的新页形成一次左右交接
+        var offset = previous.RenderTransform as TranslateTransform ?? new TranslateTransform();
+        previous.RenderTransform = offset;
+
+        AnimationEngine.Opacity(previous, 0, 130, Ease.OutFluent, Swap);
+        AnimationEngine.TranslateX(offset, -PageSlideX * direction, 150, Ease.OutFluent);
+    }
+
+    /// <summary>方向感：1 表示新页在侧栏里更靠下（从右侧进），-1 表示更靠上。</summary>
+    private int TransitionDirection(int fromPage, int toPage)
+    {
+        var from = VisualRailIndex(fromPage);
+        var to = VisualRailIndex(toPage);
+
+        if (from < 0 || to < 0 || from == to) return 1;
+
+        return to > from ? 1 : -1;
+    }
+
+    /// <summary>页面在侧栏里的实际位置（顺序与显隐都能在设置页改）。找不到返回 -1。</summary>
+    private int VisualRailIndex(int page)
+    {
+        for (var i = 0; i < PanNav.Children.Count; i++)
+        {
+            if (PanNav.Children[i] is NavItem { Tag: string tag } &&
+                int.TryParse(tag, out var value) && value == page)
+            {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
     /// <summary>当前显示的页面。给自检用。</summary>
@@ -257,8 +386,8 @@ public partial class MainWindow : Window
 
     // ————— 页面进入动画 —————
 
-    /// <summary>页面内容错峰进入：逐块淡入并轻微上移。</summary>
-    private static void RunEnterAnimation(LauncherPage page)
+    /// <summary>页面内容错峰进入：逐块淡入、从下方浮起并轻微放大，拉开层次。</summary>
+    private void RunEnterAnimation(LauncherPage page)
     {
         var host = FindStaggerHost(page.Content);
         var targets = host is not null
@@ -272,20 +401,29 @@ public partial class MainWindow : Window
         }
 
         var index = 0;
+
         foreach (var element in targets)
         {
             if (element is not FrameworkElement target) continue;
 
-            var offset = target.RenderTransform as TranslateTransform ?? new TranslateTransform();
-            target.RenderTransform = offset;
+            // 页面内的块都归这里管，模板里没有别处给它设过变换，所以直接换成新的变换组
+            var offset = new TranslateTransform(0, EnterOffsetY);
+            var scale = new ScaleTransform(EnterScaleFrom, EnterScaleFrom);
+
+            target.RenderTransformOrigin = new Point(0.5, 0.5);
+            target.RenderTransform = new TransformGroup { Children = { scale, offset } };
             target.Opacity = 0;
 
-            var delay = Math.Min(index * StaggerStepMs, StaggerMaxDelayMs);
+            var delay = _staggerDelayOffsetMs + Math.Min(index * StaggerStepMs, StaggerMaxDelayMs);
 
-            AnimationEngine.Start($"enter:{target.GetHashCode()}", 0, 1, 280, Ease.OutFluent, v =>
+            AnimationEngine.Start($"enter:{target.GetHashCode()}", 0, 1, EnterDurationMs, Ease.OutFluent, v =>
             {
-                target.Opacity = v;
+                target.Opacity = Math.Min(1, v);
                 offset.Y = EnterOffsetY * (1 - v);
+
+                var size = EnterScaleFrom + (1 - EnterScaleFrom) * v;
+                scale.ScaleX = size;
+                scale.ScaleY = size;
             }, delayMs: delay);
 
             index++;
@@ -335,6 +473,22 @@ public partial class MainWindow : Window
     }
 
     private void OnMinimizeClick(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
+
+    // ————— 背景视差 —————
+    // 挂在 PanForm 上：它铺满整块窗口并带背景，鼠标在整个窗口里移动都能收到。
+
+    private void OnPointerMoved(object sender, MouseEventArgs e)
+    {
+        var width = PanForm.ActualWidth;
+        var height = PanForm.ActualHeight;
+        if (width <= 1 || height <= 1) return;
+
+        // 归一化到 -1~1，窗口中心是 0；背景朝反方向移动
+        var point = e.GetPosition(PanForm);
+        BackgroundView.SetPointer((point.X / width - 0.5) * 2, (point.Y / height - 0.5) * 2);
+    }
+
+    private void OnPointerLeft(object sender, MouseEventArgs e) => BackgroundView.SetPointer(0, 0);
 
     // ————— 拖拽安装 —————
     // 挂在 PanForm 上：窗口里只有这一层铺满且带背景（Background 为 null 的元素不参与命中测试，

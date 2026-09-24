@@ -2,6 +2,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
+using StardewLauncher.App.Animation;
 using StardewLauncher.App.Controls;
 using StardewLauncher.App.Theme;
 using StardewLauncher.App.Windows;
@@ -17,6 +19,10 @@ public partial class PageLaunch : LauncherPage
 {
     /// <summary>日志面板最多保留的行数，超出时丢弃最早的行。</summary>
     private const int MaxLogLines = 400;
+
+    /// <summary>全景图缓慢推拉：单程 7 秒，一个来回 14 秒。</summary>
+    private const string PanoramaKey = "panorama";
+    private const double PanoramaMaxZoom = 1.06;
 
     private bool _subscribed;
     private bool _sessionSubscribed;
@@ -51,11 +57,18 @@ public partial class PageLaunch : LauncherPage
         // 设置页可能改过城市，回到启动页时刷新一次（天气命中缓存则不会重复请求）
         PanWidgets?.Refresh();
 
+        StartPanoramaDrift();
         SubscribeSession();
     }
 
     /// <summary>离开页面时只退订事件，不结束游戏进程——用户可能关掉启动器继续玩。</summary>
-    public override void OnLeave() => UnsubscribeSession();
+    public override void OnLeave()
+    {
+        UnsubscribeSession();
+
+        // 页面看不见了就别让全景图继续推拉，省下每帧渲染
+        AnimationEngine.StopAmbient(PanoramaKey);
+    }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
@@ -64,6 +77,11 @@ public partial class PageLaunch : LauncherPage
             _subscribed = true;
             InstanceStore.Changed += RefreshCurrentInstance;
         }
+
+        RunArtIntro();
+
+        // 常去小站的条目容器要等一次布局才会生成，所以排到布局之后再逐条放出来
+        Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(RunLinkIntro));
 
         SubscribeSession();
     }
@@ -77,6 +95,70 @@ public partial class PageLaunch : LauncherPage
         }
 
         UnsubscribeSession();
+    }
+
+    // ————— 动效 —————
+
+    /// <summary>
+    /// 全景图缓慢推拉。用画笔自己的相对变换而不是给 Border 套 RenderTransform：
+    /// 画笔的变换发生在 Border 绘制内部，圆角裁切依然有效，放大也不会溢出圆角。
+    /// 宿主传页面本身——ImageBrush 不是 FrameworkElement，引擎没法判断它还在不在树上。
+    /// </summary>
+    private void StartPanoramaDrift()
+    {
+        if (BrushPanorama is null || !AnimationEngine.IsEnabled) return;
+
+        var zoom = new ScaleTransform(1, 1) { CenterX = 0.5, CenterY = 0.5 };
+        BrushPanorama.RelativeTransform = zoom;
+
+        AnimationEngine.StartAmbient(this, PanoramaKey, 1, PanoramaMaxZoom, 7000, Ease.InOutFluent, v =>
+        {
+            zoom.ScaleX = v;
+            zoom.ScaleY = v;
+        });
+    }
+
+    /// <summary>欢迎卡里的图标方块：从略小略歪"弹"正。</summary>
+    private void RunArtIntro()
+    {
+        if (BorAppIcon is null || !AnimationEngine.IsEnabled) return;
+
+        BorAppIcon.RenderTransformOrigin = new Point(0.5, 0.5);
+
+        var scale = new ScaleTransform(0.75, 0.75);
+        var tilt = new RotateTransform(-10);
+        BorAppIcon.RenderTransform = new TransformGroup { Children = { scale, tilt } };
+
+        AnimationEngine.Start("launch:art", 0, 1, 520, Ease.OutBack, v =>
+        {
+            var size = 0.75 + 0.25 * v;
+            scale.ScaleX = size;
+            scale.ScaleY = size;
+            tilt.Angle = -10 * (1 - v);
+        }, delayMs: 120);
+    }
+
+    /// <summary>常去小站的条目逐条从左侧浮出来。取不到条目容器就这次不播。</summary>
+    private void RunLinkIntro()
+    {
+        if (PanLinks is null || !AnimationEngine.IsEnabled) return;
+
+        PanLinks.UpdateLayout();
+
+        for (var i = 0; i < PanLinks.Items.Count; i++)
+        {
+            if (PanLinks.ItemContainerGenerator.ContainerFromIndex(i) is not FrameworkElement item) continue;
+
+            var offset = new TranslateTransform(-12, 0);
+            item.RenderTransform = offset;
+            item.Opacity = 0;
+
+            AnimationEngine.Start($"launch:link:{i}", 0, 1, 280, Ease.OutFluent, v =>
+            {
+                item.Opacity = Math.Min(1, v);
+                offset.X = -12 * (1 - v);
+            }, delayMs: 200 + i * 45);
+        }
     }
 
     // ————— 界面刷新 —————

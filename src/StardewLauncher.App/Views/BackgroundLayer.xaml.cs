@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using StardewLauncher.App.Animation;
 using StardewLauncher.App.Theme;
 using StardewLauncher.Core.App;
 using StardewLauncher.Core.Logging;
@@ -19,6 +20,16 @@ namespace StardewLauncher.App.Views;
 /// </summary>
 public partial class BackgroundLayer : UserControl
 {
+    /// <summary>背景的基础缩放：大于 1 才留出视差平移的余量，平移时不会露出黑边。</summary>
+    private const double DriftBaseZoom = 1.04;
+    private const double DriftMaxZoom = 1.09;
+    private const double DriftHalfCycleMs = 11000;
+
+    /// <summary>鼠标视差的最大位移（像素）。基础缩放要能盖住它。</summary>
+    private const double ParallaxMax = 7;
+
+    private const string DriftKey = "background";
+
     private readonly DispatcherTimer _gifTimer = new();
 
     private List<(BitmapSource Frame, TimeSpan Delay)> _gifFrames = [];
@@ -27,6 +38,9 @@ public partial class BackgroundLayer : UserControl
     private int _gifIndex;
     private int _loadVersion;
     private bool _paused;
+    private bool _hasContent;
+    private double _pointerX;
+    private double _pointerY;
 
     public BackgroundLayer()
     {
@@ -59,26 +73,45 @@ public partial class BackgroundLayer : UserControl
         VidBackground.Stretch = stretch;
 
         // 背景是铺在「页面标题」这类裸文字下面的，所以必须压一层：
-        // 深色主题压黑、浅色主题压白，才不会让标题糊在图上
+        // 深色主题压黑、浅色主题压白，才不会让标题糊在图上。
+        // 压暗量做成淡入，换背景时不会"啪"地一下变暗；
+        // 淡的是画刷自己的不透明度，元素本身保持不透明——否则自检会把压暗层当成"卡在透明态的元素"。
         var overlay = ThemeService.IsDark ? Colors.Black : Colors.White;
-        OverlayDim.Background = new SolidColorBrush(overlay)
+        var dim = Math.Clamp(dimPercent, 0, 80) / 100d;
+        var dimBrush = new SolidColorBrush(overlay);
+
+        OverlayDim.Background = dimBrush;
+
+        if (AnimationEngine.IsEnabled)
         {
-            Opacity = Math.Clamp(dimPercent, 0, 80) / 100d
-        };
+            dimBrush.Opacity = 0;
+            AnimationEngine.Start("background:dim", 0, dim, 420, Ease.OutFluent, v => dimBrush.Opacity = v);
+        }
+        else
+        {
+            dimBrush.Opacity = dim;
+        }
+
+        _hasContent = true;
 
         try
         {
             switch (kind)
             {
                 case BackgroundKind.Video:
+                    // 视频本身就在动，再叠推拉会晕
+                    PrepareDrift(drifting: false);
                     StartVideo(file);
                     break;
 
                 case BackgroundKind.Gif:
+                    PrepareDrift(drifting: false);
                     LoadGif(file);
                     break;
 
                 default:
+                    PrepareDrift(drifting: true);
+
                     ImgBackground.Source = LoadFrozen(file);
                     ImgBackground.Visibility = Visibility.Visible;
 
@@ -91,6 +124,47 @@ public partial class BackgroundLayer : UserControl
             Log.Warn($"背景加载失败，回退主题渐变：{ex.Message}");
             Reset();
         }
+    }
+
+    /// <summary>
+    /// 鼠标视差：背景朝指针反方向轻移，做出景深。入参是相对内容区的 -1~1 归一化坐标。
+    /// 指针只挪了一点点就跳过，免得白白重起动画。
+    /// </summary>
+    public void SetPointer(double x, double y)
+    {
+        if (!_hasContent) return;
+        if (Math.Abs(x - _pointerX) < 0.05 && Math.Abs(y - _pointerY) < 0.05) return;
+
+        _pointerX = x;
+        _pointerY = y;
+
+        AnimationEngine.TranslateX(DriftShift, -x * ParallaxMax, 220, Ease.OutFluent);
+        AnimationEngine.TranslateY(DriftShift, -y * ParallaxMax, 220, Ease.OutFluent);
+    }
+
+    /// <summary>
+    /// 摆好推拉的初始状态。drifting 为 true 时缓慢往复缩放，否则只固定在基础缩放上
+    /// （动图和视频自己就在动，再叠推拉会显得很吵）。
+    /// </summary>
+    private void PrepareDrift(bool drifting)
+    {
+        DriftZoom.ScaleX = DriftBaseZoom;
+        DriftZoom.ScaleY = DriftBaseZoom;
+        DriftShift.X = 0;
+        DriftShift.Y = 0;
+
+        if (!drifting)
+        {
+            AnimationEngine.StopAmbient(DriftKey);
+            return;
+        }
+
+        AnimationEngine.StartAmbient(PanDrift, DriftKey, DriftBaseZoom, DriftMaxZoom,
+            DriftHalfCycleMs, Ease.InOutFluent, v =>
+            {
+                DriftZoom.ScaleX = v;
+                DriftZoom.ScaleY = v;
+            });
     }
 
     /// <summary>窗口最小化时停掉动图与视频，别白烧 CPU。</summary>
@@ -319,6 +393,17 @@ public partial class BackgroundLayer : UserControl
         _gifIndex = 0;
         _gifTimer.Stop();
         _videoProbe?.Stop();
+
+        // 没有背景了，推拉与视差一并收掉，别留着每帧渲染
+        _hasContent = false;
+        _pointerX = 0;
+        _pointerY = 0;
+
+        AnimationEngine.StopAmbient(DriftKey);
+        DriftZoom.ScaleX = 1;
+        DriftZoom.ScaleY = 1;
+        DriftShift.X = 0;
+        DriftShift.Y = 0;
 
         ImgBackground.Source = null;
         ImgBackground.Visibility = Visibility.Collapsed;

@@ -19,6 +19,8 @@ public class NavItem : RadioButton
     private SvgIcon? _icon;
     private TextBlock? _text;
     private ScaleTransform? _indicatorScale;
+    private ScaleTransform? _iconScale;
+    private TranslateTransform? _textOffset;
 
     public static readonly DependencyProperty IconProperty = DependencyProperty.Register(
         nameof(Icon), typeof(string), typeof(NavItem),
@@ -75,6 +77,19 @@ public class NavItem : RadioButton
             _indicator.RenderTransformOrigin = new Point(0.5, 0.5);
             _indicatorScale = new ScaleTransform(1, IsChecked == true ? 1 : 0);
             _indicator.RenderTransform = _indicatorScale;
+        }
+
+        if (_icon is not null)
+        {
+            _icon.RenderTransformOrigin = new Point(0.5, 0.5);
+            _iconScale = new ScaleTransform(1, 1);
+            _icon.RenderTransform = _iconScale;
+        }
+
+        if (_text is not null)
+        {
+            _textOffset = new TranslateTransform();
+            _text.RenderTransform = _textOffset;
         }
 
         SyncIcon();
@@ -141,13 +156,43 @@ public class NavItem : RadioButton
         _icon?.SetResourceReference(SvgIcon.IconBrushProperty, foregroundKey);
         _text?.SetResourceReference(TextBlock.ForegroundProperty, foregroundKey);
 
-        if (_indicatorScale is null) return;
+        var on = animate && AnimationEngine.IsEnabled;
 
-        var to = selected ? 1d : 0d;
-        if (animate && AnimationEngine.IsEnabled)
-            AnimationEngine.ScaleY(_indicatorScale, to, selected ? 260 : 150,
+        if (_indicatorScale is not null)
+        {
+            var to = selected ? 1d : 0d;
+
+            if (on)
+            {
+                AnimationEngine.ScaleY(_indicatorScale, to, selected ? 260 : 150,
+                    selected ? Ease.OutBack : Ease.OutFluent);
+
+                // 竖条同时横向弹出来，比单纯拉长更像一次明确的"选中"反馈
+                AnimationEngine.ScaleX(_indicatorScale, selected ? 1d : 0.4, selected ? 300 : 150,
+                    selected ? Ease.OutBack : Ease.OutFluent);
+            }
+            else
+            {
+                _indicatorScale.ScaleY = to;
+                _indicatorScale.ScaleX = selected ? 1d : 0.4;
+            }
+        }
+
+        if (_iconScale is not null)
+        {
+            var size = selected ? 1.16 : 1d;
+
+            if (on) AnimationEngine.Scale(_iconScale, size, selected ? 300 : 180,
                 selected ? Ease.OutBack : Ease.OutFluent);
-        else
-            _indicatorScale.ScaleY = to;
+            else _iconScale.ScaleX = _iconScale.ScaleY = size;
+        }
+
+        if (_textOffset is not null)
+        {
+            var shift = selected ? 3d : 0d;
+
+            if (on) AnimationEngine.TranslateX(_textOffset, shift, selected ? 260 : 160, Ease.OutFluent);
+            else _textOffset.X = shift;
+        }
     }
 }

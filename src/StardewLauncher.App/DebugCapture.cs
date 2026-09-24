@@ -41,10 +41,16 @@ internal static class DebugCapture
             {
                 window.UpdateLayout();
 
-                Log.Info($"动画引擎：TickCount={AnimationEngine.TickCount}，仍在运行的动画={AnimationEngine.RunningCount}");
+                // 环境动效（呼吸光、缓慢推拉）本来就不收尾，检查未收尾动画时要把它们排除掉
+                var pending = AnimationEngine.RunningKeys
+                    .Where(key => !key.StartsWith(AnimationEngine.AmbientPrefix, StringComparison.Ordinal))
+                    .ToList();
 
-                if (AnimationEngine.RunningCount > 0)
-                    Log.Warn($"未收尾的动画：{string.Join(", ", AnimationEngine.RunningKeys)}");
+                Log.Info($"动画引擎：TickCount={AnimationEngine.TickCount}，仍在运行的动画={AnimationEngine.RunningCount}" +
+                         $"（其中环境动效 {AnimationEngine.RunningCount - pending.Count} 条，本就永续）");
+
+                if (pending.Count > 0)
+                    Log.Warn($"未收尾的动画：{string.Join(", ", pending)}");
 
                 LogInvisibleElements(window);
 
