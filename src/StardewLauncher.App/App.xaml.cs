@@ -12,6 +12,7 @@ using StardewLauncher.Core.Mods;
 using StardewLauncher.Core.Nexus;
 using StardewLauncher.Core.Plugins;
 using StardewLauncher.Core.Smapi;
+using StardewLauncher.Core.Updater;
 
 namespace StardewLauncher.App;
 
@@ -52,6 +53,9 @@ public partial class App : Application
 
         InitializeLogging();
 
+        // 上次自动更新可能留下了 .old / .new 残留，顺手清掉
+        LauncherUpdater.CleanupStaleFiles();
+
         // 门锁要在主窗口创建之前过：StartupUri 的窗口是在 OnStartup 返回后才建的，
         // 这里判定不通过就直接退出，用户不会看到半截界面。
         if (!EnsureSurvive())
@@ -82,6 +86,9 @@ public partial class App : Application
             Dispatcher.BeginInvoke(() => OpenNxmDownload(incomingLink));
 
         WarmUpSmapiRelease();
+
+        // 设置里开了"启动时自动检查更新"才查；查到新版本要等主窗口出来后再问用户
+        if (SettingsStore.Current.CheckUpdateOnStartup) QueueStartupUpdateCheck();
 
 #if DEBUG
         SelfCheck.Run();
@@ -315,6 +322,59 @@ public partial class App : Application
                 Log.Warn($"启动预热 SMAPI 版本查询失败：{ex.Message}");
             }
         });
+    }
+
+    // ————— 启动时检查启动器更新 —————
+
+    /// <summary>
+    /// 主窗口是 <c>StartupUri</c> 在 OnStartup 返回之后才建出来的，
+    /// 所以这里让出一轮消息循环，等界面就绪再弹窗 —— 那时才有 owner，位置和焦点都正常。
+    /// </summary>
+    private void QueueStartupUpdateCheck()
+        => Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle,
+            new Action(() => _ = CheckLauncherUpdateOnStartupAsync()));
+
+    /// <summary>
+    /// 启动时在后台查一次启动器版本。查到新版本就问用户：现在更新 → 交给设置页下载并替换；
+    /// 以后再说 → 本次启动不再提示。检查失败只记日志，绝不打扰启动。
+    /// </summary>
+    private async Task CheckLauncherUpdateOnStartupAsync()
+    {
+        try
+        {
+            var info = await LauncherUpdater.CheckAsync();
+
+            if (!info.HasUpdate)
+            {
+                Log.Info($"启动时检查启动器更新：{info.Error ?? $"已是最新（{info.SourceName}）"}");
+                return;
+            }
+
+            Log.Info($"启动时发现启动器新版本 v{info.LatestVersion}（{info.SourceName}）");
+
+            var message = $"发现新版本 v{info.LatestVersion}（当前 {AppInfo.VersionDisplay}）。"
+                          + (info.CanAutoInstall
+                              ? "现在就下载并更新吗？更新会自动替换程序并重新启动，设置、实例与存档备份都不会动。"
+                              : "发布页里没有可直接安装的单文件 exe，只能打开下载页手动下载。");
+
+            var owner = MainWindow;
+            var answer = owner is null
+                ? MessageBox.Show(message, $"{AppInfo.Name} 更新", MessageBoxButton.YesNo, MessageBoxImage.Question)
+                : MessageBox.Show(owner, message, $"{AppInfo.Name} 更新", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (answer != MessageBoxResult.Yes)
+            {
+                Log.Info("用户选择以后再说，本次启动不再提示更新");
+                return;
+            }
+
+            if (owner is Windows.MainWindow main) main.ShowLauncherUpdate(info);
+            else ShellHelper.OpenUrl(LauncherUpdateInfo.ReleasePageUrl(SettingsStore.Current.DownloadSource));
+        }
+        catch (Exception ex)
+        {
+            Log.Warn($"启动时检查启动器更新失败：{ex.Message}");
+        }
     }
 
     /// <summary>

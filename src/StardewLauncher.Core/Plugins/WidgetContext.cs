@@ -1,4 +1,3 @@
-using System.IO;
 using StardewLauncher.Api;
 using StardewLauncher.Core.App;
 using StardewLauncher.Core.Games;
@@ -10,10 +9,11 @@ using StardewLauncher.Core.Smapi;
 namespace StardewLauncher.Core.Plugins;
 
 /// <summary>
-/// 交给扩展的上下文：只有只读数据、取数工具和扩展自己的缓存目录。
-/// 插件拿不到启动器的任何写操作，也不引用界面框架。
+/// 交给扩展的上下文：只有只读数据与联网取数。
+/// 刻意不给任何写入口 —— 不写文件、不写日志、不启动游戏、不改设置，
+/// 扩展能做的只有"取数据 + 描述要显示什么文字与数字"。
 /// </summary>
-public sealed class WidgetContext(string storageDirectory) : IWidgetContext
+public sealed class WidgetContext : IWidgetContext
 {
     /// <summary>快照缓存时长。一次刷新里多个扩展都会来取，缓存一下就不会重复扫盘。</summary>
     private static readonly TimeSpan SnapshotTtl = TimeSpan.FromSeconds(3);
@@ -23,10 +23,6 @@ public sealed class WidgetContext(string storageDirectory) : IWidgetContext
     private static DateTime _cachedAt;
 
     public string LauncherVersion => AppInfo.Version;
-
-    public string StorageDirectory { get; } = EnsureStorage(storageDirectory);
-
-    public void Log(string message) => StardewLauncher.Core.Logging.Log.Info($"[扩展] {message}");
 
     public Task<string?> HttpGetAsync(string url, CancellationToken cancellationToken = default)
         => HttpDownloader.GetStringAsync(url, "StardewLauncher-Widget", cancellationToken);
@@ -42,20 +38,6 @@ public sealed class WidgetContext(string storageDirectory) : IWidgetContext
 
             return _cached;
         }
-    }
-
-    private static string EnsureStorage(string directory)
-    {
-        try
-        {
-            Directory.CreateDirectory(directory);
-        }
-        catch (Exception ex)
-        {
-            StardewLauncher.Core.Logging.Log.Warn($"创建扩展数据目录失败：{ex.Message}");
-        }
-
-        return directory;
     }
 
     private static LauncherSnapshot Build()

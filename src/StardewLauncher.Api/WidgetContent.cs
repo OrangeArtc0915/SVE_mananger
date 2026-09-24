@@ -12,14 +12,14 @@ public enum WidgetItemKind
     /// <summary>进度条，用 <see cref="WidgetItem.Ratio"/> 表示 0~1 的进度。</summary>
     Progress = 2,
 
-    /// <summary>可点击的外部链接，用系统默认浏览器打开 <see cref="WidgetItem.Url"/>。</summary>
-    Link = 3,
-
     /// <summary>一条分隔线，用于分组。</summary>
-    Divider = 4
+    Divider = 3
 }
 
-/// <summary>卡片里的一行。</summary>
+/// <summary>
+/// 卡片里的一行。只有文字、数字与进度，没有任何可点击、可跳转的东西 ——
+/// 扩展只能描述要显示什么，不能借卡片去唤起别的程序。
+/// </summary>
 public sealed class WidgetItem
 {
     /// <summary>这一行的样式。</summary>
@@ -33,15 +33,6 @@ public sealed class WidgetItem
 
     /// <summary>进度，0~1，超出范围会被夹住。</summary>
     public double Ratio { get; init; }
-
-    /// <summary>链接地址。</summary>
-    public string Url { get; init; } = string.Empty;
-
-    /// <summary>
-    /// 行首图标名。可用的是启动器内置图标，例如 <c>lucide/clock</c>、<c>lucide/package</c>；
-    /// 留空则不显示图标。写错只是不显示，不会报错。
-    /// </summary>
-    public string? Icon { get; init; }
 
     /// <summary>一段文字，可多行。</summary>
     public static WidgetItem Text(string text) => new() { Kind = WidgetItemKind.Text, Value = text };
@@ -58,10 +49,6 @@ public sealed class WidgetItem
         Ratio = Math.Clamp(ratio, 0, 1),
         Value = value ?? string.Empty
     };
-
-    /// <summary>可点击的外部链接。</summary>
-    public static WidgetItem Link(string label, string url, string? icon = "lucide/external-link") =>
-        new() { Kind = WidgetItemKind.Link, Label = label, Url = url, Icon = icon };
 
     /// <summary>分隔线。</summary>
     public static WidgetItem Divider() => new() { Kind = WidgetItemKind.Divider };

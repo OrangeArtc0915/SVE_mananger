@@ -84,9 +84,6 @@ public static class WidgetPluginCatalog
     /// <summary>扩展目录。</summary>
     public static string WidgetsDirectory => Path.Combine(Paths.Data, "Widgets");
 
-    /// <summary>扩展专属的可写目录（放缓存用）。刻意不与 dll 混在一起，方便用户直接删 dll。</summary>
-    public static string StorageDirectoryOf(string key) => Path.Combine(Paths.Data, "WidgetStorage", key);
-
     private static readonly List<WidgetPluginEntry> Items = [];
 
     public static IReadOnlyList<WidgetPluginEntry> All => Items;
@@ -191,6 +188,16 @@ public static class WidgetPluginCatalog
 
         if (entry.IsLoaded) return true;
 
+        // 先过安全检查：这一步只读元数据，不执行扩展的任何代码
+        if (!PluginSafetyScan.TryScan(ScanTargetsOf(entry), out var violation))
+        {
+            entry.Error = error = $"安全检查未通过：{violation}。" +
+                                  "扩展不允许碰电脑上的文件、注册表与其它进程，详情见官网「写一个主页扩展」";
+
+            Log.Warn($"扩展被安全检查拦下 {entry.Key}：{violation}");
+            return false;
+        }
+
         try
         {
             var context = new PluginLoadContext(entry.Folder);
@@ -252,6 +259,35 @@ public static class WidgetPluginCatalog
         entry.Detach();
         entry.Enabled = false;
         Persist();
+    }
+
+    /// <summary>
+    /// 一个扩展要扫哪些 dll：顶层单个 dll 形式的扩展只扫它自己
+    /// （同一个 <c>Widgets</c> 目录里可能还躺着别人的扩展），
+    /// 文件夹形式的扩展则把文件夹里所有 dll 都算作它的一部分一起扫 —— 否则把访问文件
+    /// 的代码塞进一个附带依赖里就能绕过去。
+    /// </summary>
+    private static IReadOnlyList<string> ScanTargetsOf(WidgetPluginEntry entry)
+    {
+        if (string.Equals(Path.GetFullPath(entry.Folder), Path.GetFullPath(WidgetsDirectory),
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return [entry.AssemblyPath];
+        }
+
+        try
+        {
+            var files = Directory.GetFiles(entry.Folder, "*.dll")
+                .Where(file => !Path.GetFileName(file).StartsWith('.'))
+                .ToList();
+
+            return files.Count == 0 ? [entry.AssemblyPath] : files;
+        }
+        catch (Exception ex)
+        {
+            Log.Warn($"列出扩展目录里的 dll 失败 {entry.Folder}：{ex.Message}");
+            return [entry.AssemblyPath];
+        }
     }
 
     private static void Persist()

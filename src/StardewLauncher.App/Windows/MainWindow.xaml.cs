@@ -12,6 +12,7 @@ using StardewLauncher.App.Pages;
 using StardewLauncher.App.Theme;
 using StardewLauncher.Core.IO;
 using StardewLauncher.Core.Logging;
+using StardewLauncher.Core.Updater;
 using CoreApp = StardewLauncher.Core.App;
 
 namespace StardewLauncher.App.Windows;
@@ -285,6 +286,29 @@ public partial class MainWindow : Window
 
     /// <summary>当前显示的页面。给自检用。</summary>
     internal LauncherPage? CurrentPage => PanContent.Child as LauncherPage;
+
+    /// <summary>
+    /// 切到设置页，把启动时查到的更新交给它（设置页有下载进度与状态文字）。
+    /// 切页带交接动画，内容容器要等上一页淡出后才换上来，所以要等一下才拿得到设置页。
+    /// </summary>
+    internal async void ShowLauncherUpdate(LauncherUpdateInfo info)
+    {
+        SwitchToPage(NavPages.Setup);
+
+        // 最多等 1 秒；动画关掉时第一步就能拿到页面，不会有额外延迟
+        for (var waited = 0; waited < 1000; waited += 50)
+        {
+            if (CurrentPage is PageSetup page)
+            {
+                page.StartAutoUpdate(info);
+                return;
+            }
+
+            await Task.Delay(50);
+        }
+
+        Log.Warn("切到设置页后没能取到页面，启动时发现的更新改由用户手动检查");
+    }
 
     private LauncherPage GetPage(int page)
     {

@@ -226,7 +226,7 @@ const transparentClass = shouldEnableTransparency
                                     class:list={["block lg:hidden object-cover h-full w-full transition-transform duration-500 ease-out"]}
                                     src={Array.isArray(bannerImages.mobile) ? bannerImages.mobile[index] : (typeof bannerImages.mobile === 'string' ? bannerImages.mobile : '')} 
                                     position={siteConfig.banner.position}
-                                    loading={index === 0 ? "eager" : "lazy"}
+                                    loading="lazy"
                                     fetchpriority={index === 0 ? "high" : "low"}
                                     defer={index > 0}
                                 />
@@ -238,7 +238,7 @@ const transparentClass = shouldEnableTransparency
                                     class:list={["hidden lg:block object-cover h-full w-full transition-transform duration-500 ease-out"]}
                                     src={Array.isArray(bannerImages.desktop) ? bannerImages.desktop[index] : (typeof bannerImages.desktop === 'string' ? bannerImages.desktop : '')} 
                                     position={siteConfig.banner.position}
-                                    loading={index === 0 ? "eager" : "lazy"}
+                                    loading="lazy"
                                     fetchpriority={index === 0 ? "high" : "low"}
                                     defer={index > 0}
                                 />
@@ -251,12 +251,16 @@ const transparentClass = shouldEnableTransparency
     ) : (
         <!-- Single image mode -->
             <div class="relative h-full w-full">
+                {/* 桌面端与移动端各一张图，统一用 lazy：display:none 的那张不会下载，
+                    当前视口那张由 <head> 里带 media 条件的 rel=preload 提前拉取 */}
                 <!-- Mobile: use mobile-specific image with same logic as desktop -->
                 <ImageWrapper 
                     alt="Mobile banner image of the blog" 
                     class:list={["block lg:hidden object-cover h-full w-full transition duration-700 opacity-100"]}
                     src={(Array.isArray(bannerImages.mobile) ? bannerImages.mobile[0] : (typeof bannerImages.mobile === 'string' ? bannerImages.mobile : '')) || (Array.isArray(bannerImages.desktop) ? bannerImages.desktop[0] : (typeof bannerImages.desktop === 'string' ? bannerImages.desktop : '')) || ''} 
                     position={siteConfig.banner.position}
+                    loading="lazy"
+                    fetchpriority="high"
                 />
                 <!-- Desktop: use desktop-specific image -->
                 <ImageWrapper 
@@ -265,6 +269,8 @@ const transparentClass = shouldEnableTransparency
                     class:list={["hidden lg:block object-cover h-full transition duration-700 opacity-100"]}
                     src={(Array.isArray(bannerImages.desktop) ? bannerImages.desktop[0] : (typeof bannerImages.desktop === 'string' ? bannerImages.desktop : '')) || (Array.isArray(bannerImages.mobile) ? bannerImages.mobile[0] : (typeof bannerImages.mobile === 'string' ? bannerImages.mobile : '')) || ''} 
                     position={siteConfig.banner.position}
+                    loading="lazy"
+                    fetchpriority="high"
                 />
             </div>
     )}

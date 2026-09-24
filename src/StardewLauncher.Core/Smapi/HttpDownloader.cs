@@ -1,4 +1,5 @@
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using StardewLauncher.Core.Logging;
@@ -19,7 +20,14 @@ public static class HttpDownloader
     /// <summary>GetStringAsync 的内存缓存有效期，避免同一进程内对同一地址反复请求。</summary>
     private static readonly TimeSpan TextCacheTtl = TimeSpan.FromMinutes(5);
 
-    private static readonly HttpClient Client = new()
+    private static readonly HttpClient Client = new(new HttpClientHandler
+    {
+        // 必须声明支持的压缩方式，这是 GitHub 发布页"资产列表"片段的前提：
+        // 不带 Accept-Encoding 的请求，它直接回 500（实测同一个地址，带上就是 200）。
+        // 顺带也让所有文本 / JSON 请求走压缩传输，省流量、更快。
+        AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate |
+                                 DecompressionMethods.Brotli
+    })
     {
         Timeout = TimeSpan.FromSeconds(100)
     };
@@ -30,7 +38,9 @@ public static class HttpDownloader
     /// </summary>
     private static readonly HttpClient RedirectProbeClient = new(new HttpClientHandler
     {
-        AllowAutoRedirect = false
+        AllowAutoRedirect = false,
+        AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate |
+                                 DecompressionMethods.Brotli
     })
     {
         Timeout = TimeSpan.FromSeconds(30)

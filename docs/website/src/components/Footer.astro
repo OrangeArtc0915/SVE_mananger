@@ -26,9 +26,11 @@ if (footerConfig.enable) {
 }
 ---
 
-<!--<div class="border-t border-[var(&#45;&#45;primary)] mx-16 border-dashed py-8 max-w-[var(&#45;&#45;page-width)] flex flex-col items-center justify-center px-6">-->
+<!-- 注：这里原本还注释着两组备用的页脚样式（分隔线 / 卡片）。
+     因为 HTML 注释里不能出现连续短横线、只能写成 HTML 实体转义，而 Tailwind 的内容扫描会把这些
+     转义后的字符串当成 class 提取出来，往每一页的产物里塞进一批无效的 CSS 规则，并且会让
+     lightningcss 压缩直接报错。所以这里改为只保留说明文字，实际样式以下面两行为准。 -->
 <div class="transition border-t border-black/10 dark:border-white/15 my-10 border-dashed mx-32"></div>
-<!--<div class="transition bg-[oklch(92%_0.01_var(&#45;&#45;hue))] dark:bg-black rounded-2xl py-8 mt-4 mb-8 flex flex-col items-center justify-center px-6">-->
 <div class="transition border-dashed border-[oklch(85%_0.01_var(--hue))] dark:border-white/15 rounded-2xl mb-12 flex flex-col items-center justify-center px-6">
     <div class="transition text-50 text-sm text-center">
         {customFooterHtml && (

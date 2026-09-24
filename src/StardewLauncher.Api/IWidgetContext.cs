@@ -2,7 +2,13 @@ namespace StardewLauncher.Api;
 
 /// <summary>
 /// 扩展能拿到的东西。刻意只给只读数据与取数工具：
-/// 插件不能启动游戏、不能改 Mod、不能动启动器设置。
+/// 扩展既拿不到任何写文件的入口，也没有写日志的入口，更不能启动游戏、改 Mod 或动启动器设置 ——
+/// 它唯一能做的事就是把「要显示什么文字与数字」描述出来，交给启动器渲染。
+///
+/// <para>
+/// 需要记录下来给人看的东西，请放进返回的内容里（正文 / 标签取值 / 备注），
+/// 或者直接抛异常 —— 启动器会捕获异常、写进「运行日志」并显示在卡片上。
+/// </para>
 /// </summary>
 public interface IWidgetContext
 {
@@ -10,17 +16,9 @@ public interface IWidgetContext
     string LauncherVersion { get; }
 
     /// <summary>
-    /// 该扩展专属的可写目录（已创建），适合放联网缓存之类的东西。
-    /// 用户卸载扩展时这个目录不会自动删除。
-    /// </summary>
-    string StorageDirectory { get; }
-
-    /// <summary>写一条日志，会进启动器的「运行日志」页，方便排查。</summary>
-    void Log(string message);
-
-    /// <summary>
     /// GET 一个网址并返回文本内容。失败返回 <c>null</c>，不抛异常；
     /// 内部复用启动器自己的下载器（带超时、重试与 User-Agent）。
+    /// 只读：请求方式固定为 GET，无法向网上写入任何数据。
     /// </summary>
     Task<string?> HttpGetAsync(string url, CancellationToken cancellationToken = default);
 

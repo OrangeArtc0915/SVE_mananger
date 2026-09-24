@@ -46,7 +46,6 @@ public sealed class OverviewWidget : IHomepageWidgetPlugin
             items.Add(WidgetItem.Divider());
             items.Add(WidgetItem.KeyValue("最近存档", latest.FarmName));
             items.Add(WidgetItem.KeyValue("游戏内日期", latest.GameDateText));
-            items.Add(WidgetItem.Link("打开存档目录", latest.Directory, "lucide/folder-open"));
         }
 
         items.Add(WidgetItem.Divider());

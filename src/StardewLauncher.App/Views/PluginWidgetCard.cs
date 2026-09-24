@@ -1,19 +1,15 @@
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
 using StardewLauncher.Api;
 using StardewLauncher.App.Controls;
-using StardewLauncher.App.Controls.Svg;
-using StardewLauncher.Core.IO;
 using StardewLauncher.Core.Logging;
 using StardewLauncher.Core.Plugins;
 
 namespace StardewLauncher.App.Views;
 
 /// <summary>
-/// 扩展提供的主页卡片。外壳、间距、配色、进度条、链接行全部由启动器按现有卡片风格画，
-/// 扩展只提供数据与内容描述，所以扩展再多也不会出现另一个风格的卡片。
+/// 扩展提供的主页卡片。外壳、间距、配色、进度条全部由启动器按现有卡片风格画，
+/// 扩展只提供数据与内容描述 —— 卡片上没有任何可点击的行，扩展也不能借它唤起别的程序。
 /// </summary>
 internal sealed class PluginWidgetCard : SurfaceCard
 {
@@ -33,7 +29,7 @@ internal sealed class PluginWidgetCard : SurfaceCard
     public PluginWidgetCard(WidgetPluginEntry entry)
     {
         _entry = entry;
-        _context = new WidgetContext(WidgetPluginCatalog.StorageDirectoryOf(entry.Key));
+        _context = new WidgetContext();
 
         Title = entry.Instance?.Title ?? entry.Key;
         Padding = new Thickness(0);
@@ -169,7 +165,6 @@ internal sealed class PluginWidgetCard : SurfaceCard
         WidgetItemKind.Divider => BuildDivider(),
         WidgetItemKind.KeyValue => BuildKeyValue(item),
         WidgetItemKind.Progress => BuildProgress(item),
-        WidgetItemKind.Link => BuildLink(item),
         _ => BuildText(item)
     };
 
@@ -267,77 +262,6 @@ internal sealed class PluginWidgetCard : SurfaceCard
         stack.Children.Add(bar);
 
         return Padded(stack);
-    }
-
-    private FrameworkElement BuildLink(WidgetItem item)
-    {
-        var row = new Grid();
-        row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-        row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-        row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-
-        if (!string.IsNullOrWhiteSpace(item.Icon))
-        {
-            var icon = new SvgIcon
-            {
-                Icon = item.Icon,
-                Width = 14,
-                Height = 14,
-                VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(0, 0, 8, 0)
-            };
-            icon.SetResourceReference(SvgIcon.IconBrushProperty, "Accent.Base");
-            row.Children.Add(icon);
-        }
-
-        var label = new TextBlock
-        {
-            Text = Shorten(string.IsNullOrWhiteSpace(item.Label) ? item.Url : item.Label),
-            FontSize = 12.5,
-            VerticalAlignment = VerticalAlignment.Center,
-            TextTrimming = TextTrimming.CharacterEllipsis
-        };
-        label.SetResourceReference(TextBlock.ForegroundProperty, "Text.Primary");
-        Grid.SetColumn(label, 1);
-        row.Children.Add(label);
-
-        var arrow = new SvgIcon
-        {
-            Icon = "lucide/external-link",
-            Width = 12,
-            Height = 12,
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(8, 0, 0, 0)
-        };
-        arrow.SetResourceReference(SvgIcon.IconBrushProperty, "Text.Tertiary");
-        Grid.SetColumn(arrow, 2);
-        row.Children.Add(arrow);
-
-        var host = new Border
-        {
-            Padding = new Thickness(8, 5, 8, 5),
-            Margin = new Thickness(8, 2, 8, 2),
-            Cursor = Cursors.Hand,
-            Tag = item.Url,
-            CornerRadius = new CornerRadius(8)
-        };
-        host.SetResourceReference(Border.BackgroundProperty, "Common.Transparent");
-        host.Child = row;
-
-        if (!string.IsNullOrWhiteSpace(item.Url))
-        {
-            host.MouseLeftButtonUp += (_, _) =>
-            {
-                if (host.Tag is string url) ShellHelper.OpenUrl(url);
-            };
-        }
-
-        host.MouseEnter += (_, _) =>
-            host.SetResourceReference(Border.BackgroundProperty, "Nav.ItemHover");
-        host.MouseLeave += (_, _) =>
-            host.SetResourceReference(Border.BackgroundProperty, "Common.Transparent");
-
-        return host;
     }
 
     private FrameworkElement BuildDivider()

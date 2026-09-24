@@ -1,13 +1,31 @@
-/* 导入相册样式 */
-@import './albums.css';
-/* 导入追番页面样式 */
-@import './anime.css';
+/* 相册页样式已移除（albums.css）：全站没有任何页面或组件用到 .album-* ，
+   config.ts 里的 albums 开关也是关的。 */
+
 /* 导入动画样式 */
 @import './transition.css';
 @import './animation-enhancements.css';
 /* 导入渐变按钮样式 */
 @import './gradient-buttons.css';
-/* 加密内容样式已移除，现在直接使用非加密文章的样式 */
+
+/* ————— 原生滚动条隐藏 —————
+   html 与 body 上的 data-overlayscrollbars-initialize 原本由 OverlayScrollbars 的样式表
+   （14 KB，被打进了每一页）负责隐藏原生滚动条。那个库全站从未调用过 OverlayScrollbars()，
+   所以它的样式里真正生效的只有下面这两条 —— 等价地搬过来，就能把那 14 KB 去掉而不改变外观。 */
+html[data-overlayscrollbars-initialize]:not([data-overlayscrollbars-viewport]),
+body[data-overlayscrollbars-initialize]:not([data-overlayscrollbars-viewport]) {
+    scrollbar-width: none !important;
+}
+
+html[data-overlayscrollbars-initialize]:not([data-overlayscrollbars-viewport])::-webkit-scrollbar,
+html[data-overlayscrollbars-initialize]:not([data-overlayscrollbars-viewport])::-webkit-scrollbar-corner,
+body[data-overlayscrollbars-initialize]:not([data-overlayscrollbars-viewport])::-webkit-scrollbar,
+body[data-overlayscrollbars-initialize]:not([data-overlayscrollbars-viewport])::-webkit-scrollbar-corner {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
 
 @tailwind base;
 @tailwind components;

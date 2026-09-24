@@ -1,6 +1,6 @@
 ---
-// 只加载基础的等宽字体，减少加载时间
-import "@fontsource-variable/jetbrains-mono";
+// 代码块的等宽字体 @font-face 统一放在 src/styles/fonts.css（只保留 latin / latin-ext 子集），
+// 这里不再单独 import @fontsource-variable/jetbrains-mono，避免多出一个只含字体声明的 CSS 文件
 
 interface Props {
 	class: string;

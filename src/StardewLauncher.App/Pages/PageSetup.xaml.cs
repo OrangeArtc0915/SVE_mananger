@@ -12,6 +12,7 @@ using StardewLauncher.Core.Logging;
 using StardewLauncher.Core.Mods;
 using StardewLauncher.Core.Nexus;
 using StardewLauncher.Core.Smapi;
+using StardewLauncher.Core.Updater;
 using StardewLauncher.Core.Weather;
 using CoreApp = StardewLauncher.Core.App;
 using ThemeMode = StardewLauncher.Core.App.ThemeMode;
@@ -1040,6 +1041,147 @@ public partial class PageSetup : LauncherPage
     {
         button.Content = $"{label}：{(on ? "开" : "关")}";
         button.Tone = on ? ButtonTone.Solid : ButtonTone.Outline;
+    }
+
+    // ————— 启动器自身更新 —————
+
+    /// <summary>检查中，避免连点。</summary>
+    private bool _checkingLauncherUpdate;
+
+    /// <summary>已确认有新版本且能自动装：按钮这时是"下载并更新"。</summary>
+    private bool _updateReady;
+
+    /// <summary>有新版本但没有可自动安装的单文件 exe：按钮这时是"打开下载页"。</summary>
+    private bool _updateOpenPage;
+
+    private string _updateUrl = string.Empty;
+
+    private void OnCheckLauncherUpdateClick(object sender, RoutedEventArgs e)
+    {
+        if (_updateReady)
+        {
+            _ = DownloadAndInstallAsync();
+            return;
+        }
+
+        if (_updateOpenPage)
+        {
+            ShellHelper.OpenUrl(LauncherUpdateInfo.ReleasePageUrl(CoreApp.SettingsStore.Current.DownloadSource));
+            return;
+        }
+
+        _ = CheckLauncherUpdateAsync();
+    }
+
+    private async Task CheckLauncherUpdateAsync()
+    {
+        if (_checkingLauncherUpdate) return;
+
+        _checkingLauncherUpdate = true;
+        SetLauncherUpdateStatus("正在检查新版本…", warn: false);
+
+        try
+        {
+            ShowLauncherUpdateResult(await LauncherUpdater.CheckAsync());
+        }
+        catch (Exception ex)
+        {
+            Log.Warn($"检查启动器更新失败：{ex.Message}");
+            BtnCheckLauncherUpdate.Content = "检查启动器更新";
+            SetLauncherUpdateStatus($"检查失败：{ex.Message}", warn: true);
+        }
+        finally
+        {
+            _checkingLauncherUpdate = false;
+        }
+    }
+
+    private void ShowLauncherUpdateResult(LauncherUpdateInfo info)
+    {
+        _updateReady = false;
+        _updateOpenPage = false;
+        _updateUrl = string.Empty;
+
+        if (info.Error is not null)
+        {
+            BtnCheckLauncherUpdate.Content = "检查启动器更新";
+            SetLauncherUpdateStatus($"检查失败：{info.Error}", warn: true);
+            return;
+        }
+
+        if (!info.HasUpdate)
+        {
+            BtnCheckLauncherUpdate.Content = "检查启动器更新";
+            SetLauncherUpdateStatus($"当前 {CoreApp.AppInfo.VersionDisplay}，已是最新版本（{info.SourceName}）", warn: false);
+            return;
+        }
+
+        if (!info.CanAutoInstall)
+        {
+            _updateOpenPage = true;
+            BtnCheckLauncherUpdate.Content = "打开下载页";
+            SetLauncherUpdateStatus(
+                $"发现新版本 v{info.LatestVersion}，但发布页里没有单文件 exe 可供自动安装，请手动下载。", warn: true);
+            return;
+        }
+
+        _updateReady = true;
+        _updateUrl = info.DownloadUrl;
+        BtnCheckLauncherUpdate.Content = $"下载并更新到 v{info.LatestVersion}";
+        SetLauncherUpdateStatus(
+            $"发现新版本 v{info.LatestVersion}（{info.SourceName}，{info.AssetName}）。" +
+            "点上面的按钮会自动下载、替换并重启；设置、实例与存档备份都不会动。", warn: false);
+    }
+
+    private async Task DownloadAndInstallAsync()
+    {
+        if (_checkingLauncherUpdate || string.IsNullOrWhiteSpace(_updateUrl)) return;
+
+        _checkingLauncherUpdate = true;
+        BtnCheckLauncherUpdate.IsEnabled = false;
+
+        try
+        {
+            var progress = new Progress<double>(value =>
+                SetLauncherUpdateStatus($"正在下载新版本… {value:P0}", warn: false));
+
+            var result = await LauncherUpdater.DownloadAndInstallAsync(_updateUrl, progress);
+
+            SetLauncherUpdateStatus(result.Message, warn: !result.Ok);
+
+            if (!result.Ok) return;
+
+            // 交给更新脚本：它等本进程退出后替换文件并重新启动
+            await Task.Delay(600);
+            Application.Current.Shutdown();
+        }
+        catch (Exception ex)
+        {
+            Log.Error("自动更新失败", ex);
+            SetLauncherUpdateStatus($"自动更新失败：{ex.Message}", warn: true);
+        }
+        finally
+        {
+            _checkingLauncherUpdate = false;
+            BtnCheckLauncherUpdate.IsEnabled = true;
+        }
+    }
+
+    private void SetLauncherUpdateStatus(string message, bool warn)
+    {
+        LabLauncherUpdate.Text = message;
+        LabLauncherUpdate.SetResourceReference(TextBlock.ForegroundProperty, warn ? "Status.Warn" : "Text.Tertiary");
+    }
+
+    /// <summary>
+    /// 启动时检查到新版本、用户在弹窗里点了"现在更新"之后调到这里：
+    /// 把结果摆到界面上（这一页有进度显示）并立刻开始下载安装。
+    /// </summary>
+    internal void StartAutoUpdate(LauncherUpdateInfo info)
+    {
+        ShowLauncherUpdateResult(info);
+
+        if (_updateReady) _ = DownloadAndInstallAsync();
     }
 
     // ————— 当前实例与 SMAPI —————

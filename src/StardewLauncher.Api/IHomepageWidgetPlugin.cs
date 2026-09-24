@@ -8,6 +8,12 @@ namespace StardewLauncher.Api;
 /// 插件只负责两件事：取数据、描述要显示什么。卡片外观由启动器按统一样式渲染，
 /// 所以插件不需要引用 WPF，也不需要关心配色与圆角。
 /// </para>
+///
+/// <para>
+/// 插件的能力是刻意收窄的：只能产出文字与数字，拿不到任何写入口 ——
+/// 不能写文件、不能写日志、不能启动游戏或改启动器设置，产出的行也没有可点击的东西。
+/// 详见 <see cref="IWidgetContext"/> 与 <see cref="WidgetItem"/>。
+/// </para>
 /// </summary>
 /// <example>
 /// <code>

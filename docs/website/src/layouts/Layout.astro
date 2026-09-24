@@ -1,8 +1,7 @@
 ---
-// 只加载最常用的字体权重，减少加载时间
-import "@fontsource/roboto/400.css";
-import "@fontsource/roboto/700.css";
-
+// 字体改为在 src/styles/fonts.css 里手写 @font-face：
+// 只保留站点真正用到的子集（Roboto: latin + symbols）与字重（400 / 700），
+// 去掉 cyrillic / greek / vietnamese / math / latin-ext，减少 render-blocking CSS 与产物里的字体文件
 import ConfigCarrier from "@components/ConfigCarrier.astro";
 import MusicPlayer from "@components/widget/MusicPlayer.svelte";
 import Pio from "@components/widget/Pio.svelte"; // 使用 Svelte 版本的 Pio 组件
@@ -22,6 +21,7 @@ import { defaultFavicons } from "../constants/icon";
 import type { Favicon, SakuraConfig } from "../types/config";
 import { pathsEqual, url } from "../utils/url-utils";
 
+import "../styles/fonts.css";
 import "../styles/main.css";
 import "../styles/mobile-navbar.css";
 import "../styles/wallpaper-navbar-transparent.css";
@@ -113,20 +113,26 @@ if (siteConfig.generateOgImages && postSlug) {
 const favicons: Favicon[] =
 	siteConfig.favicon.length > 0 ? siteConfig.favicon : defaultFavicons;
 
-// 首屏横幅图预加载：让最大的那张图与 CSS/JS 并行开始下载，减少首屏空白时间
+// 首屏横幅图预加载：让真正会被显示的那张图与 CSS/JS 并行开始下载，减少首屏空白时间
+// 桌面端与移动端是两张不同的图，所以按视口用 media 区分，避免小屏还去下载桌面大图
 const bannerSrcConfig = siteConfig.banner.src as
 	| string
 	| string[]
 	| { desktop?: string | string[]; mobile?: string | string[] };
 const pickFirst = (v: string | string[] | undefined) =>
 	Array.isArray(v) ? v[0] : (v ?? "");
-const firstBannerImage = (() => {
-	if (typeof bannerSrcConfig === "string") return bannerSrcConfig;
-	if (Array.isArray(bannerSrcConfig)) return bannerSrcConfig[0] ?? "";
-	return (
-		pickFirst(bannerSrcConfig?.desktop) || pickFirst(bannerSrcConfig?.mobile)
-	);
-})();
+const firstDesktopBannerImage =
+	typeof bannerSrcConfig === "string"
+		? bannerSrcConfig
+		: Array.isArray(bannerSrcConfig)
+			? (bannerSrcConfig[0] ?? "")
+			: (pickFirst(bannerSrcConfig?.desktop) ||
+				pickFirst(bannerSrcConfig?.mobile));
+const firstMobileBannerImage =
+	typeof bannerSrcConfig === "string" || Array.isArray(bannerSrcConfig)
+		? firstDesktopBannerImage
+		: (pickFirst(bannerSrcConfig?.mobile) ||
+			pickFirst(bannerSrcConfig?.desktop));
 const isHomePageForBanner = isHomePage;
 
 // const siteLang = siteConfig.lang.replace('_', '-')
@@ -190,9 +196,17 @@ const umamiScripts = umamiConfig.scripts || ""; // 获取Umami scripts配置
 			/>
 		))}
 
-		{/* 首屏横幅图预加载：首页才需要，其他页面不浪费带宽 */}
-		{siteConfig.banner.enable && isHomePageForBanner && firstBannerImage && (
-			<link rel="preload" as="image" href={url(firstBannerImage)} fetchpriority="high" />
+		{/* 首屏横幅图预加载：首页才需要，其他页面不浪费带宽。
+		    桌面端/移动端图片不同，用 media 区分，只预加载当前视口真正会用到的那张 */}
+		{siteConfig.banner.enable && isHomePageForBanner && firstDesktopBannerImage && (
+			firstMobileBannerImage && firstMobileBannerImage !== firstDesktopBannerImage ? (
+				<>
+					<link rel="preload" as="image" href={url(firstDesktopBannerImage)} fetchpriority="high" media="(min-width: 1024px)" />
+					<link rel="preload" as="image" href={url(firstMobileBannerImage)} fetchpriority="high" media="(max-width: 1023px)" />
+				</>
+			) : (
+				<link rel="preload" as="image" href={url(firstDesktopBannerImage)} fetchpriority="high" />
+			)
 		)}
 
 		<!-- Set the theme before the page is rendered to avoid a flash -->
@@ -675,13 +689,9 @@ const umamiScripts = umamiConfig.scripts || ""; // 获取Umami scripts配置
 
 <script>
 import { animationManager } from '../utils/animation-utils';
-import 'overlayscrollbars/overlayscrollbars.css';
-import {
-	OverlayScrollbars,
-	// ScrollbarsHidingPlugin,
-	// SizeObserverPlugin,
-	// ClickScrollPlugin
-} from 'overlayscrollbars';
+// OverlayScrollbars 已移除：全站从未调用过 OverlayScrollbars()（body 初始化被刻意关掉了，
+// 自定义滚动条由 CustomScrollbar.astro 自己实现），但它的 CSS 有 14 KB 被打进了每一页。
+// data-overlayscrollbars-initialize 之类的标记属性只是给那个库看的，没有它也是空转。
 import {getHue, getStoredTheme, setHue, setTheme} from "../utils/setting-utils";
 import {pathsEqual, url} from "../utils/url-utils";
 import {
@@ -1279,10 +1289,21 @@ if (document.readyState === 'loading') {
 </script>
 
 <script>
-import { Fancybox } from "@fancyapps/ui";
+// Fancybox 的样式仍然静态引入：它必须是 <head> 里的 <link>，
+// 这样 swup 更新 head 时（按 outerHTML 比对增删）不会被摘掉，也不会出现样式闪烁
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
 
-function initFancybox() {
+// 但 @fancyapps/ui 的 JS 有一百多 KB，首屏根本用不到（只有点开图片放大时才需要），
+// 所以改成首屏之后按需 import，不再和首屏的 CSS / 图片抢带宽
+let fancyboxModulePromise: Promise<typeof import("@fancyapps/ui")> | null = null;
+const loadFancybox = () => {
+  fancyboxModulePromise ??= import("@fancyapps/ui");
+  return fancyboxModulePromise;
+};
+
+async function initFancybox() {
+  const { Fancybox } = await loadFancybox();
+
   // 销毁现有的 Fancybox 实例（如果存在）
   Fancybox.close();
   
@@ -1457,11 +1478,21 @@ function initFancybox() {
   });
 }
 
+// 首屏之后再加载 Fancybox：用 requestIdleCallback 让它在浏览器空闲时下载，不占首屏带宽
+const scheduleFancyboxInit = () => {
+  const ric = (window as any).requestIdleCallback;
+  if (typeof ric === "function") {
+    ric(() => { initFancybox(); }, { timeout: 2000 });
+  } else {
+    setTimeout(() => { initFancybox(); }, 1);
+  }
+};
+
 const setup = () => {
-  // 初始化 Fancybox
-  initFancybox();
+  // 初始化 Fancybox（延迟到首屏之后，避免下载 100+KB 的灯箱脚本）
+  scheduleFancyboxInit();
   
-  // 在页面视图更改时重新初始化
+  // 在页面视图更改时重新初始化（此时脚本已经加载过，不会再有额外请求）
   window.swup.hooks.on("page:view", () => {
     // 等待 DOM 更新后初始化
     setTimeout(() => {
@@ -1477,9 +1508,9 @@ if (window.swup) {
   
   // 如果 swup 尚未初始化，则直接初始化
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initFancybox);
+    document.addEventListener("DOMContentLoaded", scheduleFancyboxInit);
   } else {
-    initFancybox();
+    scheduleFancyboxInit();
   }
 }
 </script>

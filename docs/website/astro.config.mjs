@@ -176,6 +176,13 @@ export default defineConfig({
 	},
 	vite: {
 		build: {
+			// 用 lightningcss 压缩 CSS（依赖已随构建链安装），比默认 esbuild 能把
+			// 产物压得更小一些（合并可合并的规则、更短的颜色/数值写法）
+			cssMinify: "lightningcss",
+			// 明确告诉 lightningcss 目标浏览器：不指定时它会按“最新浏览器”处理，
+			// 从而把 -webkit-user-select / -webkit-background-clip 这类 Safari 仍需要的
+			// 前缀删掉（Safari 直到 26.x 才支持不带前缀的 user-select）
+			cssTarget: ["safari18"],
 			rollupOptions: {
 				onwarn(warning, warn) {
 					// temporarily suppress this warning
