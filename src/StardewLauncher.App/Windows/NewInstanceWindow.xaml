@@ -1,6 +1,7 @@
-<Window x:Class="StardewLauncher.App.Windows.NewInstanceWindow"
+<w:LauncherWindow x:Class="StardewLauncher.App.Windows.NewInstanceWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:w="clr-namespace:StardewLauncher.App.Windows"
         xmlns:c="clr-namespace:StardewLauncher.App.Controls"
         Title="新建实例"
         Width="580"
@@ -186,4 +187,4 @@
             </StackPanel>
         </StackPanel>
     </c:SurfaceCard>
-</Window>
+</w:LauncherWindow>

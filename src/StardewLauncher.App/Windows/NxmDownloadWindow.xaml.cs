@@ -16,7 +16,7 @@ namespace StardewLauncher.App.Windows;
 /// 收到 nxm:// 链接后的下载确认窗口：展示 Mod 信息、选择落盘目标、显示下载与入库结果。
 /// 整个下载在后台线程执行，界面不阻塞；失败原因原样展示给用户。
 /// </summary>
-public partial class NxmDownloadWindow : Window
+public partial class NxmDownloadWindow : LauncherWindow
 {
     private static readonly string[] KnownArchiveExtensions = [".zip", ".7z", ".rar", ".tar", ".gz"];
 

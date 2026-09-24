@@ -12,7 +12,7 @@ namespace StardewLauncher.App.Windows;
 /// Mod 配置档管理：把当前启停组合存成一套档（如「美化包」「剧情包」），需要时一键切换。
 /// 只改名不搬文件，与 ModEnabler 同一套机制。
 /// </summary>
-public partial class ModProfileWindow : Window
+public partial class ModProfileWindow : LauncherWindow
 {
     private readonly string _modsDirectory;
     private bool _busy;

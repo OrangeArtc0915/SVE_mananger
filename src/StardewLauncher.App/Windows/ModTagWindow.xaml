@@ -1,6 +1,7 @@
-<Window x:Class="StardewLauncher.App.Windows.ModTagWindow"
+<w:LauncherWindow x:Class="StardewLauncher.App.Windows.ModTagWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:w="clr-namespace:StardewLauncher.App.Windows"
         xmlns:c="clr-namespace:StardewLauncher.App.Controls"
         Title="标签"
         Width="540"
@@ -106,4 +107,4 @@
                              Click="OnCloseClick" />
         </StackPanel>
     </Grid>
-</Window>
+</w:LauncherWindow>

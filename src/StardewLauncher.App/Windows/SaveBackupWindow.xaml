@@ -1,6 +1,7 @@
-<Window x:Class="StardewLauncher.App.Windows.SaveBackupWindow"
+<w:LauncherWindow x:Class="StardewLauncher.App.Windows.SaveBackupWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:w="clr-namespace:StardewLauncher.App.Windows"
         xmlns:c="clr-namespace:StardewLauncher.App.Controls"
         xmlns:svg="clr-namespace:StardewLauncher.App.Controls.Svg"
         Title="备份与回滚"
@@ -169,4 +170,4 @@
                              Click="OnCloseClick" />
         </Grid>
     </Grid>
-</Window>
+</w:LauncherWindow>

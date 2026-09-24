@@ -10,7 +10,7 @@ using StardewLauncher.Core.Saves;
 namespace StardewLauncher.App.Windows;
 
 /// <summary>单个存档的备份管理：新建、回滚、删除。回滚前会自动给当前存档打一份快照。</summary>
-public partial class SaveBackupWindow : Window
+public partial class SaveBackupWindow : LauncherWindow
 {
     private readonly SaveSummary _save;
     private bool _busy;

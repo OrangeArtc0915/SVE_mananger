@@ -4,7 +4,7 @@ using System.Windows.Media;
 namespace StardewLauncher.App.Windows;
 
 /// <summary>一个简单的单行输入框（起名字用）。项目里没有自绘输入弹窗，先做这一个共用的。</summary>
-public partial class PromptWindow : Window
+public partial class PromptWindow : LauncherWindow
 {
     private readonly string _originalLabel;
 

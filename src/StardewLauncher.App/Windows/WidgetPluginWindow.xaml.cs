@@ -14,7 +14,7 @@ namespace StardewLauncher.App.Windows;
 /// 主页扩展管理：列出扩展目录里扫到的扩展，由用户手动启用或停用。
 /// 扫描只读文件信息，未启用的扩展不会被执行任何代码。
 /// </summary>
-public partial class WidgetPluginWindow : Window
+public partial class WidgetPluginWindow : LauncherWindow
 {
     public WidgetPluginWindow()
     {

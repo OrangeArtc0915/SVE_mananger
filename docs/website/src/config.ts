@@ -221,8 +221,8 @@ export const commentConfig: CommentConfig = {
 };
 
 export const announcementConfig: AnnouncementConfig = {
-	title: "v1.6.0 已发布", // 公告标题
-	content: "新增检查更新与一键自动更新、主页扩展（可自己写小组件）、存档管理工具箱、Mod 配置档与拖拽安装，界面动效整套重做。", // 公告内容
+	title: "v1.6.1 已发布", // 公告标题
+	content: "弹窗与所有窗口都换掉系统样式、更新完自动重开、Gitee 也能一键更新；另有检查更新、主页扩展、存档管理工具箱与 Mod 配置档。", // 公告内容
 	closable: true, // 允许用户关闭公告
 	link: {
 		enable: true, // 启用链接

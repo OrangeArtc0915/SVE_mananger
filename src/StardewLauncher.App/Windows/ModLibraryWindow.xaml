@@ -1,6 +1,7 @@
-<Window x:Class="StardewLauncher.App.Windows.ModLibraryWindow"
+<w:LauncherWindow x:Class="StardewLauncher.App.Windows.ModLibraryWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:w="clr-namespace:StardewLauncher.App.Windows"
         xmlns:c="clr-namespace:StardewLauncher.App.Controls"
         xmlns:svg="clr-namespace:StardewLauncher.App.Controls.Svg"
         Title="从 Mod 库安装"
@@ -215,4 +216,4 @@
             </StackPanel>
         </Grid>
     </Grid>
-</Window>
+</w:LauncherWindow>

@@ -12,7 +12,7 @@ namespace StardewLauncher.Api;
 /// </summary>
 public interface IWidgetContext
 {
-    /// <summary>启动器版本号，例如 <c>1.6.0</c>。可用于在界面上标注兼容性。</summary>
+    /// <summary>启动器版本号，例如 <c>1.6.1</c>。可用于在界面上标注兼容性。</summary>
     string LauncherVersion { get; }
 
     /// <summary>

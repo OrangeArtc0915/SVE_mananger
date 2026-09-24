@@ -12,7 +12,7 @@ order: 2
 | GitHub Releases | <https://github.com/OrangeArtc0915/SVE_mananger/releases> | 海外线路，更新最先到这里 |
 | Gitee 发行版 | <https://gitee.com/orangearc655743/SVE_mananger_File/releases> | 国内镜像，包的内容完全一样 |
 
-下载文件名形如 `StardewLauncher-v1.6.0-win-x64.zip`。
+下载文件名形如 `StardewLauncher-v1.6.1-win-x64.zip`。
 
 ## 安装
 

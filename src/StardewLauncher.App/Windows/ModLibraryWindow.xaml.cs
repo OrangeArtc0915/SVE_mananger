@@ -58,7 +58,7 @@ public sealed class LibraryModItem : INotifyPropertyChanged
 /// <summary>
 /// 「从 Mod 库安装」对话框：浏览库里已解压的 Mod，勾选后批量复制到游戏 Mods 目录。
 /// </summary>
-public partial class ModLibraryWindow : Window
+public partial class ModLibraryWindow : LauncherWindow
 {
     private readonly string _libraryDirectory;
     private readonly string _gameModsDirectory;

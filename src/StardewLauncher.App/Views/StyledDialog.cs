@@ -1,10 +1,9 @@
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Effects;
 using StardewLauncher.App.Controls;
 using StardewLauncher.App.Controls.Svg;
+using StardewLauncher.App.Windows;
 
 namespace StardewLauncher.App.Views;
 
@@ -21,45 +20,22 @@ internal enum DialogTone
 /// 自绘的提示框。系统的 <c>MessageBox</c> 是灰底方角 + 系统字体 + 系统按钮，
 /// 弹在启动器上非常突兀，所以全项目统一改用这个：卡片圆角、主题配色、启动器自己的按钮控件。
 ///
+/// <para>外框直接复用 <see cref="LauncherWindow"/> 那套（WindowChrome + 自绘投影），
+/// 这里只负责标题、正文与按钮。</para>
+///
 /// <para>不要再用 <c>MessageBox.Show</c>，新增提示一律走 <see cref="Dialogs"/>。</para>
 /// </summary>
-internal sealed class StyledDialog : Window
+internal sealed class StyledDialog : LauncherWindow
 {
     private StyledDialog(string caption, string message, DialogTone tone, string primaryText, string? secondaryText)
     {
-        WindowStyle = WindowStyle.None;
-        AllowsTransparency = true;
-        Background = Brushes.Transparent;
-        ResizeMode = ResizeMode.NoResize;
         SizeToContent = SizeToContent.Height;
         Width = 470;
         ShowInTaskbar = false;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         Title = caption;
-        FontFamily = (FontFamily)Application.Current.FindResource("AppFont");
 
-        if (Application.Current.TryFindResource("Text.Primary") is Brush primary) Foreground = primary;
-
-        // 外层留白用来放自绘投影
-        var card = new Border
-        {
-            Margin = new Thickness(18),
-            CornerRadius = new CornerRadius(12),
-            BorderThickness = new Thickness(1),
-            Effect = new DropShadowEffect
-            {
-                BlurRadius = 20,
-                ShadowDepth = 2,
-                Direction = 270,
-                Opacity = 0.26,
-                Color = Colors.Black
-            }
-        };
-
-        card.SetResourceReference(Border.BackgroundProperty, "Surface.Card");
-        card.SetResourceReference(Border.BorderBrushProperty, "Border.Default");
-
-        var layout = new Grid { Margin = new Thickness(20, 18, 20, 16) };
+        var layout = new Grid { Margin = new Thickness(20, 4, 20, 16) };
         layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
@@ -152,14 +128,8 @@ internal sealed class StyledDialog : Window
         Grid.SetRow(buttons, 2);
         layout.Children.Add(buttons);
 
-        card.Child = layout;
-        Content = card;
-
-        // 没有系统标题栏，按住卡片任意处都能拖动
-        card.MouseLeftButtonDown += (_, e) =>
-        {
-            if (e.ButtonState == MouseButtonState.Pressed) DragMove();
-        };
+        // 外框（圆角 + 投影 + 拖动条）由 LauncherWindow 负责
+        Content = layout;
 
         Loaded += (_, _) => confirm.Focus();
     }

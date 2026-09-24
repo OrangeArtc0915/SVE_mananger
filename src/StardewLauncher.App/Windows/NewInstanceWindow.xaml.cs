@@ -9,7 +9,7 @@ using StardewLauncher.Core.Instances;
 namespace StardewLauncher.App.Windows;
 
 /// <summary>新建实例对话框：选实例类型、手动指定游戏目录（实时校验）、填名称与备注。</summary>
-public partial class NewInstanceWindow : Window
+public partial class NewInstanceWindow : LauncherWindow
 {
     private const string DefaultModdedName = "我的实例";
     private const string DefaultVanillaName = "原版";

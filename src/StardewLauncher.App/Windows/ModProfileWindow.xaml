@@ -1,6 +1,7 @@
-<Window x:Class="StardewLauncher.App.Windows.ModProfileWindow"
+<w:LauncherWindow x:Class="StardewLauncher.App.Windows.ModProfileWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:w="clr-namespace:StardewLauncher.App.Windows"
         xmlns:c="clr-namespace:StardewLauncher.App.Controls"
         xmlns:svg="clr-namespace:StardewLauncher.App.Controls.Svg"
         Title="Mod 配置档"
@@ -196,4 +197,4 @@
                              Click="OnCloseClick" />
         </Grid>
     </Grid>
-</Window>
+</w:LauncherWindow>

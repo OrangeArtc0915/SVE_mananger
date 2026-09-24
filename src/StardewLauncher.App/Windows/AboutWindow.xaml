@@ -1,7 +1,8 @@
-<Window x:Class="StardewLauncher.App.Windows.AboutWindow"
+<w:LauncherWindow x:Class="StardewLauncher.App.Windows.AboutWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:c="clr-namespace:StardewLauncher.App.Controls"
+        xmlns:w="clr-namespace:StardewLauncher.App.Windows"
         xmlns:core="clr-namespace:StardewLauncher.Core.App;assembly=StardewLauncher.Core"
         Title="关于"
         Width="520"
@@ -185,4 +186,4 @@
                              Click="OnCloseClick" />
         </StackPanel>
     </Grid>
-</Window>
+</w:LauncherWindow>

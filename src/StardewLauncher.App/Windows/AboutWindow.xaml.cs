@@ -9,7 +9,7 @@ using CoreApp = StardewLauncher.Core.App;
 namespace StardewLauncher.App.Windows;
 
 /// <summary>「关于」独立窗口。内容与设置页解耦，只能由左侧导航打开。</summary>
-public partial class AboutWindow : Window
+public partial class AboutWindow : LauncherWindow
 {
     private const string CopyHint = "复制后可直接在 QQ 里搜索群号。";
 

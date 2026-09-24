@@ -1,6 +1,7 @@
-<Window x:Class="StardewLauncher.App.Windows.WikiWindow"
+<w:LauncherWindow x:Class="StardewLauncher.App.Windows.WikiWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:w="clr-namespace:StardewLauncher.App.Windows"
         Title="使用手册 · Wiki"
         Width="1100"
         Height="760"
@@ -16,4 +17,4 @@
         Closed="OnWindowClosed">
 
     <Border x:Name="ViewHost" />
-</Window>
+</w:LauncherWindow>

@@ -12,7 +12,7 @@ namespace StardewLauncher.App.Windows;
 /// 标签管理弹窗：为某个 Mod 勾选 / 取消标签，并新建、重命名、改色、删除标签。
 /// 弹窗只改动 ModTagStore，界面刷新由 ModTagStore.Changed 通知调用方。
 /// </summary>
-public partial class ModTagWindow : Window
+public partial class ModTagWindow : LauncherWindow
 {
     /// <summary>颜色下拉项：ColorKey 与显示名。</summary>
     private sealed record ColorOption(string Key, string Name);
