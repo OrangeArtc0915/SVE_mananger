@@ -7,8 +7,8 @@ namespace StardewLauncher.Core.App;
 public static class AppInfo
 {
     public const string Name = "星露谷启动器";
-    public const string Version = "1.5.0";
-    public const string VersionDisplay = "v1.5.0";
+    public const string Version = "1.6.0";
+    public const string VersionDisplay = "v1.6.0";
     public const string Author = "mmm";
     public const string GitHubUrl = "https://github.com/OrangeArtc0915/SVE_mananger";
     public const string GiteeUrl = "https://gitee.com/orangearc655743/SVE_mananger_File";
