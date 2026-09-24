@@ -1,21 +1,29 @@
-MIT License
+星露谷启动器 专有许可
+Copyright (c) 2026 星露谷启动器 贡献者. All rights reserved.
+版权所有，保留所有权利。
 
-Copyright (c) 2026 星露谷启动器 贡献者
+本软件（包括但不限于源代码、可执行文件、文档、界面资源与图标）的著作权归版权所有人所有，
+受中华人民共和国著作权法及适用的国际著作权条约保护。
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+未经版权所有人事先书面许可，任何人不得：
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+  1. 复制、发布、传播、出租、出售本软件或其任何部分；
+  2. 修改、翻译、演绎本软件，或基于本软件创作衍生作品；
+  3. 反向工程、反编译、反汇编本软件，或以其他方式试图获取其源代码；
+  4. 移除、遮掩或更改本软件中的任何版权声明、署名或其他权利标识。
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+【原样转发例外】
+在同时满足下列全部条件时，允许把本软件的完整安装包原样转发给他人：
+
+  - 不修改安装包内的任何文件（包括本许可证文件）；
+  - 不单独拆出、复用、再分发其中的任何部分（含其中的素材与文档）；
+  - 不收取任何费用，或仅收取不超过介质与传输成本的费用；
+  - 转发时如实说明本软件的来源。
+
+除上述例外，本许可不授予任何其他权利。本软件“按现状”提供，
+不附带任何明示或默示的担保，包括但不限于对适销性、特定用途适用性及不侵权的担保。
+在任何情况下，版权所有人均不对任何索赔、损害或其他责任承担责任，
+无论是在合同诉讼、侵权诉讼或其他诉讼中，因本软件、本软件的使用或其他交易而产生、
+引起或与之相关。
+
+本软件中引用的第三方组件、参考项目与游戏美术素材，其权利归属与许可要求另见 NOTICE。

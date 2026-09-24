@@ -170,7 +170,7 @@
                            FontSize="11.5"
                            Foreground="{DynamicResource Text.Tertiary}"
                            TextWrapping="Wrap"
-                           Text="界面与配色为独立设计，参考的开源项目与许可证见项目根目录 NOTICE。" />
+                           Text="本软件保留所有权利（允许原样转发完整安装包），详见 LICENSE；参考的开源项目与许可证见 NOTICE。" />
             </StackPanel>
         </c:SurfaceCard>
 

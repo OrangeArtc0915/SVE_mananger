@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
+using System.Windows.Threading;
 using Microsoft.Win32;
 using StardewLauncher.App.Animation;
 using StardewLauncher.App.Controls;
@@ -18,6 +19,7 @@ using StardewLauncher.Core.Homepage;
 using StardewLauncher.Core.Instances;
 using StardewLauncher.Core.Logging;
 using StardewLauncher.Core.Mods;
+using StardewLauncher.Core.Plugins;
 using StardewLauncher.Core.Saves;
 using StardewLauncher.Core.Smapi;
 using StardewLauncher.Core.Weather;
@@ -42,11 +44,14 @@ public partial class HomepageWidgetsView : UserControl
     /// <summary>按住后移动超过这个距离才算拖拽，避免把点击、误触当成拖拽。</summary>
     private const double DragThreshold = 6;
 
-    /// <summary>默认顺序。存下来的顺序里没提到的 widget 按这个顺序补在后面。</summary>
-    private static readonly string[] BuiltinOrder = HomepageLayout.WidgetIds;
-
-    /// <summary>widget id 到卡片的映射，卡片顺序与显隐都按它来找元素。</summary>
+    /// <summary>widget id 到卡片的映射，卡片顺序与显隐都按它来找元素。内置卡片与扩展卡片共用这一张表。</summary>
     private readonly Dictionary<string, SurfaceCard> _cards;
+
+    /// <summary>扩展卡片，单独留一份便于增删与刷新。</summary>
+    private readonly Dictionary<string, PluginWidgetCard> _pluginCards = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>扩展小组件在「自定义」菜单里的勾选项。</summary>
+    private readonly List<MenuItem> _pluginMenuItems = [];
 
     private SurfaceCard? _dragCard;
     private Point _dragOrigin;
@@ -68,6 +73,9 @@ public partial class HomepageWidgetsView : UserControl
             ["mods"] = CardMods
         };
 
+        SyncPluginCards();
+        SyncPluginMenuItems();
+
         ApplyWidgetLayout();
         BuildWeekdayHeader();
         ApplyArtOpacity();
@@ -79,11 +87,16 @@ public partial class HomepageWidgetsView : UserControl
         _ = RefreshWeatherAsync();
         _ = RefreshSaveAsync();
         _ = RefreshModsAsync();
+        RefreshPlugins();
     }
 
     /// <summary>供页面进入时调用，重新按当前设置刷新月历与天气（天气命中 30 分钟缓存则不会重复请求）。</summary>
     public void Refresh()
     {
+        // 回主页时扩展目录可能刚被改过（启用、停用、删掉 dll），先同步一遍
+        SyncPluginCards();
+        SyncPluginMenuItems();
+
         // 回到主页时按设置重排一次，但用户收起/排序的结果不会被重置
         ApplyWidgetLayout();
         RefreshCalendar();
@@ -91,6 +104,104 @@ public partial class HomepageWidgetsView : UserControl
         _ = RefreshWeatherAsync();
         _ = RefreshSaveAsync();
         _ = RefreshModsAsync();
+        RefreshPlugins();
+    }
+
+    // ————— 扩展小组件 —————
+
+    /// <summary>按当前启用的扩展增删卡片。启用状态来自扩展管理窗口。</summary>
+    private void SyncPluginCards()
+    {
+        var wanted = WidgetPluginCatalog.Enabled
+            .Select(entry => entry.WidgetId)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var id in _pluginCards.Keys.ToList())
+        {
+            if (wanted.Contains(id)) continue;
+
+            var card = _pluginCards[id];
+
+            WidgetsPanel.Children.Remove(card);
+            _cards.Remove(id);
+            _pluginCards.Remove(id);
+        }
+
+        foreach (var entry in WidgetPluginCatalog.Enabled)
+        {
+            if (_pluginCards.ContainsKey(entry.WidgetId)) continue;
+
+            var card = new PluginWidgetCard(entry);
+
+            _pluginCards[entry.WidgetId] = card;
+            _cards[entry.WidgetId] = card;
+            WidgetsPanel.Children.Add(card);
+        }
+    }
+
+    /// <summary>把扩展小组件的勾选项插在内置项之后、第一条分隔线之前。</summary>
+    private void SyncPluginMenuItems()
+    {
+        foreach (var item in _pluginMenuItems)
+        {
+            item.Click -= OnToggleWidgetClick;
+            MenuWidgets.Items.Remove(item);
+        }
+
+        _pluginMenuItems.Clear();
+
+        var insertAt = IndexOfFirstSeparator();
+
+        foreach (var entry in WidgetPluginCatalog.Enabled)
+        {
+            var item = new MenuItem
+            {
+                Header = entry.DisplayName,
+                Tag = entry.WidgetId,
+                IsCheckable = true,
+                StaysOpenOnClick = true
+            };
+
+            item.Click += OnToggleWidgetClick;
+
+            MenuWidgets.Items.Insert(insertAt++, item);
+            _pluginMenuItems.Add(item);
+        }
+    }
+
+    private int IndexOfFirstSeparator()
+    {
+        for (var i = 0; i < MenuWidgets.Items.Count; i++)
+            if (MenuWidgets.Items[i] is Separator) return i;
+
+        return MenuWidgets.Items.Count;
+    }
+
+    private void RefreshPlugins()
+    {
+        foreach (var card in _pluginCards.Values) _ = card.RefreshAsync();
+    }
+
+    /// <summary>打开扩展管理窗口；关掉后按新的启用状态重排一次。</summary>
+    private void OnManagePluginsClick(object sender, RoutedEventArgs e)
+    {
+        // 不能在菜单项的回调里直接开模态窗口：菜单还按着鼠标捕获，窗口会开不出来。
+        // 排到菜单收起之后再做。
+        Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(OpenPluginManager));
+    }
+
+    private void OpenPluginManager()
+    {
+        var window = new WidgetPluginWindow();
+
+        if (Window.GetWindow(this) is { } owner) window.Owner = owner;
+
+        window.ShowDialog();
+
+        SyncPluginCards();
+        SyncPluginMenuItems();
+        ApplyWidgetLayout();
+        RefreshPlugins();
     }
 
     // ————— 顺序与显隐 —————
@@ -121,16 +232,24 @@ public partial class HomepageWidgetsView : UserControl
         WidgetsPanel.InvalidateMeasure();
     }
 
-    /// <summary>整理出完整顺序：配置里不认识的 id 丢掉，没提到的按内置顺序补到后面。</summary>
+    /// <summary>
+    /// 整理出完整顺序：配置里不认识的 id 丢掉，没提到过的按"内置在前、扩展在后"补到后面
+    /// （扩展没有内置顺序可言，只能排在末尾）。
+    /// </summary>
     private static List<string> NormalizeOrder(IEnumerable<string> saved)
     {
-        var order = new List<string>(BuiltinOrder.Length);
+        var known = HomepageLayout.AllWidgetIds;
+        var order = new List<string>(known.Count);
 
         foreach (var id in saved)
-            if (BuiltinOrder.Contains(id) && !order.Contains(id)) order.Add(id);
+            if (known.Contains(id, StringComparer.OrdinalIgnoreCase) &&
+                !order.Contains(id, StringComparer.OrdinalIgnoreCase))
+            {
+                order.Add(id);
+            }
 
-        foreach (var id in BuiltinOrder)
-            if (!order.Contains(id)) order.Add(id);
+        foreach (var id in known)
+            if (!order.Contains(id, StringComparer.OrdinalIgnoreCase)) order.Add(id);
 
         return order;
     }
@@ -167,7 +286,8 @@ public partial class HomepageWidgetsView : UserControl
 
         try
         {
-            SettingsStore.Current.HomepageHiddenWidgets = BuiltinOrder.Where(ids.Contains).ToList();
+            SettingsStore.Current.HomepageHiddenWidgets =
+                HomepageLayout.AllWidgetIds.Where(ids.Contains).ToList();
             SettingsStore.Save();
         }
         catch (Exception ex)

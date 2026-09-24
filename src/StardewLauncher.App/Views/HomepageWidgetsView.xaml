@@ -43,7 +43,8 @@
                              Click="OnCustomizeClick">
                 <c:OutlineButton.ContextMenu>
                     <!-- 勾选态在 Opened 里按当前设置回填，右键直接弹出也不会错位 -->
-                    <ContextMenu FontFamily="{StaticResource AppFont}"
+                    <ContextMenu x:Name="MenuWidgets"
+                                 FontFamily="{StaticResource AppFont}"
                                  FontSize="12.5"
                                  Opened="OnWidgetMenuOpened">
                         <MenuItem Tag="calendar"
@@ -81,6 +82,11 @@
                         <MenuItem Header="导入布局…" Click="OnImportLayoutClick" />
                         <Separator />
                         <MenuItem Header="恢复默认顺序" Click="OnResetWidgetOrderClick" />
+                        <Separator />
+                        <!-- 扩展卡片由代码按已启用的扩展插进上面那组勾选项里 -->
+                        <MenuItem Header="扩展管理…"
+                                  ToolTip="从扩展目录加载自己写的小组件"
+                                  Click="OnManagePluginsClick" />
                     </ContextMenu>
                 </c:OutlineButton.ContextMenu>
             </c:OutlineButton>

@@ -10,6 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\StardewLauncher.Api\StardewLauncher.Api.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="SharpCompress" Version="0.38.0" />
   </ItemGroup>
 

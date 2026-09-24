@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Unicode;
 using StardewLauncher.Core.App;
 using StardewLauncher.Core.Logging;
+using StardewLauncher.Core.Plugins;
 
 namespace StardewLauncher.Core.Homepage;
 
@@ -33,8 +34,15 @@ public sealed record HomepageLayoutResult(bool Ok, string Message);
 /// </summary>
 public static class HomepageLayout
 {
-    /// <summary>全部小组件 id。界面上的内置顺序与这里保持一致。</summary>
+    /// <summary>内置小组件 id。界面上的内置顺序与这里保持一致。</summary>
     public static readonly string[] WidgetIds = ["calendar", "weather", "quote", "saves", "image", "mods"];
+
+    /// <summary>
+    /// 内置小组件 + 已启用的扩展小组件。排序、显隐、导入导出都按这个集合认；
+    /// 扩展被停用后它的 id 就不在这里了，布局里对应的记录会在下次整理时被丢掉。
+    /// </summary>
+    public static IReadOnlyList<string> AllWidgetIds =>
+        [.. WidgetIds, .. WidgetPluginCatalog.Enabled.Select(entry => entry.WidgetId)];
 
     private static readonly JsonSerializerOptions Options = new()
     {
@@ -116,13 +124,14 @@ public static class HomepageLayout
     /// <summary>只保留认识的 id，去掉重复项；不认识的直接丢掉，避免导入外部文件时把界面搞乱。</summary>
     private static List<string> Normalize(IEnumerable<string>? ids)
     {
+        var known = AllWidgetIds;
         var result = new List<string>();
 
         foreach (var id in ids ?? [])
         {
             if (string.IsNullOrWhiteSpace(id)) continue;
-            if (Array.IndexOf(WidgetIds, id) < 0) continue;
-            if (result.Contains(id)) continue;
+            if (!known.Contains(id, StringComparer.OrdinalIgnoreCase)) continue;
+            if (result.Contains(id, StringComparer.OrdinalIgnoreCase)) continue;
 
             result.Add(id);
         }

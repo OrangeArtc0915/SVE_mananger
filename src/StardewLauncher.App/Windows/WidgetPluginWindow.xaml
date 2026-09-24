@@ -1,0 +1,105 @@
+<Window x:Class="StardewLauncher.App.Windows.WidgetPluginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:StardewLauncher.App.Controls"
+        Title="主页扩展"
+        Width="680"
+        Height="600"
+        MinWidth="560"
+        MinHeight="460"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource Surface.Window}"
+        Foreground="{DynamicResource Text.Primary}"
+        Icon="pack://application:,,,/StardewLauncher;component/Assets/AppIcon.png"
+        FontFamily="{StaticResource AppFont}"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- 标题 -->
+        <StackPanel Grid.Row="0">
+            <TextBlock FontSize="16" FontWeight="Bold" Text="主页扩展" />
+            <TextBlock Margin="0,4,0,0"
+                       FontSize="11.5"
+                       Foreground="{DynamicResource Text.Tertiary}"
+                       Text="扩展是用户自己写的 dll，启用后会出现在主页的小组件区。只加载你信任的扩展。" />
+        </StackPanel>
+
+        <!-- 扩展目录 -->
+        <Grid Grid.Row="1" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    Padding="10,7"
+                    Background="{DynamicResource Surface.Sunken}"
+                    CornerRadius="{StaticResource Radius.Item}">
+                <TextBlock x:Name="LabDirectory"
+                           FontSize="11.5"
+                           Foreground="{DynamicResource Text.Secondary}"
+                           TextTrimming="CharacterEllipsis" />
+            </Border>
+
+            <c:OutlineButton Grid.Column="1"
+                             Height="32"
+                             Margin="8,0,0,0"
+                             Padding="12,0"
+                             Content="打开目录"
+                             Click="OnOpenFolderClick" />
+
+            <c:OutlineButton Grid.Column="2"
+                             Height="32"
+                             Margin="8,0,0,0"
+                             Padding="12,0"
+                             Content="重新扫描"
+                             Click="OnRescanClick" />
+        </Grid>
+
+        <TextBlock Grid.Row="2"
+                   Margin="0,10,0,0"
+                   FontSize="11.5"
+                   Foreground="{DynamicResource Text.Secondary}"
+                   TextWrapping="Wrap"
+                   Text="把扩展的 dll 放进扩展目录（需要多个文件时放进一个子文件夹），然后点「重新扫描」，在这里启用。" />
+
+        <!-- 扩展列表 -->
+        <ScrollViewer Grid.Row="3"
+                      Margin="0,12,0,0"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <TextBlock x:Name="PanEmpty"
+                           FontSize="12"
+                           Foreground="{DynamicResource Text.Tertiary}"
+                           Text="扩展目录里还没有 dll"
+                           TextWrapping="Wrap"
+                           Visibility="Collapsed" />
+
+                <StackPanel x:Name="PanPlugins" />
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- 底部 -->
+        <StackPanel Grid.Row="4"
+                    Margin="0,12,0,0"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+            <c:OutlineButton Width="88"
+                             Height="36"
+                             Content="完成"
+                             Tone="Solid"
+                             Click="OnCloseClick" />
+        </StackPanel>
+    </Grid>
+</Window>

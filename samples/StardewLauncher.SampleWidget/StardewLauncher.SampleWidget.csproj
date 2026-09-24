@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>StardewLauncher.SampleWidget</RootNamespace>
+    <!-- 输出 dll 的名字：丢进启动器的扩展目录后，扩展管理里就按这个文件名列出 -->
+    <AssemblyName>SampleWidget</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!--
+      写扩展只需要引用契约程序集。Private=false 是为了不把 StardewLauncher.Api.dll 复制到输出目录：
+      启动器自带这一份，扩展目录里多一份反而容易出岔子。
+      外部作者照抄这个工程即可，把 ProjectReference 换成对 StardewLauncher.Api.dll 的引用。
+    -->
+    <ProjectReference Include="..\..\src\StardewLauncher.Api\StardewLauncher.Api.csproj">
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
+
+</Project>

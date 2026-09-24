@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- 刻意不带 -windows、不引 WPF：写扩展只需要这个契约程序集，插件作者不必碰界面框架 -->
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>StardewLauncher.Api</RootNamespace>
+    <AssemblyName>StardewLauncher.Api</AssemblyName>
+    <!-- 给插件作者出 IntelliSense：注释会一起编进 xml -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+</Project>

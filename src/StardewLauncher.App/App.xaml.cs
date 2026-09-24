@@ -10,6 +10,7 @@ using StardewLauncher.Core.IO;
 using StardewLauncher.Core.Logging;
 using StardewLauncher.Core.Mods;
 using StardewLauncher.Core.Nexus;
+using StardewLauncher.Core.Plugins;
 using StardewLauncher.Core.Smapi;
 
 namespace StardewLauncher.App;
@@ -67,6 +68,7 @@ public partial class App : Application
         ModTagStore.Load();
         InstallPlanStore.Load();
         ModProfileStore.Load();
+        WidgetPluginCatalog.LoadEnabled();
         NotifyNoInstance();
 
         ThemeService.Initialize(SettingsStore.Current.Theme, SettingsStore.Current.AccentTheme);

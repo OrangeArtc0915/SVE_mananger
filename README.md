@@ -38,7 +38,7 @@
 StardewLauncher.exe   启动器本体（单文件、自带 .NET 8 运行时）
 README.md             本文件
 NOTICE                第三方依赖与参考来源说明
-LICENSE               MIT 许可证
+LICENSE               许可条款（保留所有权利，允许原样转发）
 ```
 
 > 发行包里没有任何第三方闭源二进制。联机用的樱花 FRP 客户端 frpc **不在包内**，由程序在你点「准备 frpc」时从樱花 FRP 官方接口下载，并用接口返回的 MD5 校验。
@@ -200,6 +200,9 @@ src/
     Assets/     图标与装饰图
     Resources/  语义化配色与控件样式
     Theme/      主题与强调色
+  StardewLauncher.Api/     主页扩展的契约程序集（写扩展只需要引用它）
+samples/
+  StardewLauncher.SampleWidget/  示例扩展，可直接复制改成自己的
 docs/
   website/      官网源码（Astro 项目，基于开源模板 Mizuki 定制，不参与 .NET 构建）
     src/content/posts/  文章：首页列表 / 归档 / 分类标签的数据来源
@@ -208,6 +211,25 @@ docs/
     dist/               构建产物（pnpm build 生成，不纳入版本管理）
 build.bat       发行构建脚本
 ```
+
+---
+
+## 主页扩展（API）
+
+除了内置的月历、天气、每日一言等小组件，主页还支持用户自己写的扩展：实现 `IHomepageWidgetPlugin`、编译成 dll、丢进扩展目录，再在主页「自定义 → 扩展管理…」里手动启用，它就会作为一张卡片出现在小组件区，一样能拖动排序、一样能收起。
+
+- **契约程序集**：`src/StardewLauncher.Api`（纯 `net8.0`，不含 WPF）。扩展只描述"取什么数据、显示什么"，卡片外观由启动器按统一样式渲染，所以不会有风格不一致的卡片。
+- **扩展能做什么**：联网取数、读启动器已有的数据（实例 / 当前实例的 Mod / 存档摘要）。**不能**启动游戏、启停 Mod 或改设置。
+- **加载方式**：只加载用户在扩展管理里明确启用的扩展，默认不自动执行任何第三方代码；单个扩展加载失败或运行出错只影响它自己那张卡片。
+- **示例**：`samples/StardewLauncher.SampleWidget`，编译出的 dll 直接可放进扩展目录：
+
+```powershell
+dotnet build samples\StardewLauncher.SampleWidget\StardewLauncher.SampleWidget.csproj -c Release
+# 产物复制到 <启动器数据目录>\Widgets\ 后在扩展管理里启用
+```
+
+写扩展的完整说明见官网使用手册的「写一个主页扩展」。
+
 
 ---
 
@@ -268,7 +290,9 @@ A：不支持，只做 Windows。
 
 ## 许可证
 
-本项目以 **MIT License** 发布，详见 [LICENSE](LICENSE)。
+本项目为「**保留所有权利**」的专有软件，详见 [LICENSE](LICENSE)。
+
+允许在**不修改安装包内任何文件**的前提下把完整安装包原样转发给他人；除此之外，不允许修改、拆分、复用其中的任何部分，也不允许用于商业用途。如需其他授权，请先取得版权所有人的书面许可。
 
 界面结构、配色与图标为独立设计。参考过的开源项目、借鉴的思路以及使用的第三方包（含各自许可证要求）都写在 [NOTICE](NOTICE) 里，请一并阅读。
 

@@ -199,4 +199,12 @@ public sealed class Settings
     /// 避免原图被移动或删除后挂件变空白。
     /// </summary>
     public string HomepageImageFile { get; set; } = string.Empty;
+
+    // ————— 主页扩展 —————
+
+    /// <summary>
+    /// 已启用的主页扩展的键（扩展目录里的 dll 文件名或子文件夹名，不带扩展名）。
+    /// 只加载这里列出的扩展，扫到但没启用的不会执行任何代码。
+    /// </summary>
+    public List<string> EnabledWidgetPlugins { get; set; } = [];
 }

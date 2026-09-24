@@ -5,7 +5,7 @@ import Markdown from "@components/misc/Markdown.astro";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { url } from "@utils/url-utils";
 
-const categories = ["入门", "使用", "疑难排查", "关于"];
+const categories = ["入门", "使用", "疑难排查", "扩展开发", "关于"];
 
 export async function getStaticPaths() {
 	const entries = await getCollection("wiki");
