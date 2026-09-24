@@ -5,17 +5,24 @@
   <link href="https://orangeartc0915.github.io/" rel="alternate" type="text/html"/>
   <link href="https://orangeartc0915.github.io/atom.xml" rel="self" type="application/atom+xml"/>
   <id>https://orangeartc0915.github.io/</id>
-  <updated>2026-09-24T15:18:31.696Z</updated>
+  <updated>2026-09-24T15:52:04.277Z</updated>
   <language>zh_CN</language>
   <entry>
-    <title>v1.6.0 更新说明</title>
-    <link href="https://orangeartc0915.github.io/posts/v160/" rel="alternate" type="text/html"/>
-    <id>https://orangeartc0915.github.io/posts/v160/</id>
-    <published>2026-09-23T00:00:00.000Z</published>
-    <updated>2026-09-23T00:00:00.000Z</updated>
-    <summary>新增工具箱（存档管理）、Mod 配置档、拖拽安装、内嵌使用手册、主页扩展与启动器自更新，首页小组件也能自己排了。</summary>
+    <title>v1.6.1 更新说明</title>
+    <link href="https://orangeartc0915.github.io/posts/v161/" rel="alternate" type="text/html"/>
+    <id>https://orangeartc0915.github.io/posts/v161/</id>
+    <published>2026-09-24T00:00:00.000Z</published>
+    <updated>2026-09-24T00:00:00.000Z</updated>
+    <summary>新增工具箱（存档管理）、Mod 配置档、主页扩展与启动器自更新；这一版把系统样式的弹窗全部换成自绘，更新后会自己重开。</summary>
     <content type="html"><![CDATA[<h2>这一版做了什么</h2>
 <p>这一版主要补上"启动器之外还得手动做的事"：存档要自己备份、Mod 组合要来回勾、压缩包要一层层点进来。</p>
+<h3>先修掉四处不一致</h3>
+<ul>
+<li><strong>弹窗不再是系统样式</strong>：原来的提示框是系统 <code>MessageBox</code>（灰底、方角、系统字体、系统按钮），和启动器完全是两个风格。现在全部换成自绘弹窗：卡片圆角、主题配色、启动器自己的按钮控件，分信息 / 询问 / 警告 / 错误四种语气，没有系统标题栏所以按住卡片就能拖。</li>
+<li><strong>所有窗口都不再带系统标题栏</strong>：二级窗口（关于、扩展管理、新建实例、输入框…）统一改用与主窗口同一套 <code>WindowChrome</code> 方案，自绘「浮起来的圆角卡片 + 投影」外框，右上角有最小化 / 关闭，双击标题区域最大化。</li>
+<li><strong>更新完一定会自动重开启动器</strong>：替换成功会重开新版本；万一替换失败，回滚旧版本后同样会重新打开，不会把人晾在"启动器没了"的状态。</li>
+<li><strong>Gitee 也能一键更新了</strong>：Gitee 的单个附件上限是 100 MB，装不下这个 150 MB 的单文件 exe，那边只传得上发布包 zip。启动器现在会自己把 zip 解出 exe 再替换，设置里也多了「启动器更新线路」开关（GitHub / Gitee）。</li>
+</ul>
 <h3>新增「工具箱」，第一个工具是存档管理</h3>
 <p>侧栏多了一个<strong>工具箱</strong>，点进去是「存档管理」：</p>
 <ul>
