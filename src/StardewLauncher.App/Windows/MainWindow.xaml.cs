@@ -152,7 +152,7 @@ public partial class MainWindow : Window
             NavPages.Multiplayer => new PageMultiplayer(),
             NavPages.Setup => new PageSetup(),
             NavPages.Log => new PageLog(),
-            NavPages.Saves => new PageSaves(),
+            NavPages.Toolbox => new PageToolbox(),
             _ => new PageLaunch()
         };
 
@@ -170,7 +170,7 @@ public partial class MainWindow : Window
         NavInstance.IsChecked = page == NavPages.Instance;
         NavResource.IsChecked = page == NavPages.Resource;
         NavMultiplayer.IsChecked = page == NavPages.Multiplayer;
-        NavSaves.IsChecked = page == NavPages.Saves;
+        NavToolbox.IsChecked = page == NavPages.Toolbox;
         NavSetup.IsChecked = page == NavPages.Setup;
         NavLog.IsChecked = page == NavPages.Log;
 

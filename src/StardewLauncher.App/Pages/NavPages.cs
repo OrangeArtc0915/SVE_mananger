@@ -17,5 +17,5 @@ public static class NavPages
 
     public const int Log = 6;
 
-    public const int Saves = 7;
+    public const int Toolbox = 7;
 }

@@ -1,10 +1,10 @@
-<c:LauncherPage x:Class="StardewLauncher.App.Pages.PageSaves"
-                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                xmlns:c="clr-namespace:StardewLauncher.App.Controls"
-                xmlns:svg="clr-namespace:StardewLauncher.App.Controls.Svg">
+<UserControl x:Class="StardewLauncher.App.Views.SaveManagerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:StardewLauncher.App.Controls"
+             xmlns:svg="clr-namespace:StardewLauncher.App.Controls.Svg">
 
-    <Grid Margin="24,20,24,16">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -12,41 +12,25 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- 工具栏：标题占剩余宽度、工具组固定靠右 -->
-        <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-
-            <StackPanel Grid.Column="0">
-                <TextBlock FontSize="18" FontWeight="Bold" Text="存档" />
-                <TextBlock Margin="0,4,0,0"
-                           FontSize="12"
-                           Foreground="{DynamicResource Text.Secondary}"
-                           Text="读取游戏自身的存档目录，摘要与备份都在这里；备份放在启动器数据目录里，不会混进游戏文件夹"
-                           TextWrapping="Wrap" />
-            </StackPanel>
-
-            <StackPanel Grid.Column="1"
-                        VerticalAlignment="Top"
-                        Orientation="Horizontal">
-                <c:OutlineButton x:Name="BtnOpenDir"
-                                 Content="打开存档目录"
-                                 Tone="Outline"
-                                 Click="OnOpenSavesDirClick" />
-                <c:OutlineButton x:Name="BtnBackupAll"
-                                 Margin="8,0,0,0"
-                                 Content="全部备份一次"
-                                 Tone="Outline"
-                                 Click="OnBackupAllClick" />
-                <c:OutlineButton x:Name="BtnRefresh"
-                                 Margin="8,0,0,0"
-                                 Content="刷新"
-                                 Tone="Solid"
-                                 Click="OnRefreshClick" />
-            </StackPanel>
-        </Grid>
+        <!-- 工具栏 -->
+        <StackPanel Grid.Row="0"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+            <c:OutlineButton x:Name="BtnOpenDir"
+                             Content="打开存档目录"
+                             Tone="Outline"
+                             Click="OnOpenSavesDirClick" />
+            <c:OutlineButton x:Name="BtnBackupAll"
+                             Margin="8,0,0,0"
+                             Content="全部备份一次"
+                             Tone="Outline"
+                             Click="OnBackupAllClick" />
+            <c:OutlineButton x:Name="BtnRefresh"
+                             Margin="8,0,0,0"
+                             Content="刷新"
+                             Tone="Solid"
+                             Click="OnRefreshClick" />
+        </StackPanel>
 
         <!-- 路径与备份目录 -->
         <TextBlock x:Name="LabPaths"
@@ -237,4 +221,4 @@
             </ScrollViewer>
         </Grid>
     </Grid>
-</c:LauncherPage>
+</UserControl>

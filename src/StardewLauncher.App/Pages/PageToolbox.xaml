@@ -1,0 +1,98 @@
+<c:LauncherPage x:Class="StardewLauncher.App.Pages.PageToolbox"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:c="clr-namespace:StardewLauncher.App.Controls"
+                xmlns:svg="clr-namespace:StardewLauncher.App.Controls.Svg"
+                xmlns:views="clr-namespace:StardewLauncher.App.Views">
+
+    <Grid Margin="24,20,24,16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- 标题行：进入工具后标题带上工具名，右侧出现返回按钮 -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+                <TextBlock x:Name="LabTitle"
+                           FontSize="18"
+                           FontWeight="Bold"
+                           Text="工具箱" />
+                <TextBlock x:Name="LabSubtitle"
+                           Margin="0,4,0,0"
+                           FontSize="12"
+                           Foreground="{DynamicResource Text.Secondary}"
+                           Text="不属于日常流程、但偶尔要用的小工具都收在这里"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+
+            <c:OutlineButton x:Name="BtnBack"
+                             Grid.Column="1"
+                             VerticalAlignment="Top"
+                             Content="← 返回工具箱"
+                             Tone="Outline"
+                             Visibility="Collapsed"
+                             Click="OnBackClick" />
+        </Grid>
+
+        <!-- 工具列表 / 工具内容 -->
+        <Grid Grid.Row="1" Margin="0,14,0,0">
+            <ScrollViewer x:Name="PanTools"
+                          HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto">
+                <WrapPanel>
+                    <!-- 存档管理 -->
+                    <c:SurfaceCard MinWidth="320"
+                                   MaxWidth="420"
+                                   Padding="0"
+                                   UseShadow="False"
+                                   HasHoverEffect="False">
+                        <Grid Margin="16,14,16,14">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                <svg:SvgIcon Width="20"
+                                             Height="20"
+                                             VerticalAlignment="Center"
+                                             Icon="lucide/save"
+                                             IconBrush="{DynamicResource Accent.Base}" />
+                                <TextBlock Margin="8,0,0,0"
+                                           VerticalAlignment="Center"
+                                           FontSize="15"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Text.Primary}"
+                                           Text="存档管理" />
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="1"
+                                       Margin="0,8,0,0"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource Text.Secondary}"
+                                       Text="看游戏存档的摘要，顺手备份一下；出问题时可以一键回滚到之前的备份。"
+                                       TextWrapping="Wrap" />
+
+                            <c:OutlineButton Grid.Row="2"
+                                             Margin="0,12,0,0"
+                                             HorizontalAlignment="Left"
+                                             Content="打开"
+                                             Tag="saves"
+                                             Tone="Solid"
+                                             Click="OnOpenToolClick" />
+                        </Grid>
+                    </c:SurfaceCard>
+                </WrapPanel>
+            </ScrollViewer>
+
+            <views:SaveManagerView x:Name="SaveManager" Visibility="Collapsed" />
+        </Grid>
+    </Grid>
+</c:LauncherPage>

@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Controls;
 using StardewLauncher.App.Controls;
 using StardewLauncher.App.Windows;
 using StardewLauncher.Core.App;
@@ -7,14 +8,17 @@ using StardewLauncher.Core.IO;
 using StardewLauncher.Core.Logging;
 using StardewLauncher.Core.Saves;
 
-namespace StardewLauncher.App.Pages;
+namespace StardewLauncher.App.Views;
 
-/// <summary>存档页：列出游戏存档的摘要，并提供备份与回滚。</summary>
-public partial class PageSaves : LauncherPage
+/// <summary>
+/// 存档管理（工具箱里的一个工具）：列出游戏存档的摘要，并提供备份与回滚。
+/// 作为工具箱的子视图存在，进入时由宿主调用 <see cref="Activate"/>。
+/// </summary>
+public partial class SaveManagerView : UserControl
 {
     private bool _busy;
 
-    public PageSaves()
+    public SaveManagerView()
     {
         InitializeComponent();
         Log.SetModule("存档");
@@ -22,7 +26,8 @@ public partial class PageSaves : LauncherPage
         LabPaths.Text = $"存档目录：{SaveScanner.SavesDirectory}　　备份目录：{SaveBackupService.Root}";
     }
 
-    public override void OnEnter() => _ = ScanAsync();
+    /// <summary>宿主切到这个工具时调用：重新扫描存档。</summary>
+    public void Activate() => _ = ScanAsync();
 
     // ————— 扫描 —————
 

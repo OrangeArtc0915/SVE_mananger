@@ -169,11 +169,11 @@
                                            Tag="4"
                                            Text="联机功能"
                                            Checked="OnNavChecked" />
-                                <c:NavItem x:Name="NavSaves"
+                                <c:NavItem x:Name="NavToolbox"
                                            GroupName="MainNav"
-                                           Icon="lucide/save"
+                                           Icon="lucide/tool-case"
                                            Tag="7"
-                                           Text="存档"
+                                           Text="工具箱"
                                            Checked="OnNavChecked" />
                                 <c:NavItem x:Name="NavSetup"
                                            GroupName="MainNav"

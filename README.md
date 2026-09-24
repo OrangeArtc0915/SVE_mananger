@@ -10,7 +10,7 @@
 - 拖拽安装：把压缩包或一个 Mod 文件夹拖到窗口任意位置，自动切到 Mod 管理页开始导入
 - 安装规划：安装前先列出「会发生什么」（覆盖哪些文件、替换哪些 XNB、装到哪个目录），确认后再动手
 - 依赖检查：递归解析 `manifest.json` 的前置关系，缺哪个一键补齐
-- 存档管理：列出游戏存档的摘要（进度、金钱、游玩时长、技能、体积），一键备份、按需回滚；备份放在启动器数据目录里，不往游戏存档目录塞东西
+- 存档管理（侧栏「工具箱 → 存档管理」）：列出游戏存档的摘要（进度、金钱、游玩时长、技能、体积），一键备份、按需回滚；备份放在启动器数据目录里，不往游戏存档目录塞东西
 - **一键装 SMAPI**：在「资源中心」直接下载并安装 SMAPI，官方与启动器云端镜像两条线路可选
 - 资源中心：安装 SMAPI，或在内嵌浏览器里直接浏览八个 Mod 站点，Nexus 页面上点「Mod Manager Download」即可在启动器内下载，非会员也能用
 - **樱花 FRP 联机**：填自己的樱花 FRP 访问密钥，在可用节点上建一条 UDP 24642 隧道并拉起官方 frpc；域名地址与 IP 地址各有一键复制，页面右侧还内嵌了官方管理面板（建隧道、改名、删除都在那里）
@@ -66,7 +66,7 @@ LICENSE               MIT 许可证
 
 ### 备份与回滚存档
 
-侧栏的「存档」页读的是游戏自己的存档目录 `%APPDATA%\StardewValley\Saves`，只读不改：
+侧栏「工具箱 → 存档管理」读的是游戏自己的存档目录 `%APPDATA%\StardewValley\Saves`，只读不改：
 
 1. 每张卡片就是一份存档，写着玩家名、农场名、进度（第几年 / 季节 / 第几天）、金钱、游玩时长、五项技能、最后保存时间、存档体积和已有备份数；主存档文件缺失时会红字提示
 2. 点卡片上的「备份」就把这份存档整目录复制一份到 `Data\save-backups\<存档Id>\<时间戳>\`；页面右上角还有「全部备份一次」
@@ -166,7 +166,7 @@ src\StardewLauncher.App\bin\Debug\net8.0-windows\StardewLauncher.exe
 :: 等价于 build.bat 的发布命令
 dotnet publish src\StardewLauncher.App\StardewLauncher.App.csproj ^
     -c Release -r win-x64 --self-contained true ^
-    -p:PublishSingleFile=true -p:DebugType=none -p:Version=1.4.0 -o publish
+    -p:PublishSingleFile=true -p:DebugType=none -p:Version=1.5.0 -o publish
 ```
 
 也可以直接双击 `一键编译并运行.bat` 做「编译 + 启动」。
@@ -192,7 +192,7 @@ src/
     Tasks/      后台任务中心
   StardewLauncher.App/      WPF 界面
     Windows/    主窗口及各功能弹窗
-    Pages/      启动 / Mod 管理 / 游戏实例 / 资源中心 / 联机功能 / 存档 / 设置 / 运行日志
+    Pages/      启动 / Mod 管理 / 游戏实例 / 资源中心 / 联机功能 / 工具箱 / 设置 / 运行日志
     Views/      嵌入页面的子视图（含主页小组件、内嵌 Wiki）与背景层
     Controls/   自绘控件与 SVG 图标解析
     Assets/     图标与装饰图

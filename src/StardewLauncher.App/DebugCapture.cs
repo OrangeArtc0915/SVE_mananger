@@ -132,6 +132,7 @@ internal static class DebugCapture
             (Index: NavPages.Instance, Name: "游戏实例"),
             (Index: NavPages.Resource, Name: "资源中心"),
             (Index: NavPages.Multiplayer, Name: "联机功能"),
+            (Index: NavPages.Toolbox, Name: "工具箱"),
             (Index: NavPages.Setup, Name: "设置"),
             (Index: NavPages.Log, Name: "运行日志")
         };
