@@ -5,7 +5,7 @@
   <link href="https://orangeartc0915.github.io/" rel="alternate" type="text/html"/>
   <link href="https://orangeartc0915.github.io/atom.xml" rel="self" type="application/atom+xml"/>
   <id>https://orangeartc0915.github.io/</id>
-  <updated>2026-09-24T15:04:55.280Z</updated>
+  <updated>2026-09-24T15:18:31.696Z</updated>
   <language>zh_CN</language>
   <entry>
     <title>v1.6.0 更新说明</title>
@@ -66,7 +66,8 @@
 <li>查到新版本，按钮直接变成「下载并更新到 vX.Y.Z」—— 下载、校验、替换、重启一气呵成，进度就显示在按钮下面</li>
 <li>更新只替换启动器那一个 exe，<code>Data\</code>（设置、实例、存档备份、扩展、背景）原样不动</li>
 <li>万一替换失败，会自动把旧版本换回来，不会留下一个打不开的目录</li>
-<li>更新源跟着「下载源」走：先试你选的那个，取不到自动换另一个</li>
+<li>更新线路可以在 GitHub / Gitee 之间自己选，选的那条取不到版本信息时自动换另一条</li>
+<li>发布页只放了整包 zip 时（Gitee 的单个附件上限 100 MB，装不下 150 MB 的单文件 exe），启动器会自己把 zip 解出 exe 再替换</li>
 <li>不想手动点，就打开「启动时自动检查更新」，每次启动在后台查一次，有新版会问你要不要现在更（默认关）</li>
 </ul>
 <h3>主页可以自己写扩展了</h3>

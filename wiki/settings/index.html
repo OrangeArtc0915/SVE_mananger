@@ -113,6 +113,7 @@ const configHue = 45;
 <li>检查 Mod 更新：默认开启，每次进 Mod 管理页顺带查一次，结果缓存 6 小时（详见 <a href="/SVE_mananger/wiki/mods/">Mod 管理</a>）</li>
 <li>检查 SMAPI 更新：默认开启</li>
 <li><strong>检查启动器更新</strong>：手动查一次启动器自身有没有新版本，不受上面开关影响</li>
+<li><strong>启动器更新线路</strong>：GitHub / Gitee，只影响启动器自身的更新走哪个源（见 <a href="#%E6%9B%B4%E6%96%B0%E5%90%AF%E5%8A%A8%E5%99%A8">更新启动器</a>）</li>
 </ul>
 </li>
 <li><strong>存档</strong>：显示存档目录，可一键打开</li>
@@ -142,15 +143,16 @@ const configHue = 45;
 
 
 
-<table><thead><tr><th>结果</th><th>按钮变成</th><th>点下去是</th></tr></thead><tbody><tr><td>已是最新</td><td>「检查启动器更新」</td><td>再查一次</td></tr><tr><td>有新版本，且发布页里有单文件 <code>StardewLauncher.exe</code></td><td>「下载并更新到 vX.Y.Z」</td><td><strong>下载 → 自动替换 → 重启</strong></td></tr><tr><td>有新版本，但发布页里没有可直接安装的单文件 exe</td><td>「打开下载页」</td><td>用浏览器打开发布页，手动下载</td></tr></tbody></table><p>一键更新的过程：</p><ol>
-<li>新版本先下载成 <code>StardewLauncher.exe.new</code>（支持断点续传，进度显示在按钮下面）；</li>
+<table><thead><tr><th>结果</th><th>按钮变成</th><th>点下去是</th></tr></thead><tbody><tr><td>已是最新</td><td>「检查启动器更新」</td><td>再查一次</td></tr><tr><td>有新版本，且发布页里有单文件 <code>StardewLauncher.exe</code> 或发布包 zip</td><td>「下载并更新到 vX.Y.Z」</td><td><strong>下载 → 自动替换 → 重启</strong></td></tr><tr><td>有新版本，但发布页里两样都没有</td><td>「打开下载页」</td><td>用浏览器打开发布页，手动下载</td></tr></tbody></table><section><h3 id="更新线路">更新线路<a class="anchor" href="#更新线路"><span class="anchor-icon" data-pagefind-ignore="">#</span></a></h3><p><strong>启动器更新线路</strong>有 GitHub / Gitee 两个按钮，只决定启动器<strong>自身</strong>的更新去哪个源查版本、去哪下载（不影响 Mod 与 SMAPI 的下载源）。选的那条取不到版本信息时会<strong>自动换另一条</strong>，所以单边受阻也还能查到新版本。改动上面的「下载源」时，这里会跟着一起变；之后可以再单独改。</p><blockquote>
+<p>为什么会有这个开关：两个源的附件上限不一样。GitHub 单个资产能到 2 GB，可以只传一个 150 MB 的单文件 exe；<strong>Gitee 的单个附件上限是 100 MB</strong>，那个 exe 传不上去，只能传约 65 MB 的整包 zip。所以选 Gitee 线路时，启动器会把 zip 下下来、解出里面的 <code>StardewLauncher.exe</code> 再替换 —— 你不用管这些，点一下按钮就行。</p>
+</blockquote></section><section><h3 id="一键更新的过程">一键更新的过程<a class="anchor" href="#一键更新的过程"><span class="anchor-icon" data-pagefind-ignore="">#</span></a></h3><ol>
+<li>新版本下载成 <code>StardewLauncher.exe.new</code>（发布页只有 zip 时先下成 <code>.new.zip</code>，解出 exe 后立刻删掉 zip）；下载支持断点续传，进度显示在按钮下面；</li>
 <li>下载完先校验（文件要够大、文件头得是 exe），不合格就丢弃并说明原因；</li>
 <li>校验通过后启动器自己退出，由一个临时脚本等它完全退出再替换文件并重新启动；</li>
 <li>万一替换失败，脚本会把旧版本换回来，不会留下一个打不开的目录。</li>
 </ol><blockquote>
 <p><strong>更新不会动你的数据</strong>：<code>Data\</code>（设置、实例、存档备份、扩展、个性化背景）原样保留。被替换的只有启动器那一个 exe。</p>
-<p>更新源跟随「下载源」设置：先试你选的那个（GitHub / Gitee），取不到再自动换另一个。所以想更新走得快，把下载源切到能通的那个即可。</p>
-</blockquote><p><strong>更新后残留的文件</strong>：正常替换后 <code>.old</code> / <code>.new</code> 会被清掉；如果上次更新到一半被中断，下次启动时会自动清理。</p><p><strong>想自己手动更新</strong>：直接到发布页下载新的 <code>StardewLauncher.exe</code>，覆盖掉旧的那个即可，同目录的 <code>Data\</code> 不用动。</p></section>
+</blockquote><p><strong>更新后残留的文件</strong>：正常替换后 <code>.old</code> / <code>.new</code> / <code>.new.zip</code> 会被清掉；如果上次更新到一半被中断，下次启动时会自动清理。</p><p><strong>想自己手动更新</strong>：直接到发布页下载新版本，解压后覆盖掉旧的 <code>StardewLauncher.exe</code> 即可，同目录的 <code>Data\</code> 不用动。</p></section></section>
 <section><h2 id="存档备份">存档备份<a class="anchor" href="#存档备份"><span class="anchor-icon" data-pagefind-ignore="">#</span></a></h2><p>「工具箱 → 存档管理」里的备份行为由两个设置控制，它们写在 <code>Data\Settings.json</code> 里（设置界面暂无对应控件）：</p>
 
 
@@ -242,7 +244,12 @@ const configHue = 45;
 
 
 
-<table><thead><tr><th>设置项</th><th>默认</th><th>作用</th></tr></thead><tbody><tr><td><code>AccentHue</code></td><td>-1</td><td>自定义强调色的色相（0-359）；<code>-1</code> 表示用四套预设</td></tr><tr><td><code>AccentSaturation</code></td><td>68</td><td>自定义强调色的饱和度（8-100）</td></tr><tr><td><code>PanelOpacity</code></td><td>78</td><td>半透明面板的不透明度（55-100），越大越实</td></tr><tr><td><code>NavOrder</code></td><td>空</td><td>侧栏导航顺序；留空表示用默认顺序</td></tr><tr><td><code>NavHidden</code></td><td>空</td><td>被收起的侧栏导航项</td></tr><tr><td><code>HomepageImageFile</code></td><td>空</td><td>「自定义图片」小组件用的图（存在数据目录里）</td></tr></tbody></table><blockquote>
+
+
+
+
+
+<table><thead><tr><th>设置项</th><th>默认</th><th>作用</th></tr></thead><tbody><tr><td><code>AccentHue</code></td><td>-1</td><td>自定义强调色的色相（0-359）；<code>-1</code> 表示用四套预设</td></tr><tr><td><code>AccentSaturation</code></td><td>68</td><td>自定义强调色的饱和度（8-100）</td></tr><tr><td><code>PanelOpacity</code></td><td>78</td><td>半透明面板的不透明度（55-100），越大越实</td></tr><tr><td><code>NavOrder</code></td><td>空</td><td>侧栏导航顺序；留空表示用默认顺序</td></tr><tr><td><code>NavHidden</code></td><td>空</td><td>被收起的侧栏导航项</td></tr><tr><td><code>LauncherUpdateSource</code></td><td>GitHub</td><td>启动器自身更新走哪个源（<code>GitHub</code> / <code>Gitee</code>）；改「下载源」时会跟着变</td></tr><tr><td><code>HomepageImageFile</code></td><td>空</td><td>「自定义图片」小组件用的图（存在数据目录里）</td></tr></tbody></table><blockquote>
 <p><code>Settings.json</code> 里含有 Nexus 与樱花 FRP 的密钥，<strong>不要把这个文件发给别人或传到网上</strong>。</p>
 </blockquote></section>  </div> <script type="module">document.addEventListener("click",function(i){const c=i.target;if(c&&c.classList.contains("copy-btn")){const l=c.closest("pre")?.querySelector("code");let s="";if(l){const t=l.querySelectorAll("span.line");if(t.length>0){const o=[];for(let e=0;e<t.length;e++){const r=t[e].textContent||"";o.push(r)}s=o.join(`
 `)}else{const o=l.querySelectorAll(".code:not(summary *)");if(o.length>0){const e=[];for(let n=0;n<o.length;n++){const a=o[n].textContent||"";e.push(a)}s=e.join(`
