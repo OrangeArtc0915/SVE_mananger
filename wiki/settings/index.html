@@ -109,7 +109,13 @@ const configHue = 45;
 <li><strong>当前实例</strong>：显示当前选中的实例，可在此切换</li>
 <li><strong>游戏目录</strong>：显示自动定位到的路径，可手动指定（含 <code>Stardew Valley.exe</code> 的那一层），也能一键打开</li>
 <li><strong>SMAPI</strong>：显示当前 SMAPI 版本，并提供「打开 SMAPI 下载页」</li>
-<li><strong>更新检查</strong>：开关启动时的自动更新检查（默认关闭，避免频繁请求撞限流）</li>
+<li><strong>更新检查</strong>：三个独立开关
+<ul>
+<li>启动时自动检查更新：默认关闭（避免频繁请求撞限流）</li>
+<li>检查 Mod 更新：默认开启，每次进 Mod 管理页顺带查一次，结果缓存 6 小时（详见 <a href="/SVE_mananger/wiki/mods/">Mod 管理</a>）</li>
+<li>检查 SMAPI 更新：默认开启</li>
+</ul>
+</li>
 <li><strong>存档</strong>：显示存档目录，可一键打开</li>
 </ul></section>
 <section><h2 id="存档备份">存档备份<a class="anchor" href="#存档备份"><span class="anchor-icon" data-pagefind-ignore="">#</span></a></h2><p>「工具箱 → 存档管理」里的备份行为由两个设置控制，它们写在 <code>Data\Settings.json</code> 里（设置界面暂无对应控件）：</p>

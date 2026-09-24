@@ -94,7 +94,11 @@ const configHue = 45;
 <li>谁缺前置、缺哪一个，列表里一目了然</li>
 <li>缺的可以从 Mod 库补齐，或去对应站点下载</li>
 </ul></section>
-<section><h2 id="检查更新">检查更新<a class="anchor" href="#检查更新"><span class="anchor-icon" data-pagefind-ignore="">#</span></a></h2><p>开启「检查 Mod 更新」（默认开启）后，启动器会比对每个 Mod 的版本，有新版本会在列表里标出来。</p></section>
+<section><h2 id="检查更新">检查更新<a class="anchor" href="#检查更新"><span class="anchor-icon" data-pagefind-ignore="">#</span></a></h2><p>开启「检查 Mod 更新」（默认开启）后，启动器会比对每个 Mod 的版本，有新版本的在列表里标一个可点的标记，点它就打开新版本的下载页。</p><p>它走的是 <a href="https://smapi.io">smapi.io</a> 的公开接口（<strong>不需要 Nexus API 密钥</strong>），依据是每个 Mod 的 <code>manifest.json</code> 里的 <code>UpdateKeys</code>：</p><ul>
+<li><strong>只有写了 <code>UpdateKeys</code> 的 Mod 才查得到</strong> —— manifest 里没写，启动器就无从知道该去哪个站点比对</li>
+<li>进 Mod 管理页会自动查一次，结果缓存 6 小时，不会反复去问对方接口；想立刻重查就点工具栏的「检查更新」</li>
+<li>查不到也不影响使用：连不上时会退回显示上次的结果，并在提示条里说明</li>
+</ul></section>
 <section><h2 id="mod-库">Mod 库<a class="anchor" href="#mod-库"><span class="anchor-icon" data-pagefind-ignore="">#</span></a></h2><p>Mod 库是「已下载 / 已解压、还没装进某个实例」的 Mod 集合，可以理解为你的私人仓库。它的位置可以在设置里改（Mod 很多时建议放到空间大的盘）。</p><p>下载完成后是否自动解压入库、是否顺带装进当前实例，分别由两个开关控制（前者默认开，后者默认关）。</p></section>
 <section><h2 id="下载慢怎么办">下载慢怎么办<a class="anchor" href="#下载慢怎么办"><span class="anchor-icon" data-pagefind-ignore="">#</span></a></h2><p>启动器内下载支持<strong>多连接分片</strong>与<strong>断点续传</strong>：服务器支持时最多 6 个连接同时下，中断后从各自断点接着下。但速度上限仍取决于你的网络与站点线路 —— 启动器不缓存也不加速。</p><p>实在慢可以先用浏览器下好，再用「导入」放进 Mod 库，效果一样。</p></section>  </div> <script type="module">document.addEventListener("click",function(i){const c=i.target;if(c&&c.classList.contains("copy-btn")){const l=c.closest("pre")?.querySelector("code");let s="";if(l){const t=l.querySelectorAll("span.line");if(t.length>0){const o=[];for(let e=0;e<t.length;e++){const r=t[e].textContent||"";o.push(r)}s=o.join(`
 `)}else{const o=l.querySelectorAll(".code:not(summary *)");if(o.length>0){const e=[];for(let n=0;n<o.length;n++){const a=o[n].textContent||"";e.push(a)}s=e.join(`
