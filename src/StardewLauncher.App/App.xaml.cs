@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Threading;
 using StardewLauncher.App.Nexus;
 using StardewLauncher.App.Theme;
+using StardewLauncher.App.Views;
 using StardewLauncher.App.Windows;
 using StardewLauncher.Core.App;
 using StardewLauncher.Core.Games;
@@ -142,8 +143,8 @@ public partial class App : Application
         var message = "此版本星露谷启动器暂停支持！请联系域管理员！"
                       + $"\n\n错误代码：{result.Code}";
 
-        MessageBox.Show(message, $"{AppInfo.Name} {AppInfo.VersionDisplay}",
-            MessageBoxButton.OK, MessageBoxImage.Stop);
+        // 门锁在主窗口建出来之前就要判定，这里没有 owner，弹窗会居中在屏幕上
+        Dialogs.Error(null, message, $"{AppInfo.Name} {AppInfo.VersionDisplay}");
     }
 
     private static void InitializeLogging()
@@ -202,9 +203,7 @@ public partial class App : Application
             Log.Warn("收到无法解析的 nxm 链接，已忽略");
 
             const string message = "收到一个无法识别的 nxm 链接，已忽略。";
-            if (MainWindow is { } ownerWindow) MessageBox.Show(ownerWindow, message, "从 Nexus 下载",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
-            else MessageBox.Show(message, "从 Nexus 下载", MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.Warn(MainWindow, message, "从 Nexus 下载");
 
             return;
         }
@@ -355,14 +354,11 @@ public partial class App : Application
             var message = $"发现新版本 v{info.LatestVersion}（当前 {AppInfo.VersionDisplay}）。"
                           + (info.CanAutoInstall
                               ? "现在就下载并更新吗？更新会自动替换程序并重新启动，设置、实例与存档备份都不会动。"
-                              : "发布页里没有可直接安装的单文件 exe，只能打开下载页手动下载。");
+                              : "发布页里没有可直接安装的单文件 exe 或发布包 zip，只能打开下载页手动下载。");
 
             var owner = MainWindow;
-            var answer = owner is null
-                ? MessageBox.Show(message, $"{AppInfo.Name} 更新", MessageBoxButton.YesNo, MessageBoxImage.Question)
-                : MessageBox.Show(owner, message, $"{AppInfo.Name} 更新", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
-            if (answer != MessageBoxResult.Yes)
+            if (!Dialogs.Ask(owner, message, $"{AppInfo.Name} 更新", "现在更新", "以后再说"))
             {
                 Log.Info("用户选择以后再说，本次启动不再提示更新");
                 return;
@@ -394,8 +390,7 @@ public partial class App : Application
     private void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         Log.Fatal("界面线程未处理异常", e.Exception);
-        MessageBox.Show(e.Exception.Message, "星露谷启动器遇到了一个问题",
-            MessageBoxButton.OK, MessageBoxImage.Error);
+        Dialogs.Error(MainWindow, e.Exception.Message, "星露谷启动器遇到了一个问题");
         e.Handled = true;
     }
 

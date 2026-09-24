@@ -2,6 +2,7 @@ using System.IO;
 using System.Text;
 using System.Windows;
 using StardewLauncher.App.Controls;
+using StardewLauncher.App.Views;
 using StardewLauncher.Core.App;
 using StardewLauncher.Core.Instances;
 using StardewLauncher.Core.IO;
@@ -138,9 +139,9 @@ public partial class NxmDownloadWindow : Window
 
         if (string.IsNullOrWhiteSpace(targetDirectory))
         {
-            MessageBox.Show(this,
+            Dialogs.Info(this,
                 installToInstance ? "当前没有可用实例。" : "还没有设置 Mod 库目录，请先到设置页指定。",
-                "从 Nexus 下载", MessageBoxButton.OK, MessageBoxImage.Information);
+                "从 Nexus 下载");
             return;
         }
 

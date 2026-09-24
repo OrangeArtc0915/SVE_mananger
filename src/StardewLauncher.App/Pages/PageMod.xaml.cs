@@ -7,6 +7,7 @@ using System.Windows.Media;
 using Microsoft.Win32;
 using StardewLauncher.App.Controls;
 using StardewLauncher.App.Controls.Svg;
+using StardewLauncher.App.Views;
 using StardewLauncher.App.Windows;
 using StardewLauncher.Core.App;
 using StardewLauncher.Core.Instances;
@@ -757,20 +758,20 @@ public partial class PageMod : LauncherPage
         {
             ShowNotice($"Mod 库里没有提供 {row.MissingUniqueId} 的 Mod", true);
             ShowMessage($"Mod 库里没有提供 {row.MissingUniqueId} 的 Mod。\n\n库目录：{library}",
-                "从 Mod 库补齐", MessageBoxImage.Information);
+                "从 Mod 库补齐", DialogTone.Info);
             return;
         }
 
         var provider = providers[0];
 
-        var answer = MessageBox.Show(
+        var answer = Dialogs.Confirm(
             Window.GetWindow(this)!,
             $"将为「{row.ModName}」补齐前置「{provider.DisplayName}」。\n" +
             $"版本：{(string.IsNullOrWhiteSpace(provider.Version) ? "未知" : provider.Version)}\n" +
             $"安装到：{modsDirectory}\n\n同名文件夹会先备份为 .bak-<时间戳>。确定安装吗？",
-            "从 Mod 库补齐", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+            "从 Mod 库补齐");
 
-        if (answer != MessageBoxResult.OK) return;
+        if (!answer) return;
 
         ImportResult install;
         try
@@ -807,12 +808,12 @@ public partial class PageMod : LauncherPage
         var library = SettingsStore.Current.ModLibraryDirectory;
         if (string.IsNullOrWhiteSpace(library) || !Directory.Exists(library))
         {
-            var goSetup = MessageBox.Show(
+            var goSetup = Dialogs.Confirm(
                 Window.GetWindow(this)!,
                 "还没有设置可用的 Mod 库目录，无法一键补齐。\n\n现在就去设置页选择吗？",
-                "一键补齐", MessageBoxButton.OKCancel, MessageBoxImage.Information);
+                "一键补齐");
 
-            if (goSetup == MessageBoxResult.OK)
+            if (goSetup)
                 (Window.GetWindow(this) as MainWindow)?.SwitchToPage(NavPages.Setup);
 
             return;
@@ -889,12 +890,12 @@ public partial class PageMod : LauncherPage
             return;
         }
 
-        var confirm = MessageBox.Show(
+        var confirm = Dialogs.Confirm(
             Window.GetWindow(this)!,
             BuildFillConfirm(installs, notInLibrary, modsDirectory),
-            "一键补齐", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+            "一键补齐");
 
-        if (confirm != MessageBoxResult.OK)
+        if (!confirm)
         {
             BtnFillAllDeps.IsEnabled = true;
             ShowNotice("已取消一键补齐。", false);
@@ -980,13 +981,13 @@ public partial class PageMod : LauncherPage
         var preview = string.Join("\n", missing.Take(8).Select(id => "· " + id));
         if (missing.Count > 8) preview += $"\n… 其余 {missing.Count - 8} 个";
 
-        var answer = MessageBox.Show(
+        var answer = Dialogs.Confirm(
             Window.GetWindow(this)!,
             $"以下 {missing.Count} 个前置在 Mod 库里没有找到：\n\n{preview}\n\n" +
             "是否在启动器内打开 Nexus 搜索第一个缺失的前置？",
-            "在线搜索缺失前置", MessageBoxButton.OKCancel, MessageBoxImage.Information);
+            "在线搜索缺失前置");
 
-        if (answer != MessageBoxResult.OK) return;
+        if (!answer) return;
 
         var dialog = new NexusBrowserWindow(NexusApi.BuildSearchUrl(missing[0]));
         var owner = Window.GetWindow(this);
@@ -1052,7 +1053,7 @@ public partial class PageMod : LauncherPage
         var enable = !item.IsEnabled;
         if (!ModEnabler.TrySetEnabled(item.Entry, enable, out var error))
         {
-            ShowMessage(error ?? "操作失败", "Mod 启停", MessageBoxImage.Warning);
+            ShowMessage(error ?? "操作失败", "Mod 启停", DialogTone.Warning);
             return;
         }
 
@@ -1064,16 +1065,16 @@ public partial class PageMod : LauncherPage
     {
         if (sender is not FrameworkElement { Tag: ModItem item }) return;
 
-        var answer = MessageBox.Show(
+        var answer = Dialogs.Confirm(
             Window.GetWindow(this)!,
             $"确定删除 Mod「{item.DisplayName}」吗？\n会删除整个 Mod 文件夹：\n{item.Entry.FolderPath}\n删除后可从回收站恢复。",
-            "删除 Mod", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+            "删除 Mod");
 
-        if (answer != MessageBoxResult.OK) return;
+        if (!answer) return;
 
         if (!ModEnabler.TryDelete(item.Entry, true, out var error))
         {
-            ShowMessage(error ?? "删除失败", "删除 Mod", MessageBoxImage.Warning);
+            ShowMessage(error ?? "删除失败", "删除 Mod", DialogTone.Warning);
             return;
         }
 
@@ -1127,12 +1128,12 @@ public partial class PageMod : LauncherPage
 
         if (string.IsNullOrWhiteSpace(library) || !Directory.Exists(library))
         {
-            var answer = MessageBox.Show(
+            var answer = Dialogs.Confirm(
                 Window.GetWindow(this)!,
                 "还没有设置 Mod 库目录，请到设置页选择。\n\n现在就去设置页吗？",
-                "Mod 库", MessageBoxButton.OKCancel, MessageBoxImage.Information);
+                "Mod 库");
 
-            if (answer == MessageBoxResult.OK)
+            if (answer)
                 (Window.GetWindow(this) as MainWindow)?.SwitchToPage(NavPages.Setup);
 
             return;
@@ -1194,7 +1195,7 @@ public partial class PageMod : LauncherPage
         {
             ShowNotice("还没有可用的 Mods 目录，请先创建游戏实例。", true);
             ShowMessage("还没有可用的 Mods 目录。\n\n先到「游戏实例」建一个 Mod 端实例，再来导入 Mod。",
-                "导入 Mod", MessageBoxImage.Warning);
+                "导入 Mod", DialogTone.Warning);
             return;
         }
 
@@ -1219,7 +1220,7 @@ public partial class PageMod : LauncherPage
         if (accepted.Count == 0)
         {
             ShowMessage($"拖进来的 {skipped.Count} 个文件都不是能识别的 Mod 包。\n\n支持 zip / rar / 7z / tar / gz，也可以直接拖一个 Mod 文件夹。",
-                "导入 Mod", MessageBoxImage.Warning);
+                "导入 Mod", DialogTone.Warning);
             return;
         }
 
@@ -1273,7 +1274,7 @@ public partial class PageMod : LauncherPage
         ShowNotice($"导入完成：共 {accepted.Count} 个包，成功 {ok} 个、失败 {failed} 个，装入 {installed} 个 Mod。", failed > 0);
 
         ShowMessage(report.ToString().TrimEnd(), "导入完成",
-            failed > 0 ? MessageBoxImage.Warning : MessageBoxImage.Information);
+            failed > 0 ? DialogTone.Warning : DialogTone.Info);
 
         await ScanAsync();
     }
@@ -1304,6 +1305,20 @@ public partial class PageMod : LauncherPage
         return builder.ToString().TrimEnd();
     }
 
-    private void ShowMessage(string message, string caption, MessageBoxImage icon)
-        => MessageBox.Show(Window.GetWindow(this)!, message, caption, MessageBoxButton.OK, icon);
+    private void ShowMessage(string message, string caption, DialogTone tone)
+    {
+        var owner = Window.GetWindow(this)!;
+        switch (tone)
+        {
+            case DialogTone.Warning:
+                Dialogs.Warn(owner, message, caption);
+                break;
+            case DialogTone.Error:
+                Dialogs.Error(owner, message, caption);
+                break;
+            default:
+                Dialogs.Info(owner, message, caption);
+                break;
+        }
+    }
 }

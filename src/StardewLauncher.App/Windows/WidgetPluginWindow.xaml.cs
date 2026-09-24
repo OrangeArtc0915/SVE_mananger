@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using StardewLauncher.App.Controls;
+using StardewLauncher.App.Views;
 using StardewLauncher.Core.IO;
 using StardewLauncher.Core.Logging;
 using StardewLauncher.Core.Plugins;
@@ -162,8 +163,7 @@ public partial class WidgetPluginWindow : Window
         }
         else
         {
-            MessageBox.Show(this, error ?? "未知原因", "无法启用这个扩展",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.Warn(this, error ?? "未知原因", "无法启用这个扩展");
         }
 
         BuildRows();

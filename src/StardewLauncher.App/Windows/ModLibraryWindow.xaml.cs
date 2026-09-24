@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using StardewLauncher.App.Views;
 using StardewLauncher.Core.Logging;
 using StardewLauncher.Core.Mods;
 
@@ -224,13 +225,13 @@ public partial class ModLibraryWindow : Window
         var selected = _allItems.Where(item => item.IsSelected).Select(item => item.Mod).ToList();
         if (selected.Count == 0) return;
 
-        var answer = MessageBox.Show(
+        var answer = Dialogs.Confirm(
             this,
             $"将把选中的 {selected.Count} 个 Mod 复制到游戏 Mods 目录：\n{_gameModsDirectory}\n\n" +
             "同名文件夹会先备份为 .bak-<时间戳>。确定继续吗？",
-            "安装 Mod", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+            "安装 Mod");
 
-        if (answer != MessageBoxResult.OK) return;
+        if (!answer) return;
 
         BtnInstall.IsEnabled = false;
 
@@ -251,15 +252,18 @@ public partial class ModLibraryWindow : Window
             BtnInstall.Content = "安装选中";
             BtnInstall.IsEnabled = true;
             Log.Error("从 Mod 库安装失败", ex);
-            MessageBox.Show(this, $"安装失败：{ex.Message}", "安装 Mod", MessageBoxButton.OK, MessageBoxImage.Error);
+            Dialogs.Error(this, $"安装失败：{ex.Message}", "安装 Mod");
             return;
         }
 
         BtnInstall.Content = "安装选中";
         Log.Info($"Mod 库安装结果：成功 {result.InstalledCount} 个，警告 {result.Warnings.Count} 条，错误 {result.Errors.Count} 条");
 
-        MessageBox.Show(this, BuildResultMessage(result), "安装完成", MessageBoxButton.OK,
-            result.Errors.Count > 0 ? MessageBoxImage.Warning : MessageBoxImage.Information);
+        var message = BuildResultMessage(result);
+        if (result.Errors.Count > 0)
+            Dialogs.Warn(this, message, "安装完成");
+        else
+            Dialogs.Info(this, message, "安装完成");
 
         DialogResult = true;
     }

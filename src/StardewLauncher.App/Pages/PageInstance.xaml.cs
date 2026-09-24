@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using StardewLauncher.App.Controls;
+using StardewLauncher.App.Views;
 using StardewLauncher.App.Windows;
 using StardewLauncher.Core.Games;
 using StardewLauncher.Core.Instances;
@@ -119,14 +120,14 @@ public partial class PageInstance : LauncherPage
 
         var toVanilla = !instance.IsVanilla;
 
-        var answer = MessageBox.Show(
+        var answer = Dialogs.Confirm(
             Window.GetWindow(this)!,
             toVanilla
                 ? $"把实例「{instance.Name}」切换为原版？\n\n之后启动会直接运行游戏主程序，不再加载任何 Mod。"
                 : $"把实例「{instance.Name}」切换为 Mod 端？\n\n之后启动会通过 SMAPI 加载 Mod。",
-            "切换实例类型", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+            "切换实例类型");
 
-        if (answer != MessageBoxResult.OK) return;
+        if (!answer) return;
 
         instance.Kind = toVanilla ? InstanceKind.Vanilla : InstanceKind.Modded;
         InstanceStore.Save(instance);
@@ -203,12 +204,12 @@ public partial class PageInstance : LauncherPage
     {
         if (sender is not FrameworkElement { Tag: Instance instance }) return;
 
-        var answer = MessageBox.Show(
+        var answer = Dialogs.Confirm(
             Window.GetWindow(this)!,
             $"确定删除实例「{instance.Name}」吗？\n只会删除这条实例记录，不会删除游戏目录或 Mod 文件。",
-            "删除实例", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+            "删除实例");
 
-        if (answer != MessageBoxResult.OK) return;
+        if (!answer) return;
 
         InstanceStore.Delete(instance);
         ApplyFilter();

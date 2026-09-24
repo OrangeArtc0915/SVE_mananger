@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using StardewLauncher.App.Controls;
+using StardewLauncher.App.Views;
 using StardewLauncher.Core.Mods;
 
 namespace StardewLauncher.App.Windows;
@@ -191,12 +192,12 @@ public partial class ModTagWindow : Window
     {
         if (sender is not FrameworkElement { Tag: ModTag tag }) return;
 
-        var answer = MessageBox.Show(
+        var answer = Dialogs.Confirm(
             this,
             $"确定删除标签「{tag.Name}」吗？\n所有 Mod 上的该标签都会被移除。",
-            "删除标签", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+            "删除标签");
 
-        if (answer != MessageBoxResult.OK) return;
+        if (!answer) return;
 
         ModTagStore.Delete(tag);
         BuildTagRows();
@@ -208,7 +209,7 @@ public partial class ModTagWindow : Window
 
         if (string.IsNullOrEmpty(name))
         {
-            MessageBox.Show(this, "请先输入标签名字。", "新建标签", MessageBoxButton.OK, MessageBoxImage.Information);
+            Dialogs.Info(this, "请先输入标签名字。", "新建标签");
             return;
         }
 

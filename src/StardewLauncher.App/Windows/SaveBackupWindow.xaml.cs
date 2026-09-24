@@ -1,5 +1,6 @@
 using System.Windows;
 using StardewLauncher.App.Controls;
+using StardewLauncher.App.Views;
 using StardewLauncher.Core.App;
 using StardewLauncher.Core.Games;
 using StardewLauncher.Core.IO;
@@ -89,9 +90,9 @@ public partial class SaveBackupWindow : Window
 
         if (GameProcess.IsRunning())
         {
-            MessageBox.Show(this,
+            Dialogs.Warn(this,
                 "游戏正在运行，先退出游戏再回滚。\n\n游戏中保存会把回滚的结果覆盖掉，而且存档文件可能被占用。",
-                "回滚已取消", MessageBoxButton.OK, MessageBoxImage.Warning);
+                "回滚已取消");
             return;
         }
 
@@ -99,13 +100,13 @@ public partial class SaveBackupWindow : Window
             ? "\n当前存档会先自动快照一份，之后还能退回来。"
             : "\n注意：设置里关掉了「恢复前自动快照」，这次回滚不可撤销。";
 
-        var answer = MessageBox.Show(this,
+        var answer = Dialogs.Confirm(this,
             $"用 {backup.TimeText} 的备份（{backup.KindText}，{backup.SizeText}）覆盖存档「{_save.DisplayName}」？"
             + snapshotLine
             + "\n\n已经打开的游戏不会感知这次改动；改完再进游戏即可。",
-            "确认回滚", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+            "确认回滚");
 
-        if (answer != MessageBoxResult.OK) return;
+        if (!answer) return;
 
         _busy = true;
         SetButtonsEnabled(false);
@@ -135,11 +136,11 @@ public partial class SaveBackupWindow : Window
         var toRecycleBin = SettingsStore.Current.DeleteToRecycleBin;
         var target = toRecycleBin ? "回收站" : "永久删除";
 
-        var answer = MessageBox.Show(this,
+        var answer = Dialogs.Confirm(this,
             $"删除 {backup.TimeText} 的备份（{backup.SizeText}）？\n\n会放进{target}。",
-            "删除备份", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+            "删除备份");
 
-        if (answer != MessageBoxResult.OK) return;
+        if (!answer) return;
 
         _busy = true;
         SetButtonsEnabled(false);

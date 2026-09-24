@@ -463,8 +463,7 @@ public partial class HomepageWidgetsView : UserControl
 
         if (imported is null)
         {
-            MessageBox.Show(Window.GetWindow(this)!, $"这张图用不了：{error}", "自定义图片",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.Warn(Window.GetWindow(this)!, $"这张图用不了：{error}", "自定义图片");
             return;
         }
 
@@ -579,8 +578,10 @@ public partial class HomepageWidgetsView : UserControl
     {
         if (Window.GetWindow(this) is not { } owner) return;
 
-        MessageBox.Show(owner, result.Message, "主页布局", MessageBoxButton.OK,
-            result.Ok ? MessageBoxImage.Information : MessageBoxImage.Warning);
+        if (result.Ok)
+            Dialogs.Info(owner, result.Message, "主页布局");
+        else
+            Dialogs.Warn(owner, result.Message, "主页布局");
     }
 
     // ————— 拖拽排序 —————

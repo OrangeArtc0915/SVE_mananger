@@ -458,23 +458,40 @@ public static class LauncherUpdater
         var lines = new[]
         {
             "@echo off",
-            "setlocal",
+            "setlocal enabledelayedexpansion",
             $"set \"TARGET={target}\"",
             $"set \"STAGED={staged}\"",
             "set \"BACKUP=%TARGET%.old\"",
+            "set /a TRIES=0",
+
+            // 等本进程真正退出。tasklist 还列着它就说明没退干净（此时文件也还锁着），
+            // 每秒问一次，最多等 90 秒。
             ":wait",
             $"tasklist /FI \"PID eq {pid}\" 2>nul | find \"{pid}\" >nul",
-            "if not errorlevel 1 (",
-            "  ping -n 2 127.0.0.1 >nul",
-            "  goto wait",
+            "if errorlevel 1 goto ready",
+            "set /a TRIES+=1",
+            "if !TRIES! GEQ 90 (",
+            "  del /f /q \"%~f0\" >nul 2>&1",
+            "  exit /b 2",
             ")",
+            "ping -n 2 127.0.0.1 >nul",
+            "goto wait",
+
+            ":ready",
             "if exist \"%BACKUP%\" del /f /q \"%BACKUP%\" >nul 2>&1",
             "move /y \"%TARGET%\" \"%BACKUP%\" >nul 2>&1",
             "move /y \"%STAGED%\" \"%TARGET%\" >nul 2>&1",
+
+            // 新版本没就位：把旧版本换回去，并且一样要重新打开 ——
+            // 不能让用户停在一个"启动器没了"的状态里
             "if not exist \"%TARGET%\" (",
             "  move /y \"%BACKUP%\" \"%TARGET%\" >nul 2>&1",
+            "  start \"\" \"%TARGET%\"",
+            "  del /f /q \"%~f0\" >nul 2>&1",
             "  exit /b 1",
             ")",
+
+            // 换好了：重新打开（就是新版本），再清掉备份与脚本自己
             "start \"\" \"%TARGET%\"",
             "ping -n 3 127.0.0.1 >nul",
             "if exist \"%BACKUP%\" del /f /q \"%BACKUP%\" >nul 2>&1",

@@ -2,6 +2,7 @@ using System.IO;
 using System.Windows;
 using Microsoft.Win32;
 using StardewLauncher.App.Controls;
+using StardewLauncher.App.Views;
 using StardewLauncher.Core.Mods;
 using StardewLauncher.Core.Logging;
 
@@ -128,12 +129,12 @@ public partial class ModProfileWindow : Window
         if (_busy) return;
         if (sender is not FrameworkElement { Tag: ModProfile profile }) return;
 
-        var answer = MessageBox.Show(this,
+        var answer = Dialogs.Confirm(this,
             $"应用配置档「{profile.Name}」？\n\n会按这份档逐个启用 / 禁用 Mod（{profile.MetaText}），"
             + "文件名只会加 / 去开头的点，不会删改任何 Mod 文件。\n\n如果游戏正在运行，改完请重开游戏才会生效。",
-            "应用配置档", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+            "应用配置档");
 
-        if (answer != MessageBoxResult.OK) return;
+        if (!answer) return;
 
         _busy = true;
         SetButtonsEnabled(false);
@@ -176,11 +177,11 @@ public partial class ModProfileWindow : Window
         if (_busy) return;
         if (sender is not FrameworkElement { Tag: ModProfile profile }) return;
 
-        var answer = MessageBox.Show(this,
+        var answer = Dialogs.Confirm(this,
             $"用当前 Mod 的启停状态覆盖配置档「{profile.Name}」？\n\n覆盖后原来的记录就找不回来了。",
-            "覆盖配置档", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+            "覆盖配置档");
 
-        if (answer != MessageBoxResult.OK) return;
+        if (!answer) return;
 
         _busy = true;
         SetButtonsEnabled(false);
@@ -241,11 +242,11 @@ public partial class ModProfileWindow : Window
     {
         if (sender is not FrameworkElement { Tag: ModProfile profile }) return;
 
-        var answer = MessageBox.Show(this,
+        var answer = Dialogs.Confirm(this,
             $"删除配置档「{profile.Name}」？\n\n只删这份记录，Mod 文件不受影响。",
-            "删除配置档", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+            "删除配置档");
 
-        if (answer != MessageBoxResult.OK) return;
+        if (!answer) return;
 
         ModProfileStore.Delete(profile);
         ShowNotice($"已删除配置档「{profile.Name}」。");

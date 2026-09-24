@@ -117,9 +117,8 @@ public partial class SaveManagerView : UserControl
             message += "\n\n注意：游戏正在运行，此时备份的是上次保存的状态。";
         }
 
-        var answer = MessageBox.Show(Window.GetWindow(this)!, message, "全部备份",
-            MessageBoxButton.OKCancel, MessageBoxImage.Question);
-        if (answer != MessageBoxResult.OK) return;
+        var answer = Dialogs.Confirm(Window.GetWindow(this)!, message, "全部备份");
+        if (!answer) return;
 
         _busy = true;
         SetButtonsEnabled(false);

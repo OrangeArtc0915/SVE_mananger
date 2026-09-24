@@ -254,7 +254,7 @@ public partial class NexusBrowserView : UserControl
             Log.Warn($"内嵌浏览器收到无法解析的 nxm 链接（{source}）");
             var owner = Window.GetWindow(this);
             if (owner is not null)
-                MessageBox.Show(owner, "无法解析该下载链接。", "在线下载 Mod", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Dialogs.Warn(owner, "无法解析该下载链接。", "在线下载 Mod");
             return;
         }
 
@@ -263,7 +263,7 @@ public partial class NexusBrowserView : UserControl
             Log.Info($"内嵌浏览器收到的 nxm 链接不属于星露谷：{link.SafeText}");
             var owner = Window.GetWindow(this);
             if (owner is not null)
-                MessageBox.Show(owner, "该链接不是星露谷物语的 Mod。", "在线下载 Mod", MessageBoxButton.OK, MessageBoxImage.Information);
+                Dialogs.Info(owner, "该链接不是星露谷物语的 Mod。", "在线下载 Mod");
             return;
         }
 

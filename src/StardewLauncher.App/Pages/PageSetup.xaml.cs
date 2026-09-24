@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using StardewLauncher.App.Controls;
 using StardewLauncher.App.Theme;
+using StardewLauncher.App.Views;
 using StardewLauncher.App.Windows;
 using StardewLauncher.Core.Appearance;
 using StardewLauncher.Core.Instances;
@@ -105,9 +106,9 @@ public partial class PageSetup : LauncherPage
 
         if (string.IsNullOrWhiteSpace(dir) || !Directory.Exists(dir))
         {
-            MessageBox.Show(Window.GetWindow(this)!,
+            Dialogs.Info(Window.GetWindow(this)!,
                 "当前没有可用的游戏目录。请先到「游戏实例」页新建实例并指定游戏目录。",
-                "游戏目录", MessageBoxButton.OK, MessageBoxImage.Information);
+                "游戏目录");
             return;
         }
 
@@ -146,9 +147,9 @@ public partial class PageSetup : LauncherPage
 
         if (detected is null)
         {
-            MessageBox.Show(Window.GetWindow(this)!,
+            Dialogs.Info(Window.GetWindow(this)!,
                 "没有找到 Mod 库目录。可以点「选择目录」手动指定。",
-                "自动检测", MessageBoxButton.OK, MessageBoxImage.Information);
+                "自动检测");
             return;
         }
 
@@ -156,9 +157,9 @@ public partial class PageSetup : LauncherPage
         CoreApp.SettingsStore.Save();
         RefreshModLibrary();
 
-        MessageBox.Show(Window.GetWindow(this)!,
+        Dialogs.Info(Window.GetWindow(this)!,
             $"已找到并设置 Mod 库目录：\n{detected}",
-            "自动检测", MessageBoxButton.OK, MessageBoxImage.Information);
+            "自动检测");
     }
 
     private void OnOpenModLibraryClick(object sender, RoutedEventArgs e)
@@ -167,9 +168,9 @@ public partial class PageSetup : LauncherPage
 
         if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
         {
-            MessageBox.Show(Window.GetWindow(this)!,
+            Dialogs.Info(Window.GetWindow(this)!,
                 "还没有设置可用的 Mod 库目录。",
-                "Mod 库", MessageBoxButton.OK, MessageBoxImage.Information);
+                "Mod 库");
             return;
         }
 
