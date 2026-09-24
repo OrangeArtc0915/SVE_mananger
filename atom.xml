@@ -5,7 +5,7 @@
   <link href="https://orangeartc0915.github.io/" rel="alternate" type="text/html"/>
   <link href="https://orangeartc0915.github.io/atom.xml" rel="self" type="application/atom+xml"/>
   <id>https://orangeartc0915.github.io/</id>
-  <updated>2026-09-24T10:10:48.464Z</updated>
+  <updated>2026-09-24T10:55:24.664Z</updated>
   <language>zh_CN</language>
   <entry>
     <title>v1.5.0 更新说明</title>
@@ -42,6 +42,24 @@
 <li>右上角「自定义」菜单可以勾选显示 / 隐藏，或者恢复默认顺序</li>
 <li>顺序与显隐会记住，下次打开还是你排的样子</li>
 </ul>
+<h3>还能自己调</h3>
+<p>除了工具箱和配置档，这一版还塞进一批“自己调”的东西。</p>
+<p><strong>三个新小组件</strong>：主页从 3 张卡片变成 6 张。</p>
+<ul>
+<li><strong>存档概览</strong>：读游戏存档目录里最近保存的那份，显示玩家名 / 农场名、进度、金钱、游玩时长和五项技能；读不到就写「还没扫到存档」</li>
+<li><strong>自定义图片</strong>：自己选一张 <code>jpg</code> / <code>png</code> / <code>bmp</code> / <code>gif</code>，启动器会复制一份到 <code>Data\Homepage\</code>，之后原图动了删了都不影响；卡片上有「换图」「移除」</li>
+<li><strong>Mod 概览</strong>：当前实例名、「共 N 个 · 启用 X · 禁用 Y」和 SMAPI 版本；原版实例、没装 SMAPI 各有对应提示</li>
+</ul>
+<p>「自定义」菜单里还多了「导出布局…」与「导入布局…」：导出一个 json（顺序 + 显隐 + 图片挂件的图路径），换机或重装后导回来就行。</p>
+<blockquote>
+<p>导入时如果那台机器上缺图，会提示「需要重新选一张」。拖动排序与显示 / 隐藏照旧，都自动记住。</p>
+</blockquote>
+<p><strong>自定义外观</strong>，在「设置 → 外观」：</p>
+<ul>
+<li><strong>自定义强调色</strong>：一条色相滑块（0-359），拖动即改即看；也可以在输入框填 <code>#E67E22</code> 这样的色值点「按色值」，点「用预设配色」则回到四套预设</li>
+<li><strong>面板不透明度</strong>：更透（60）/ 默认（78）/ 更实（90）/ 不透明（100），影响侧栏、标题栏与卡片这类半透明面板</li>
+</ul>
+<p><strong>侧栏导航也能排</strong>：8 个导航项用「上移」「下移」调顺序，「收起」/「显示」决定藏不藏，底部有「恢复默认顺序」；顺序与显隐存进设置，重启后保持。</p>
 <h3>其它</h3>
 <ul>
 <li>官网 Wiki 补了「存档管理」与「Mod 配置档」两篇，并修正了此前与实现不符的说明（实例并不隔离 Mod 与存档目录）</li>
