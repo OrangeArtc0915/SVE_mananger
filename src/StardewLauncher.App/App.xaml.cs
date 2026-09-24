@@ -124,15 +124,14 @@ public partial class App : Application
         return false;
     }
 
+    /// <summary>
+    /// 两种拦截图给用户看的是同一句话：不区分"远端明确停了"还是"我们没读到"，
+    /// 免得有人专挑检测不到的时候去用。要分辨只能看错误代码，取不到配置的细节在日志里。
+    /// </summary>
     private static void ShowSurviveBlocked(SurviveResult result)
     {
-        var message = result.State == SurviveState.Denied
-            ? "此版本星露谷启动器暂停支持！请联系域管理员！"
-              + $"\n\n错误代码：{result.Code}"
-            : "无法校验启动权限，启动器已停止运行。"
-              + $"\n\n{result.Detail}"
-              + $"\n\n错误代码：{result.Code}"
-              + "\n请联系域管理员。";
+        var message = "此版本星露谷启动器暂停支持！请联系域管理员！"
+                      + $"\n\n错误代码：{result.Code}";
 
         MessageBox.Show(message, $"{AppInfo.Name} {AppInfo.VersionDisplay}",
             MessageBoxButton.OK, MessageBoxImage.Stop);
