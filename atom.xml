@@ -5,12 +5,12 @@
   <link href="https://orangeartc0915.github.io/" rel="alternate" type="text/html"/>
   <link href="https://orangeartc0915.github.io/atom.xml" rel="self" type="application/atom+xml"/>
   <id>https://orangeartc0915.github.io/</id>
-  <updated>2026-09-24T14:59:46.837Z</updated>
+  <updated>2026-09-24T15:04:55.280Z</updated>
   <language>zh_CN</language>
   <entry>
-    <title>v1.5.0 更新说明</title>
-    <link href="https://orangeartc0915.github.io/posts/v150/" rel="alternate" type="text/html"/>
-    <id>https://orangeartc0915.github.io/posts/v150/</id>
+    <title>v1.6.0 更新说明</title>
+    <link href="https://orangeartc0915.github.io/posts/v160/" rel="alternate" type="text/html"/>
+    <id>https://orangeartc0915.github.io/posts/v160/</id>
     <published>2026-09-23T00:00:00.000Z</published>
     <updated>2026-09-23T00:00:00.000Z</updated>
     <summary>新增工具箱（存档管理）、Mod 配置档、拖拽安装、内嵌使用手册、主页扩展与启动器自更新，首页小组件也能自己排了。</summary>
