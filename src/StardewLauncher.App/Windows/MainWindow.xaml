@@ -138,7 +138,10 @@
                             BorderBrush="{DynamicResource Border.Default}"
                             BorderThickness="0,0,1,0">
                         <Grid>
-                            <StackPanel Margin="0,12,0,0" VerticalAlignment="Top">
+                            <!-- 导航项的实际顺序与显隐由 ApplyNavLayout() 按设置排布，这里只是默认摆放 -->
+                            <StackPanel x:Name="PanNav"
+                                        Margin="0,12,0,0"
+                                        VerticalAlignment="Top">
                                 <c:NavItem x:Name="NavLaunch"
                                            GroupName="MainNav"
                                            Icon="lucide/play"

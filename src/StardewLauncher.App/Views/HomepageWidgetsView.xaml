@@ -61,6 +61,24 @@
                                   IsCheckable="True"
                                   StaysOpenOnClick="True"
                                   Click="OnToggleWidgetClick" />
+                        <MenuItem Tag="saves"
+                                  Header="存档概览"
+                                  IsCheckable="True"
+                                  StaysOpenOnClick="True"
+                                  Click="OnToggleWidgetClick" />
+                        <MenuItem Tag="image"
+                                  Header="自定义图片"
+                                  IsCheckable="True"
+                                  StaysOpenOnClick="True"
+                                  Click="OnToggleWidgetClick" />
+                        <MenuItem Tag="mods"
+                                  Header="Mod 概览"
+                                  IsCheckable="True"
+                                  StaysOpenOnClick="True"
+                                  Click="OnToggleWidgetClick" />
+                        <Separator />
+                        <MenuItem Header="导出布局…" Click="OnExportLayoutClick" />
+                        <MenuItem Header="导入布局…" Click="OnImportLayoutClick" />
                         <Separator />
                         <MenuItem Header="恢复默认顺序" Click="OnResetWidgetOrderClick" />
                     </ContextMenu>
@@ -289,6 +307,174 @@
                                        TextWrapping="Wrap" />
                         </Grid>
                     </Grid>
+                </Grid>
+            </c:SurfaceCard>
+
+            <!-- 存档概览：读游戏自己的存档摘要 -->
+            <c:SurfaceCard x:Name="CardSaves" MinHeight="140" Padding="0">
+                <Grid Margin="14,12,14,12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal">
+                        <svg:SvgIcon Width="14"
+                                     Height="14"
+                                     VerticalAlignment="Center"
+                                     Icon="lucide/save"
+                                     IconBrush="{DynamicResource Accent.Base}" />
+                        <TextBlock Margin="6,0,0,0"
+                                   VerticalAlignment="Center"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   Text="存档" />
+                    </StackPanel>
+
+                    <TextBlock x:Name="LabSaveTitle"
+                               Grid.Row="1"
+                               Margin="0,10,0,0"
+                               FontSize="13.5"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource Text.Primary}"
+                               TextTrimming="CharacterEllipsis" />
+
+                    <TextBlock x:Name="LabSaveLine"
+                               Grid.Row="2"
+                               Margin="0,4,0,0"
+                               FontSize="11.5"
+                               Foreground="{DynamicResource Text.Secondary}"
+                               TextWrapping="Wrap" />
+
+                    <TextBlock x:Name="LabSaveSkills"
+                               Grid.Row="3"
+                               Margin="0,4,0,0"
+                               FontSize="11"
+                               Foreground="{DynamicResource Text.Tertiary}"
+                               TextWrapping="Wrap" />
+                </Grid>
+            </c:SurfaceCard>
+
+            <!-- 自定义图片挂件：用户自己选一张图放这儿 -->
+            <c:SurfaceCard x:Name="CardImage" MinHeight="150" Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel x:Name="PanImageEmpty" Grid.Row="0" Margin="14,12,14,12">
+                        <StackPanel Orientation="Horizontal">
+                            <svg:SvgIcon Width="14"
+                                         Height="14"
+                                         VerticalAlignment="Center"
+                                         Icon="lucide/image"
+                                         IconBrush="{DynamicResource Accent.Base}" />
+                            <TextBlock Margin="6,0,0,0"
+                                       VerticalAlignment="Center"
+                                       FontSize="11.5"
+                                       Foreground="{DynamicResource Text.Tertiary}"
+                                       Text="自定义图片" />
+                        </StackPanel>
+
+                        <TextBlock Margin="0,10,0,0"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource Text.Secondary}"
+                                   Text="放一张自己的图在这里"
+                                   TextWrapping="Wrap" />
+
+                        <c:OutlineButton Margin="0,10,0,0"
+                                         HorizontalAlignment="Left"
+                                         Padding="12,5"
+                                         Content="选择图片"
+                                         Tone="Solid"
+                                         Click="OnPickImageClick" />
+                    </StackPanel>
+
+                    <Grid x:Name="PanImageView" Grid.Row="0" Visibility="Collapsed">
+                        <Image x:Name="ImgCustom" Height="150" Stretch="UniformToFill" />
+
+                        <Border Margin="8"
+                                Padding="6,4"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Top"
+                                Background="{DynamicResource Surface.CardGlass}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource Radius.Item}">
+                            <StackPanel Orientation="Horizontal">
+                                <c:OutlineButton Padding="10,3"
+                                                 FontSize="11.5"
+                                                 Content="换图"
+                                                 Tone="Plain"
+                                                 Click="OnPickImageClick" />
+                                <c:OutlineButton Margin="4,0,0,0"
+                                                 Padding="10,3"
+                                                 FontSize="11.5"
+                                                 Content="移除"
+                                                 Tone="Plain"
+                                                 Click="OnClearImageClick" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <TextBlock x:Name="LabImageMissing"
+                               Grid.Row="1"
+                               Margin="14,0,14,10"
+                               FontSize="11"
+                               Foreground="{DynamicResource Status.Warn}"
+                               Text="图片文件不在了，重新选一张。"
+                               TextWrapping="Wrap"
+                               Visibility="Collapsed" />
+                </Grid>
+            </c:SurfaceCard>
+
+            <!-- Mod 概览：当前实例的 Mod 数量与 SMAPI 版本 -->
+            <c:SurfaceCard x:Name="CardMods" MinHeight="140" Padding="0">
+                <Grid Margin="14,12,14,12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal">
+                        <svg:SvgIcon Width="14"
+                                     Height="14"
+                                     VerticalAlignment="Center"
+                                     Icon="lucide/package"
+                                     IconBrush="{DynamicResource Accent.Base}" />
+                        <TextBlock Margin="6,0,0,0"
+                                   VerticalAlignment="Center"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   Text="Mod 概览" />
+                    </StackPanel>
+
+                    <TextBlock x:Name="LabModTitle"
+                               Grid.Row="1"
+                               Margin="0,10,0,0"
+                               FontSize="13.5"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource Text.Primary}"
+                               TextTrimming="CharacterEllipsis" />
+
+                    <TextBlock x:Name="LabModCounts"
+                               Grid.Row="2"
+                               Margin="0,4,0,0"
+                               FontSize="11.5"
+                               Foreground="{DynamicResource Text.Secondary}"
+                               TextWrapping="Wrap" />
+
+                    <TextBlock x:Name="LabModSmapi"
+                               Grid.Row="3"
+                               Margin="0,4,0,0"
+                               FontSize="11"
+                               Foreground="{DynamicResource Text.Tertiary}"
+                               TextWrapping="Wrap" />
                 </Grid>
             </c:SurfaceCard>
 

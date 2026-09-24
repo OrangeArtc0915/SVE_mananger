@@ -3,6 +3,55 @@
                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                 xmlns:c="clr-namespace:StardewLauncher.App.Controls">
 
+    <c:LauncherPage.Resources>
+        <!-- 色相条：细轨道 + 圆形滑块，用主题画笔保证深浅色下都看得清 -->
+        <Style x:Key="AccentHueSlider" TargetType="Slider">
+            <Setter Property="Height" Value="22" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid VerticalAlignment="Center" Background="Transparent">
+                            <Border Height="6"
+                                    VerticalAlignment="Center"
+                                    Background="{DynamicResource Surface.Sunken}"
+                                    BorderBrush="{DynamicResource Border.Default}"
+                                    BorderThickness="1"
+                                    CornerRadius="3" />
+                            <Track x:Name="PART_Track" VerticalAlignment="Center">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Background="Transparent"
+                                                  BorderThickness="0"
+                                                  Command="Slider.DecreaseLarge"
+                                                  Focusable="False"
+                                                  Opacity="0" />
+                                </Track.DecreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb Width="16" Height="16" Cursor="Hand">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Ellipse Fill="{DynamicResource Accent.Bright}"
+                                                         Stroke="{DynamicResource Surface.Card}"
+                                                         StrokeThickness="2" />
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Background="Transparent"
+                                                  BorderThickness="0"
+                                                  Command="Slider.IncreaseLarge"
+                                                  Focusable="False"
+                                                  Opacity="0" />
+                                </Track.IncreaseRepeatButton>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </c:LauncherPage.Resources>
+
     <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="24,20,24,16">
             <TextBlock FontSize="18" FontWeight="Bold" Text="设置" />
@@ -98,6 +147,83 @@
                                     Background="{DynamicResource Accent.Faint}"
                                     CornerRadius="6" />
                         </StackPanel>
+
+                        <TextBlock Margin="0,16,0,0"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource Text.Secondary}"
+                                   Text="自定义强调色" />
+                        <TextBlock x:Name="LabAccentHint"
+                                   Margin="0,6,0,0"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   TextWrapping="Wrap"
+                                   Text="拖动下面的色相条即改即看（上面的色板跟着变）；不想要自定义色时点「用预设配色」。" />
+                        <Slider x:Name="SldAccentHue"
+                                Margin="0,8,0,0"
+                                Maximum="359"
+                                Minimum="0"
+                                KeyUp="OnAccentHueCommitted"
+                                LostMouseCapture="OnAccentHueCommitted"
+                                Style="{StaticResource AccentHueSlider}"
+                                ValueChanged="OnAccentHueChanged" />
+
+                        <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
+                            <Border Width="180"
+                                    Height="32"
+                                    Padding="10,0"
+                                    Background="{DynamicResource Surface.Card}"
+                                    BorderBrush="{DynamicResource Border.Default}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource Radius.Card}">
+                                <TextBox x:Name="TxtAccentHex"
+                                         VerticalContentAlignment="Center"
+                                         Background="Transparent"
+                                         BorderThickness="0"
+                                         CaretBrush="{DynamicResource Text.Primary}"
+                                         Foreground="{DynamicResource Text.Primary}" />
+                            </Border>
+                            <c:OutlineButton x:Name="BtnAccentHex"
+                                             Margin="8,0,0,0"
+                                             Content="按色值"
+                                             Tone="Outline"
+                                             Click="OnAccentHexClick" />
+                            <c:OutlineButton x:Name="BtnAccentReset"
+                                             Margin="8,0,0,0"
+                                             Content="用预设配色"
+                                             Tone="Plain"
+                                             Click="OnAccentResetClick" />
+                        </StackPanel>
+
+                        <TextBlock Margin="0,16,0,0"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource Text.Secondary}"
+                                   Text="面板不透明度" />
+                        <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                            <c:OutlineButton x:Name="BtnGlassThin"
+                                             Tag="60"
+                                             Content="更透"
+                                             Click="OnPanelOpacityClick" />
+                            <c:OutlineButton x:Name="BtnGlassNormal"
+                                             Margin="8,0,0,0"
+                                             Tag="78"
+                                             Content="默认"
+                                             Click="OnPanelOpacityClick" />
+                            <c:OutlineButton x:Name="BtnGlassThick"
+                                             Margin="8,0,0,0"
+                                             Tag="90"
+                                             Content="更实"
+                                             Click="OnPanelOpacityClick" />
+                            <c:OutlineButton x:Name="BtnGlassSolid"
+                                             Margin="8,0,0,0"
+                                             Tag="100"
+                                             Content="不透明"
+                                             Click="OnPanelOpacityClick" />
+                        </StackPanel>
+                        <TextBlock Margin="0,10,0,0"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   TextWrapping="Wrap"
+                                   Text="只影响侧栏、标题栏与卡片这类半透明面板；数值越大越实，背景图越看不出来。" />
                     </StackPanel>
                 </c:SurfaceCard>
 
@@ -178,6 +304,24 @@
                                    Foreground="{DynamicResource Text.Tertiary}"
                                    TextWrapping="Wrap"
                                    Text="背景铺满整个窗口，界面面板是半透明的。页面标题直接压在背景上，所以建议留着压暗。" />
+                    </StackPanel>
+                </c:SurfaceCard>
+
+                <!-- 1.8 侧栏导航 -->
+                <c:SurfaceCard Title="侧栏导航">
+                    <StackPanel>
+                        <TextBlock FontSize="12"
+                                   Foreground="{DynamicResource Text.Secondary}"
+                                   Text="上移 / 下移调整顺序，右边的按钮决定显示还是收起；改完立刻生效。" />
+
+                        <StackPanel x:Name="PanNavItems" Margin="0,10,0,0" />
+
+                        <c:OutlineButton x:Name="BtnNavReset"
+                                         Margin="0,12,0,0"
+                                         HorizontalAlignment="Left"
+                                         Content="恢复默认顺序"
+                                         Tone="Plain"
+                                         Click="OnNavResetClick" />
                     </StackPanel>
                 </c:SurfaceCard>
 

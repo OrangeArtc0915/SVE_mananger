@@ -222,7 +222,7 @@ export const commentConfig: CommentConfig = {
 
 export const announcementConfig: AnnouncementConfig = {
 	title: "v1.5.0 已发布", // 公告标题
-	content: "新增工具箱（存档管理：摘要 / 备份 / 回滚）、Mod 配置档、拖拽安装与可自定义的首页小组件。", // 公告内容
+	content: "新增工具箱（存档备份 / 回滚）、Mod 配置档、拖拽安装，以及自定义外观与 6 个主页小组件。", // 公告内容
 	closable: true, // 允许用户关闭公告
 	link: {
 		enable: true, // 启用链接

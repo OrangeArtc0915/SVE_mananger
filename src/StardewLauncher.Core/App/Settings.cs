@@ -161,6 +161,28 @@ public sealed class Settings
     /// </summary>
     public int BackgroundDim { get; set; } = 45;
 
+    // ————— 自定义外观 —————
+
+    /// <summary>自定义强调色的色相（0-359）；-1 表示用预设那四套配色。</summary>
+    public int AccentHue { get; set; } = -1;
+
+    /// <summary>自定义强调色的饱和度（8-100）。</summary>
+    public int AccentSaturation { get; set; } = 68;
+
+    /// <summary>半透明面板的不透明度（55-100）：数值越大越实。默认 78。</summary>
+    public int PanelOpacity { get; set; } = 78;
+
+    // ————— 侧栏导航 —————
+
+    /// <summary>
+    /// 侧栏导航项的先后顺序，存导航 id（launch / mod / instance / resource / multiplayer / toolbox / setup / log）。
+    /// 留空表示用默认顺序；没提到的按默认顺序排在有记录的后面。
+    /// </summary>
+    public List<string> NavOrder { get; set; } = [];
+
+    /// <summary>被用户收起来的侧栏导航项 id。</summary>
+    public List<string> NavHidden { get; set; } = [];
+
     // ————— 主页小组件 —————
 
     /// <summary>
@@ -171,4 +193,10 @@ public sealed class Settings
 
     /// <summary>被用户收起的主页小组件 id。</summary>
     public List<string> HomepageHiddenWidgets { get; set; } = [];
+
+    /// <summary>
+    /// 「自定义图片」小组件用的图片。用户选的文件会被复制到数据目录，
+    /// 避免原图被移动或删除后挂件变空白。
+    /// </summary>
+    public string HomepageImageFile { get; set; } = string.Empty;
 }

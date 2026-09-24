@@ -28,6 +28,7 @@ public partial class PageSetup : LauncherPage
     private bool _nexusKeyDirty;
     private bool _suppressWeatherCityChanged;
     private bool _weatherQueryRunning;
+    private bool _suppressAccentSlider;
 
     public PageSetup()
     {
@@ -81,6 +82,8 @@ public partial class PageSetup : LauncherPage
         if (sender is not FrameworkElement { Tag: string tag }) return;
         if (!Enum.TryParse<AccentTheme>(tag, out var accent)) return;
 
+        // 点了预设就放弃自定义色，否则预设会被自定义色盖住，看着像没反应
+        ThemeService.ClearCustomAccent();
         ThemeService.SetTheme(ThemeService.Mode, accent);
         CoreApp.SettingsStore.Save();
         RefreshSelection();
@@ -643,6 +646,235 @@ public partial class PageSetup : LauncherPage
             => ThemeService.Accent == theme ? ButtonTone.Solid : ButtonTone.Outline;
 
         RefreshBackground();
+        RefreshAccentControls();
+        RefreshNav();
+    }
+
+    // ————— 自定义强调色 / 面板不透明度 —————
+
+    /// <summary>把当前主题状态回填到色相条、色值框与档位按钮。</summary>
+    private void RefreshAccentControls()
+    {
+        _suppressAccentSlider = true;
+        SldAccentHue.Value = ThemeService.EffectiveHue;
+        _suppressAccentSlider = false;
+
+        var baseColor = ThemeService.CurrentBaseColor;
+        TxtAccentHex.Text = $"#{baseColor.R:X2}{baseColor.G:X2}{baseColor.B:X2}";
+
+        LabAccentHint.Text = ThemeService.UseCustomAccent
+            ? $"当前是自定义色：色相 {ThemeService.CustomHue}°，饱和度 {ThemeService.CustomSaturation}%。继续拖色相条，或在左边填一个色值。"
+            : "拖动下面的色相条即改即看（上面的色板跟着变）；不想要自定义色时点「用预设配色」。";
+
+        var opacity = ThemeService.PanelOpacity;
+
+        BtnGlassThin.Tone = opacity < 70 ? ButtonTone.Solid : ButtonTone.Outline;
+        BtnGlassNormal.Tone = opacity is >= 70 and < 85 ? ButtonTone.Solid : ButtonTone.Outline;
+        BtnGlassThick.Tone = opacity is >= 85 and < 100 ? ButtonTone.Solid : ButtonTone.Outline;
+        BtnGlassSolid.Tone = opacity >= 100 ? ButtonTone.Solid : ButtonTone.Outline;
+    }
+
+    /// <summary>拖色相条时实时换色（只改内存），松手或按方向键后落盘。</summary>
+    private void OnAccentHueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (_suppressAccentSlider) return;
+
+        ThemeService.SetCustomAccent((int)Math.Round(e.NewValue), ThemeService.EffectiveSaturation);
+
+        var baseColor = ThemeService.CurrentBaseColor;
+        TxtAccentHex.Text = $"#{baseColor.R:X2}{baseColor.G:X2}{baseColor.B:X2}";
+        LabAccentHint.Text = $"自定义色：色相 {(int)Math.Round(e.NewValue)}°，饱和度 {ThemeService.CustomSaturation}%。";
+    }
+
+    /// <summary>拖动结束 / 键盘微调后落盘，避免拖动过程中每格都写一次设置文件。</summary>
+    private void OnAccentHueCommitted(object sender, RoutedEventArgs e)
+    {
+        if (_suppressAccentSlider || !ThemeService.UseCustomAccent) return;
+
+        CoreApp.SettingsStore.Save();
+        RefreshSelection();
+    }
+
+    private void OnAccentHexClick(object sender, RoutedEventArgs e)
+    {
+        var text = (TxtAccentHex.Text ?? string.Empty).Trim();
+        if (!text.StartsWith('#')) text = "#" + text;
+
+        if (!TryParseColor(text, out var color))
+        {
+            LabAccentHint.Text = "色值看不懂。写成 #E67E22 这样的六位十六进制就行（也可以写三位缩写）。";
+            return;
+        }
+
+        var (hue, saturation) = ThemeService.DescribeColor(color);
+        ThemeService.SetCustomAccent(hue, saturation);
+        CoreApp.SettingsStore.Save();
+        RefreshSelection();
+    }
+
+    private void OnAccentResetClick(object sender, RoutedEventArgs e)
+    {
+        ThemeService.ClearCustomAccent();
+        CoreApp.SettingsStore.Save();
+        RefreshSelection();
+    }
+
+    private static bool TryParseColor(string text, out System.Windows.Media.Color color)
+    {
+        color = default;
+
+        try
+        {
+            if (System.Windows.Media.ColorConverter.ConvertFromString(text) is System.Windows.Media.Color parsed)
+            {
+                color = parsed;
+                return true;
+            }
+        }
+        catch
+        {
+            // 解析失败走下面的 return false，由调用方给提示
+        }
+
+        return false;
+    }
+
+    private void OnPanelOpacityClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: string tag }) return;
+        if (!int.TryParse(tag, out var opacity)) return;
+
+        ThemeService.SetPanelOpacity(opacity);
+        CoreApp.SettingsStore.Save();
+        RefreshAccentControls();
+    }
+
+    // ————— 侧栏导航的顺序与显隐 —————
+
+    /// <summary>按设置重建侧栏导航的行：名称 + 上移 / 下移 / 显示或收起。</summary>
+    private void RefreshNav()
+    {
+        var settings = CoreApp.SettingsStore.Current;
+        var order = MainWindow.NormalizeNavOrder(settings.NavOrder);
+        var hidden = new HashSet<string>(settings.NavHidden ?? [], StringComparer.OrdinalIgnoreCase);
+        var names = MainWindow.NavItemDefs.ToDictionary(def => def.Id, def => def.Name, StringComparer.OrdinalIgnoreCase);
+
+        PanNavItems.Children.Clear();
+
+        for (var i = 0; i < order.Count; i++)
+        {
+            var id = order[i];
+            var isHidden = hidden.Contains(id);
+
+            var row = new Grid { Margin = new Thickness(0, 0, 0, i == order.Count - 1 ? 0 : 6) };
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+            var label = new TextBlock
+            {
+                Text = names.TryGetValue(id, out var name) ? name : id,
+                FontSize = 12,
+                VerticalAlignment = VerticalAlignment.Center,
+                Foreground = (System.Windows.Media.Brush)FindResource(isHidden ? "Text.Disabled" : "Text.Primary")
+            };
+
+            Grid.SetColumn(label, 0);
+            row.Children.Add(label);
+
+            var tools = new StackPanel { Orientation = Orientation.Horizontal };
+
+            var up = new OutlineButton
+            {
+                Content = "上移",
+                Tag = id,
+                Tone = ButtonTone.Plain,
+                IsEnabled = i > 0
+            };
+            up.Click += OnNavMoveUpClick;
+            tools.Children.Add(up);
+
+            var down = new OutlineButton
+            {
+                Margin = new Thickness(8, 0, 0, 0),
+                Content = "下移",
+                Tag = id,
+                Tone = ButtonTone.Plain,
+                IsEnabled = i < order.Count - 1
+            };
+            down.Click += OnNavMoveDownClick;
+            tools.Children.Add(down);
+
+            var toggle = new OutlineButton
+            {
+                Margin = new Thickness(8, 0, 0, 0),
+                Content = isHidden ? "显示" : "收起",
+                Tag = id,
+                Tone = isHidden ? ButtonTone.Outline : ButtonTone.Plain
+            };
+            toggle.Click += OnNavToggleClick;
+            tools.Children.Add(toggle);
+
+            Grid.SetColumn(tools, 1);
+            row.Children.Add(tools);
+
+            PanNavItems.Children.Add(row);
+        }
+    }
+
+    private void OnNavMoveUpClick(object sender, RoutedEventArgs e) => MoveNav(sender, -1);
+
+    private void OnNavMoveDownClick(object sender, RoutedEventArgs e) => MoveNav(sender, 1);
+
+    private void MoveNav(object sender, int delta)
+    {
+        if (sender is not FrameworkElement { Tag: string id }) return;
+
+        var order = MainWindow.NormalizeNavOrder(CoreApp.SettingsStore.Current.NavOrder);
+        var index = order.IndexOf(id);
+        var target = index + delta;
+
+        if (index < 0 || target < 0 || target >= order.Count) return;
+
+        (order[index], order[target]) = (order[target], order[index]);
+
+        CoreApp.SettingsStore.Current.NavOrder = order;
+        CoreApp.SettingsStore.Save();
+
+        ApplyNavLayoutAndRefresh();
+    }
+
+    private void OnNavToggleClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: string id }) return;
+
+        var settings = CoreApp.SettingsStore.Current;
+        var hidden = new List<string>(settings.NavHidden ?? []);
+
+        var wasHidden = hidden.RemoveAll(item => string.Equals(item, id, StringComparison.OrdinalIgnoreCase)) > 0;
+        if (!wasHidden) hidden.Add(id);
+
+        settings.NavHidden = hidden;
+        CoreApp.SettingsStore.Save();
+
+        ApplyNavLayoutAndRefresh();
+    }
+
+    private void OnNavResetClick(object sender, RoutedEventArgs e)
+    {
+        var settings = CoreApp.SettingsStore.Current;
+        settings.NavOrder = [];
+        settings.NavHidden = [];
+
+        CoreApp.SettingsStore.Save();
+
+        ApplyNavLayoutAndRefresh();
+    }
+
+    /// <summary>设置改完立刻下发到主窗口，再回填本页的行。</summary>
+    private void ApplyNavLayoutAndRefresh()
+    {
+        (Window.GetWindow(this) as MainWindow)?.ApplyNavLayout();
+        RefreshNav();
     }
 
     // ————— 个性化背景 —————

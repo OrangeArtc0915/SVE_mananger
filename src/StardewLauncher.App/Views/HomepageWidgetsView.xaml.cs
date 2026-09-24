@@ -1,16 +1,24 @@
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
+using Microsoft.Win32;
 using StardewLauncher.App.Controls;
 using StardewLauncher.App.Pages;
 using StardewLauncher.App.Theme;
 using StardewLauncher.App.Windows;
 using StardewLauncher.Core.App;
+using StardewLauncher.Core.Appearance;
 using StardewLauncher.Core.Homepage;
+using StardewLauncher.Core.Instances;
 using StardewLauncher.Core.Logging;
+using StardewLauncher.Core.Mods;
+using StardewLauncher.Core.Saves;
+using StardewLauncher.Core.Smapi;
 using StardewLauncher.Core.Weather;
 
 namespace StardewLauncher.App.Views;
@@ -34,7 +42,7 @@ public partial class HomepageWidgetsView : UserControl
     private const double DragThreshold = 6;
 
     /// <summary>默认顺序。存下来的顺序里没提到的 widget 按这个顺序补在后面。</summary>
-    private static readonly string[] BuiltinOrder = ["calendar", "weather", "quote"];
+    private static readonly string[] BuiltinOrder = HomepageLayout.WidgetIds;
 
     /// <summary>widget id 到卡片的映射，卡片顺序与显隐都按它来找元素。</summary>
     private readonly Dictionary<string, SurfaceCard> _cards;
@@ -53,7 +61,10 @@ public partial class HomepageWidgetsView : UserControl
         {
             ["calendar"] = CardCalendar,
             ["weather"] = CardWeather,
-            ["quote"] = CardQuote
+            ["quote"] = CardQuote,
+            ["saves"] = CardSaves,
+            ["image"] = CardImage,
+            ["mods"] = CardMods
         };
 
         ApplyWidgetLayout();
@@ -63,7 +74,10 @@ public partial class HomepageWidgetsView : UserControl
 
         RefreshCalendar();
         RefreshQuote();
+        RefreshImage();
         _ = RefreshWeatherAsync();
+        _ = RefreshSaveAsync();
+        _ = RefreshModsAsync();
     }
 
     /// <summary>供页面进入时调用，重新按当前设置刷新月历与天气（天气命中 30 分钟缓存则不会重复请求）。</summary>
@@ -72,7 +86,10 @@ public partial class HomepageWidgetsView : UserControl
         // 回到主页时按设置重排一次，但用户收起/排序的结果不会被重置
         ApplyWidgetLayout();
         RefreshCalendar();
+        RefreshImage();
         _ = RefreshWeatherAsync();
+        _ = RefreshSaveAsync();
+        _ = RefreshModsAsync();
     }
 
     // ————— 顺序与显隐 —————
@@ -210,6 +227,218 @@ public partial class HomepageWidgetsView : UserControl
     }
 
     private void OnRestoreWidgetsClick(object sender, RoutedEventArgs e) => PersistHidden([]);
+
+    // ————— 存档概览 —————
+
+    /// <summary>取最近保存的那份存档展示；读盘放在后台线程。</summary>
+    private async Task RefreshSaveAsync()
+    {
+        try
+        {
+            var saves = await Task.Run(SaveScanner.Scan);
+
+            if (saves.Count == 0)
+            {
+                LabSaveTitle.Text = "还没扫到存档";
+                LabSaveLine.Text = SaveScanner.Exists
+                    ? "存档目录里没有可识别的存档。"
+                    : "没找到游戏存档目录。";
+                LabSaveSkills.Text = string.Empty;
+                return;
+            }
+
+            var save = saves[0];
+
+            LabSaveTitle.Text = $"{save.DisplayName} · {save.FarmText}";
+            LabSaveLine.Text = $"{save.DateText} · {save.MoneyText} · 游玩 {save.PlayTimeText}";
+            LabSaveSkills.Text = saves.Count > 1
+                ? $"{save.SkillsText}　·　共 {saves.Count} 个存档"
+                : save.SkillsText;
+        }
+        catch (Exception ex)
+        {
+            Log.Warn($"读存档概览失败：{ex.Message}");
+            LabSaveTitle.Text = "读不到存档";
+            LabSaveLine.Text = ex.Message;
+        }
+    }
+
+    // ————— 自定义图片 —————
+
+    /// <summary>有图就显示图，没图就显示「选择图片」；图丢了额外给一条提示。</summary>
+    private void RefreshImage()
+    {
+        var file = SettingsStore.Current.HomepageImageFile ?? string.Empty;
+        var exists = !string.IsNullOrWhiteSpace(file) && File.Exists(file);
+
+        PanImageEmpty.Visibility = exists ? Visibility.Collapsed : Visibility.Visible;
+        PanImageView.Visibility = exists ? Visibility.Visible : Visibility.Collapsed;
+        LabImageMissing.Visibility = !exists && !string.IsNullOrWhiteSpace(file)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+
+        if (!exists)
+        {
+            ImgCustom.Source = null;
+            return;
+        }
+
+        try
+        {
+            var image = new BitmapImage();
+            image.BeginInit();
+            // 一次读进内存，别让 WPF 一直占着文件——换图时要能把旧文件删掉
+            image.CacheOption = BitmapCacheOption.OnLoad;
+            image.UriSource = new Uri(file);
+            image.EndInit();
+            image.Freeze();
+
+            ImgCustom.Source = image;
+        }
+        catch (Exception ex)
+        {
+            Log.Warn($"加载主页挂件图片失败：{ex.Message}");
+            PanImageEmpty.Visibility = Visibility.Visible;
+            PanImageView.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private void OnPickImageClick(object sender, RoutedEventArgs e)
+    {
+        var dialog = new OpenFileDialog
+        {
+            Title = "选择主页挂件的图片",
+            Filter = "图片 (*.jpg;*.jpeg;*.png;*.bmp;*.gif)|*.jpg;*.jpeg;*.png;*.bmp;*.gif|所有文件 (*.*)|*.*",
+            CheckFileExists = true
+        };
+
+        var owner = Window.GetWindow(this);
+        var confirmed = owner is null ? dialog.ShowDialog() : dialog.ShowDialog(owner);
+        if (confirmed != true) return;
+
+        var imported = HomepageImageStore.Import(dialog.FileName, out var error);
+
+        if (imported is null)
+        {
+            MessageBox.Show(Window.GetWindow(this)!, $"这张图用不了：{error}", "自定义图片",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        SettingsStore.Current.HomepageImageFile = imported;
+        SettingsStore.Save();
+
+        RefreshImage();
+    }
+
+    private void OnClearImageClick(object sender, RoutedEventArgs e)
+    {
+        HomepageImageStore.Clear();
+        SettingsStore.Current.HomepageImageFile = string.Empty;
+        SettingsStore.Save();
+
+        RefreshImage();
+    }
+
+    // ————— Mod 概览 —————
+
+    private async Task RefreshModsAsync()
+    {
+        try
+        {
+            var instance = InstanceStore.Current;
+
+            if (instance is null)
+            {
+                LabModTitle.Text = "还没选实例";
+                LabModCounts.Text = "到「游戏实例」建一个，这里就会显示 Mod 数量。";
+                LabModSmapi.Text = string.Empty;
+                return;
+            }
+
+            LabModTitle.Text = instance.Name;
+
+            var scan = await Task.Run(() => ModScanner.Scan(instance.ModsDirectory));
+
+            LabModCounts.Text = scan.Mods.Count == 0
+                ? "Mods 目录里还没有 Mod"
+                : $"共 {scan.Mods.Count} 个 · 启用 {scan.EnabledCount} · 禁用 {scan.DisabledCount}"
+                  + (scan.InvalidCount > 0 ? $" · 异常 {scan.InvalidCount}" : string.Empty);
+
+            var installed = instance.Install is { HasSmapi: true } install ? install.SmapiVersion : null;
+
+            if (installed is null)
+            {
+                LabModSmapi.Text = instance.IsVanilla ? "这是原版实例，不加载 Mod" : "当前实例没装 SMAPI";
+                return;
+            }
+
+            LabModSmapi.Text = $"SMAPI {installed}";
+
+            // 最新版本走 24 小时磁盘缓存；取不到就只显示已装版本
+            var latest = await SmapiUpdateChecker.GetLatestAsync();
+
+            if (latest is not null && SemVer.IsNewer(latest.Version, installed))
+                LabModSmapi.Text = $"SMAPI {installed}（有新版 {latest.Version}）";
+        }
+        catch (Exception ex)
+        {
+            Log.Warn($"读 Mod 概览失败：{ex.Message}");
+            LabModTitle.Text = "读不到 Mod 信息";
+            LabModCounts.Text = ex.Message;
+        }
+    }
+
+    // ————— 布局导出 / 导入 —————
+
+    private void OnExportLayoutClick(object sender, RoutedEventArgs e)
+    {
+        var dialog = new SaveFileDialog
+        {
+            Title = "导出主页布局",
+            Filter = "布局文件 (*.json)|*.json",
+            FileName = "homepage-layout.json",
+            AddExtension = true,
+            DefaultExt = ".json"
+        };
+
+        var owner = Window.GetWindow(this);
+        var confirmed = owner is null ? dialog.ShowDialog() : dialog.ShowDialog(owner);
+        if (confirmed != true) return;
+
+        ShowLayoutNotice(HomepageLayout.Export(dialog.FileName));
+    }
+
+    private void OnImportLayoutClick(object sender, RoutedEventArgs e)
+    {
+        var dialog = new OpenFileDialog
+        {
+            Title = "选择要导入的布局文件",
+            Filter = "布局文件 (*.json)|*.json|所有文件 (*.*)|*.*",
+            CheckFileExists = true
+        };
+
+        var owner = Window.GetWindow(this);
+        var confirmed = owner is null ? dialog.ShowDialog() : dialog.ShowDialog(owner);
+        if (confirmed != true) return;
+
+        var result = HomepageLayout.Import(dialog.FileName);
+        ShowLayoutNotice(result);
+
+        if (!result.Ok) return;
+
+        ApplyWidgetLayout();
+        RefreshImage();
+    }
+
+    /// <summary>导出 / 导入的结果用消息框说清楚，别只写日志。</summary>
+    private void ShowLayoutNotice(HomepageLayoutResult result)
+    {
+        if (Window.GetWindow(this) is not { } owner) return;
+
+        MessageBox.Show(owner, result.Message, "主页布局", MessageBoxButton.OK,
+            result.Ok ? MessageBoxImage.Information : MessageBoxImage.Warning);
+    }
 
     // ————— 拖拽排序 —————
 

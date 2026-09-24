@@ -23,6 +23,22 @@ public partial class MainWindow : Window
     private const double StaggerMaxDelayMs = 220;
     private const double EnterOffsetY = 16;
 
+    /// <summary>
+    /// 侧栏导航项：id 用于读写设置，顺序即默认顺序。
+    /// 设置页的「侧栏导航」卡片也读这张表，加导航项时这里和 XAML 一起加。
+    /// </summary>
+    internal static readonly (string Id, string Name)[] NavItemDefs =
+    [
+        ("launch", "启动"),
+        ("mod", "Mod 管理"),
+        ("instance", "游戏实例"),
+        ("resource", "资源中心"),
+        ("multiplayer", "联机功能"),
+        ("toolbox", "工具箱"),
+        ("setup", "设置"),
+        ("log", "运行日志")
+    ];
+
     /// <summary>页面缓存：同一页面在会话内只创建一次。</summary>
     private readonly Dictionary<int, LauncherPage> _pages = new();
 
@@ -42,6 +58,7 @@ public partial class MainWindow : Window
         PanBack.SizeChanged += (_, e) => RectForm.Rect = new Rect(0, 0, e.NewSize.Width, e.NewSize.Height);
         Loaded += (_, _) =>
         {
+            ApplyNavLayout();
             SwitchToPage(NavPages.Launch);
             ApplyBackground();
 
@@ -176,6 +193,67 @@ public partial class MainWindow : Window
 
         _suppressNavCheck = false;
     }
+
+    // ————— 侧栏导航的顺序与显隐 —————
+
+    /// <summary>按设置重排 / 隐藏侧栏导航项。设置页改完会调它。</summary>
+    internal void ApplyNavLayout()
+    {
+        var settings = CoreApp.SettingsStore.Current;
+        var order = NormalizeNavOrder(settings.NavOrder);
+        var hidden = new HashSet<string>(settings.NavHidden ?? [], StringComparer.OrdinalIgnoreCase);
+
+        var items = new List<NavItem>(order.Count);
+
+        foreach (var id in order)
+        {
+            if (NavElementOf(id) is not { } item) continue;
+
+            item.Visibility = hidden.Contains(id) ? Visibility.Collapsed : Visibility.Visible;
+            items.Add(item);
+        }
+
+        // 导航项在 XAML 里声明、字段持有引用，这里只负责重新挂载与显隐
+        PanNav.Children.Clear();
+        foreach (var item in items) PanNav.Children.Add(item);
+
+        Log.Info($"侧栏导航已排布：显示 {items.Count(item => item.Visibility == Visibility.Visible)}/{items.Count} 项");
+    }
+
+    /// <summary>补全顺序：不认识的 id 丢掉，没提到的按默认顺序接在后面。</summary>
+    internal static List<string> NormalizeNavOrder(IEnumerable<string>? saved)
+    {
+        var defaults = NavItemDefs.Select(def => def.Id).ToList();
+        var order = new List<string>(defaults.Count);
+
+        foreach (var id in saved ?? [])
+        {
+            if (!defaults.Contains(id, StringComparer.OrdinalIgnoreCase)) continue;
+            if (order.Contains(id, StringComparer.OrdinalIgnoreCase)) continue;
+
+            order.Add(id);
+        }
+
+        foreach (var id in defaults)
+        {
+            if (!order.Contains(id, StringComparer.OrdinalIgnoreCase)) order.Add(id);
+        }
+
+        return order;
+    }
+
+    private NavItem? NavElementOf(string id) => id switch
+    {
+        "launch" => NavLaunch,
+        "mod" => NavMod,
+        "instance" => NavInstance,
+        "resource" => NavResource,
+        "multiplayer" => NavMultiplayer,
+        "toolbox" => NavToolbox,
+        "setup" => NavSetup,
+        "log" => NavLog,
+        _ => null
+    };
 
     // ————— 页面进入动画 —————
 
