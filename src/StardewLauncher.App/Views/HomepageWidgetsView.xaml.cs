@@ -7,6 +7,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using Microsoft.Win32;
+using StardewLauncher.App.Animation;
 using StardewLauncher.App.Controls;
 using StardewLauncher.App.Pages;
 using StardewLauncher.App.Theme;
@@ -198,6 +199,28 @@ public partial class HomepageWidgetsView : UserControl
 
         foreach (var item in menu.Items.OfType<MenuItem>())
             if (item.Tag is string id && _cards.ContainsKey(id)) item.IsChecked = !hidden.Contains(id);
+
+        RunMenuIntro(menu);
+    }
+
+    /// <summary>菜单淡入 + 轻微下落，和界面其它动效保持一致（模板里的面板在这里才拿得到）。</summary>
+    private static void RunMenuIntro(ContextMenu menu)
+    {
+        if (!AnimationEngine.IsEnabled) return;
+        if (menu.Template?.FindName("MenuPanel", menu) is not Border panel) return;
+
+        panel.RenderTransformOrigin = new Point(0.5, 0);
+
+        var drop = panel.RenderTransform as TranslateTransform ?? new TranslateTransform();
+        panel.RenderTransform = drop;
+
+        panel.Opacity = 0;
+
+        AnimationEngine.Start($"menu:intro:{menu.GetHashCode()}", 0, 1, 200, Ease.OutFluent, v =>
+        {
+            panel.Opacity = v;
+            drop.Y = -7 * (1 - v);
+        });
     }
 
     private void OnToggleWidgetClick(object sender, RoutedEventArgs e)

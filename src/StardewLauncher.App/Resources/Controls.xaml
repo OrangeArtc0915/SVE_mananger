@@ -317,4 +317,144 @@
         </Setter>
     </Style>
 
+    <!-- ===================== 菜单 =====================
+         WPF 默认的右键菜单是系统外观：直角、系统蓝高亮、系统勾选符号，和这套暖色圆角设计完全不搭。
+         这里整块换掉模板：圆角卡片 + 主题色描边 + 自绘勾选图标。
+         Popup 一侧的 Margin 是给自绘投影留的位置——弹窗是分层窗口，留白处本来就是透明的。
+    -->
+
+    <Style TargetType="ContextMenu">
+        <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
+        <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="HasDropShadow" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ContextMenu">
+                    <Border x:Name="MenuPanel"
+                            Margin="4"
+                            Padding="6"
+                            Background="{DynamicResource Surface.Card}"
+                            BorderBrush="{DynamicResource Border.Default}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource Radius.Card}">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="16"
+                                              Direction="270"
+                                              Opacity="0.22"
+                                              ShadowDepth="0"
+                                              Color="{DynamicResource Shadow.Tint}" />
+                        </Border.Effect>
+
+                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="MenuItem">
+        <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
+        <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="MenuItem">
+                    <Grid>
+                        <Border x:Name="Row"
+                                Padding="10,6"
+                                Background="{DynamicResource Common.Transparent}"
+                                CornerRadius="{StaticResource Radius.Item}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="18" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <svg:SvgIcon x:Name="CheckIcon"
+                                             Grid.Column="0"
+                                             Width="13"
+                                             Height="13"
+                                             VerticalAlignment="Center"
+                                             Icon="lucide/circle-check"
+                                             IconBrush="{DynamicResource Accent.Base}"
+                                             Visibility="Collapsed" />
+
+                                <ContentPresenter x:Name="HeaderHost"
+                                                  Grid.Column="1"
+                                                  VerticalAlignment="Center"
+                                                  ContentSource="Header"
+                                                  RecognizesAccessKey="True" />
+
+                                <TextBlock x:Name="Arrow"
+                                           Grid.Column="2"
+                                           Margin="14,0,0,0"
+                                           VerticalAlignment="Center"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource Text.Tertiary}"
+                                           Text="›"
+                                           Visibility="Collapsed" />
+                            </Grid>
+                        </Border>
+
+                        <Popup x:Name="PART_Popup"
+                               AllowsTransparency="True"
+                               Focusable="False"
+                               IsOpen="{TemplateBinding IsSubmenuOpen}"
+                               Placement="Right">
+                            <Border Margin="4"
+                                    Padding="6"
+                                    Background="{DynamicResource Surface.Card}"
+                                    BorderBrush="{DynamicResource Border.Default}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource Radius.Card}">
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="16"
+                                                      Direction="270"
+                                                      Opacity="0.22"
+                                                      ShadowDepth="0"
+                                                      Color="{DynamicResource Shadow.Tint}" />
+                                </Border.Effect>
+
+                                <StackPanel IsItemsHost="True"
+                                            KeyboardNavigation.DirectionalNavigation="Cycle" />
+                            </Border>
+                        </Popup>
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="CheckIcon" Property="Visibility" Value="Visible" />
+                        </Trigger>
+
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="Row" Property="Background" Value="{DynamicResource Nav.ItemHover}" />
+                        </Trigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                        </Trigger>
+
+                        <Trigger Property="Role" Value="SubmenuHeader">
+                            <Setter TargetName="Arrow" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Separator">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Separator">
+                    <Border Height="1"
+                            Margin="8,4"
+                            Background="{DynamicResource Border.Default}" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>
