@@ -176,7 +176,7 @@ src\StardewLauncher.App\bin\Debug\net8.0-windows\StardewLauncher.exe
 :: 等价于 build.bat 的发布命令
 dotnet publish src\StardewLauncher.App\StardewLauncher.App.csproj ^
     -c Release -r win-x64 --self-contained true ^
-    -p:PublishSingleFile=true -p:DebugType=none -p:Version=1.5.0 -o publish
+    -p:PublishSingleFile=true -p:DebugType=none -p:Version=1.6.0 -o publish
 ```
 
 也可以直接双击 `一键编译并运行.bat` 做「编译 + 启动」。

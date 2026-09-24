@@ -221,8 +221,8 @@ export const commentConfig: CommentConfig = {
 };
 
 export const announcementConfig: AnnouncementConfig = {
-	title: "v1.5.0 已发布", // 公告标题
-	content: "新增工具箱（存档备份 / 回滚）、Mod 配置档、拖拽安装，以及自定义外观与 6 个主页小组件。", // 公告内容
+	title: "v1.6.0 已发布", // 公告标题
+	content: "新增检查更新与一键自动更新、主页扩展（可自己写小组件）、存档管理工具箱、Mod 配置档与拖拽安装，界面动效整套重做。", // 公告内容
 	closable: true, // 允许用户关闭公告
 	link: {
 		enable: true, // 启用链接
