@@ -369,7 +369,7 @@ public partial class App : Application
             }
 
             if (owner is Windows.MainWindow main) main.ShowLauncherUpdate(info);
-            else ShellHelper.OpenUrl(LauncherUpdateInfo.ReleasePageUrl(SettingsStore.Current.DownloadSource));
+            else ShellHelper.OpenUrl(LauncherUpdateInfo.ReleasePageUrl(SettingsStore.Current.LauncherUpdateSource));
         }
         catch (Exception ex)
         {

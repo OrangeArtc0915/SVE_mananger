@@ -48,6 +48,7 @@ public partial class PageSetup : LauncherPage
         RefreshAutoInstall();
         RefreshNexusQuota();
         RefreshDownloadSource();
+        RefreshUpdateLine();
         RefreshDownloadFolder();
         RefreshWeatherCity();
     }
@@ -63,6 +64,7 @@ public partial class PageSetup : LauncherPage
         RefreshAutoInstall();
         RefreshNexusQuota();
         RefreshDownloadSource();
+        RefreshUpdateLine();
         RefreshDownloadFolder();
         RefreshWeatherCity();
         _ = RefreshSmapiAsync();
@@ -435,10 +437,52 @@ public partial class PageSetup : LauncherPage
         }
 
         settings.DownloadSource = source;
+
+        // 启动器更新线路默认跟着下载源走，用户可以之后单独改
+        settings.LauncherUpdateSource = source;
+
         CoreApp.SettingsStore.Save();
         RefreshDownloadSource();
+        RefreshUpdateLine();
 
         Log.Info($"下载源已切换为 {CoreApp.DownloadSourceUrls.DisplayName(source)}");
+    }
+
+    // ————— 启动器更新线路 —————
+
+    private void OnUpdateLineClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: string tag }) return;
+        if (!Enum.TryParse<CoreApp.DownloadSource>(tag, out var source)) return;
+
+        var settings = CoreApp.SettingsStore.Current;
+        if (settings.LauncherUpdateSource == source)
+        {
+            RefreshUpdateLine();
+            return;
+        }
+
+        settings.LauncherUpdateSource = source;
+        CoreApp.SettingsStore.Save();
+        RefreshUpdateLine();
+
+        // 换了线路，上一次的检查结果与按钮状态就没意义了，退回初始态
+        _updateReady = false;
+        _updateOpenPage = false;
+        _updateUrl = string.Empty;
+        if (BtnCheckLauncherUpdate is not null) BtnCheckLauncherUpdate.Content = "检查启动器更新";
+
+        Log.Info($"启动器更新线路已切换为 {CoreApp.DownloadSourceUrls.DisplayName(source)}");
+    }
+
+    private void RefreshUpdateLine()
+    {
+        if (BtnUpdateLineGitHub is null) return;
+
+        var source = CoreApp.SettingsStore.Current.LauncherUpdateSource;
+
+        BtnUpdateLineGitHub.Tone = source == CoreApp.DownloadSource.GitHub ? ButtonTone.Solid : ButtonTone.Outline;
+        BtnUpdateLineGitee.Tone = source == CoreApp.DownloadSource.Gitee ? ButtonTone.Solid : ButtonTone.Outline;
     }
 
     private void OnOpenDownloadSourceClick(object sender, MouseButtonEventArgs e)
@@ -1066,7 +1110,7 @@ public partial class PageSetup : LauncherPage
 
         if (_updateOpenPage)
         {
-            ShellHelper.OpenUrl(LauncherUpdateInfo.ReleasePageUrl(CoreApp.SettingsStore.Current.DownloadSource));
+            ShellHelper.OpenUrl(LauncherUpdateInfo.ReleasePageUrl(CoreApp.SettingsStore.Current.LauncherUpdateSource));
             return;
         }
 
@@ -1121,7 +1165,7 @@ public partial class PageSetup : LauncherPage
             _updateOpenPage = true;
             BtnCheckLauncherUpdate.Content = "打开下载页";
             SetLauncherUpdateStatus(
-                $"发现新版本 v{info.LatestVersion}，但发布页里没有单文件 exe 可供自动安装，请手动下载。", warn: true);
+                $"发现新版本 v{info.LatestVersion}，但发布页里没有可直接安装的单文件 exe 或发布包 zip，请手动下载。", warn: true);
             return;
         }
 

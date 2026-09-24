@@ -102,6 +102,12 @@ public sealed class Settings
     /// <summary>文件下载使用的源。国内网络访问 GitHub 较慢时可切到 Gitee。</summary>
     public DownloadSource DownloadSource { get; set; } = DownloadSource.GitHub;
 
+    /// <summary>
+    /// 启动器自身更新（查版本与下载新版本）走哪个源。默认与 <see cref="DownloadSource"/> 一致，
+    /// 用户改下载源时会跟着一起变；之后可以单独改。
+    /// </summary>
+    public DownloadSource LauncherUpdateSource { get; set; } = DownloadSource.GitHub;
+
     /// <summary>下载完成后自动安装到当前实例的 Mods 目录（默认关闭，由用户在设置页开启）。</summary>
     public bool AutoInstallToInstance { get; set; }
 

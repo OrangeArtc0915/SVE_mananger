@@ -384,6 +384,27 @@
                                    TextWrapping="Wrap"
                                    Text="点上面的按钮检查启动器自身有没有新版本。" />
 
+                        <TextBlock Margin="0,10,0,0"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource Text.Secondary}"
+                                   Text="启动器更新线路" />
+                        <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                            <c:OutlineButton x:Name="BtnUpdateLineGitHub"
+                                             Tag="GitHub"
+                                             Content="GitHub"
+                                             Click="OnUpdateLineClick" />
+                            <c:OutlineButton x:Name="BtnUpdateLineGitee"
+                                             Margin="8,0,0,0"
+                                             Tag="Gitee"
+                                             Content="Gitee"
+                                             Click="OnUpdateLineClick" />
+                        </StackPanel>
+                        <TextBlock Margin="0,8,0,0"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   TextWrapping="Wrap"
+                                   Text="只影响启动器自身更新的查版本与下载走哪个源；选的那条取不到时会自动换另一条。改动上面的「下载源」时这里会跟着变。" />
+
                         <c:OutlineButton x:Name="BtnCheckOnStartup"
                                          Margin="0,10,0,0"
                                          HorizontalAlignment="Left"

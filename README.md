@@ -160,11 +160,18 @@ Data\Log\              运行日志，反馈问题时请带上
 
 #### 发版时要传的资产
 
-启动器的「一键自动更新」靠发布页里的 **单文件 `StardewLauncher.exe`** 实现：它下载这个文件、校验后原地替换自己。
+启动器的「一键自动更新」靠发布页里的资产实现：优先用**单文件 `StardewLauncher.exe`**（下载后直接替换自己）；发布页里没有裸 exe 时，用**整包 `StardewLauncher-v<版本>-win-x64.zip`**，启动器会把它下下来、解出里面的 exe 再替换。
 
-所以发新版本时，除了 `StardewLauncher-v<版本>-win-x64.zip`，**还要把 `publish\StardewLauncher.exe` 本身作为 release 资产一起传上去**（名字以 `StardewLauncher` 开头、以 `.exe` 结尾即可，例如 `StardewLauncher.exe` 或 `StardewLauncher-v1.6.0-win-x64.exe`）。
+两个源的上限不一样，所以传法不同：
 
-发布页里只有压缩包、没有单文件 exe 时，检查更新仍然能用，但按钮只会是「打开下载页」，用户得手动下载。
+| 源 | 传什么 | 原因 |
+| --- | --- | --- |
+| GitHub | `StardewLauncher-v<版本>-win-x64.zip` **和** `StardewLauncher.exe` | 单个资产上限 2 GB；有裸 exe 时会优先用它，省一次解压 |
+| Gitee | 只传 `StardewLauncher-v<版本>-win-x64.zip` | **单个附件上限 100 MB**，而这个自包含单文件 exe 有 140 MB 以上，传不上去；zip 约 65 MB 没问题 |
+
+资产名要以 `StardewLauncher` 开头，并以 `.exe` 或 `.zip` 结尾（例如 `StardewLauncher.exe`、`StardewLauncher-v1.6.0-win-x64.zip`）——名字对不上就不会被当成更新包。
+
+发布页里两样都没有时，检查更新仍然能用，但按钮只会是「打开下载页」，用户得手动下载。
 
 ### 手动构建
 

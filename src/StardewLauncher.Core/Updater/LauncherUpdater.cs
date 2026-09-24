@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using StardewLauncher.Core.App;
@@ -19,7 +20,7 @@ public sealed record LauncherUpdateInfo(
     string SourceName,
     string? Error)
 {
-    /// <summary>能否一键自动安装：只有单文件 exe 资产才能直接替换自身。</summary>
+    /// <summary>能否一键自动安装：发布页里有单文件 exe 或整包 zip 才行。</summary>
     public bool CanAutoInstall => HasUpdate && !string.IsNullOrWhiteSpace(DownloadUrl);
 
     /// <summary>发布页地址，供用户手动下载。</summary>
@@ -45,12 +46,18 @@ public sealed record UpdateInstallResult(bool Ok, string Message);
 /// 再交给一个临时的 cmd 脚本 —— 它等本进程退出后替换文件并重新启动，
 /// 替换失败会把旧文件换回去。数据目录（设置、实例、存档备份）不动。
 /// </para>
+///
+/// <para>
+/// 资产优先用裸的单文件 exe；只有发布包里没有 exe 时才用整包 zip，先解压出 exe 再替换。
+/// 之所以要支持 zip：Gitee 的单个附件上限是 100 MB，而这个自包含单文件 exe 有一百四十多兆，
+/// 那边只传得上 zip（约 65 MB）。
+/// </para>
 /// </summary>
 public static class LauncherUpdater
 {
     private const string UserAgent = "StardewLauncher";
 
-    /// <summary>可自动安装的资产名必须以它开头（例如 StardewLauncher.exe、StardewLauncher-v1.6.0-win-x64.exe）。</summary>
+    /// <summary>可自动安装的资产名必须以它开头（例如 StardewLauncher.exe、StardewLauncher-v1.6.0-win-x64.zip）。</summary>
     private const string ExePrefix = "StardewLauncher";
 
     /// <summary>下载下来的新版本先落到这个后缀，替换时再改名覆盖。</summary>
@@ -58,6 +65,9 @@ public static class LauncherUpdater
 
     /// <summary>替换前的旧文件后缀，脚本会在成功启动后删掉它。</summary>
     private const string BackupSuffix = ".old";
+
+    /// <summary>整包 zip 下载时的临时后缀（解出 exe 后立刻删掉）。</summary>
+    private const string ArchiveSuffix = ".zip";
 
     private static readonly JsonSerializerOptions Json = new()
     {
@@ -95,10 +105,10 @@ public static class LauncherUpdater
         return new LauncherUpdateInfo(false, AppInfo.Version, string.Empty, string.Empty, string.Empty, string.Empty, detail);
     }
 
-    /// <summary>按设置里的下载源优先、另一个兜底。</summary>
+    /// <summary>按设置里的「启动器更新线路」优先、另一个兜底。</summary>
     private static IEnumerable<DownloadSource> SourceOrder()
     {
-        var preferred = SettingsStore.Current.DownloadSource;
+        var preferred = SettingsStore.Current.LauncherUpdateSource;
 
         yield return preferred;
         yield return preferred == DownloadSource.Gitee ? DownloadSource.GitHub : DownloadSource.Gitee;
@@ -250,23 +260,30 @@ public static class LauncherUpdater
     private static string Normalize(string tag) => tag.Trim().TrimStart('v', 'V');
 
     /// <summary>
-    /// 挑出可自动安装的资产：名字是 <c>StardewLauncher.exe</c>，或是以它开头、以 .exe 结尾的
+    /// 挑出可自动安装的资产：优先名字是 <c>StardewLauncher.exe</c>，或是以它开头、以 .exe 结尾的
     /// （例如 <c>StardewLauncher-v1.6.0-win-x64.exe</c>）。
     ///
     /// <para>
-    /// 刻意不认"随便哪个 .exe"：发布页上可能同时有安装器、依赖包之类的其它可执行文件，
-    /// 拿它替换自己的结果就是启动器被换成一个无关程序。压缩包也不自动装 —— 那要解压再挑文件，
-    /// 出问题更难收拾。
+    /// 没有裸 exe 时退一步用整包 zip（<c>StardewLauncher-v1.6.0-win-x64.zip</c>）——
+    /// Gitee 的单个附件上限 100 MB，一百四十多兆的单文件 exe 传不上去，那边只会是 zip。
+    /// </para>
+    ///
+    /// <para>
+    /// 刻意不认"随便哪个 .exe / .zip"：发布页上可能同时有安装器、依赖包之类的无关文件，
+    /// 拿它替换自己的结果就是启动器被换成一个别的程序。
     /// </para>
     /// </summary>
     private static (string Name, string Url) PickAsset(List<(string Name, string Url)> assets)
     {
-        foreach (var asset in assets)
+        foreach (var suffix in new[] { ".exe", ".zip" })
         {
-            if (!asset.Name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)) continue;
-            if (!asset.Name.StartsWith(ExePrefix, StringComparison.OrdinalIgnoreCase)) continue;
+            foreach (var asset in assets)
+            {
+                if (!asset.Name.StartsWith(ExePrefix, StringComparison.OrdinalIgnoreCase)) continue;
+                if (!asset.Name.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)) continue;
 
-            return asset;
+                return asset;
+            }
         }
 
         return (string.Empty, string.Empty);
@@ -290,22 +307,42 @@ public static class LauncherUpdater
             return new UpdateInstallResult(false, "取不到程序所在目录。");
 
         var staged = target + StagedSuffix;
+        var fromArchive = IsArchiveUrl(url);
+        var downloadPath = fromArchive ? staged + ArchiveSuffix : staged;
 
         try
         {
-            if (File.Exists(staged)) File.Delete(staged);
+            foreach (var leftover in new[] { staged, staged + ArchiveSuffix })
+            {
+                if (File.Exists(leftover)) File.Delete(leftover);
+            }
         }
         catch (Exception ex)
         {
             return new UpdateInstallResult(false, $"清理上次的下载残留失败：{ex.Message}");
         }
 
-        var download = await ResumableDownloader.DownloadAsync(url, staged, progress, token).ConfigureAwait(false);
+        var download = await ResumableDownloader.DownloadAsync(url, downloadPath, progress, token).ConfigureAwait(false);
 
-        if (!download.Success || !File.Exists(staged))
+        if (!download.Success || !File.Exists(downloadPath))
             return new UpdateInstallResult(false, $"下载失败：{download.Message}");
 
-        if (!LooksLikeExecutable(staged, out var reason))
+        string reason;
+
+        if (fromArchive)
+        {
+            if (!TryExtractExecutable(downloadPath, staged, out reason))
+            {
+                TryDelete(downloadPath);
+                TryDelete(staged);
+                return new UpdateInstallResult(false, $"从发布包里取出启动器失败：{reason}");
+            }
+
+            TryDelete(downloadPath);
+            Log.Info($"已从发布包里解出启动器（{Path.GetFileName(downloadPath)}）");
+        }
+
+        if (!LooksLikeExecutable(staged, out reason))
         {
             TryDelete(staged);
             return new UpdateInstallResult(false, $"下载到的文件不像是启动器：{reason}");
@@ -325,6 +362,53 @@ public static class LauncherUpdater
             Log.Error("安排自动更新失败", ex);
             TryDelete(staged);
             return new UpdateInstallResult(false, $"安排替换失败：{ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 下载地址指向的是整包 zip 吗。两个源的下载地址都以 <c>.zip</c> 结尾
+    /// （Gitee 是 <c>…/attach_files/…/download/xxx.zip</c>，GitHub 是 <c>…/releases/download/tag/xxx.zip</c>），
+    /// 所以看扩展名就够，查询串要先去掉。
+    /// </summary>
+    private static bool IsArchiveUrl(string url)
+    {
+        var path = Uri.TryCreate(url, UriKind.Absolute, out var uri) ? uri.AbsolutePath : url;
+
+        return path.EndsWith(ArchiveSuffix, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>从发布包 zip 里取出 <c>StardewLauncher.exe</c> 写到指定路径。</summary>
+    private static bool TryExtractExecutable(string archivePath, string destination, out string reason)
+    {
+        reason = string.Empty;
+
+        try
+        {
+            using var archive = ZipFile.OpenRead(archivePath);
+
+            // 发布包里的 exe 在顶层；按文件名找，以后就算套进一层目录也照样能找到
+            var entry = archive.Entries.FirstOrDefault(candidate =>
+                candidate.Name.StartsWith(ExePrefix, StringComparison.OrdinalIgnoreCase) &&
+                candidate.Name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase));
+
+            if (entry is null)
+            {
+                reason = $"发布包里没有 {ExePrefix}.exe";
+                return false;
+            }
+
+            using (var source = entry.Open())
+            using (var output = File.Create(destination))
+            {
+                source.CopyTo(output);
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            reason = ex.Message;
+            return false;
         }
     }
 
@@ -416,14 +500,15 @@ public static class LauncherUpdater
     // ————— 收尾 —————
 
     /// <summary>
-    /// 启动时清理上次更新留下的临时文件：<c>.old</c>（替换成功后的旧版本）与
-    /// 半截的 <c>.new</c>（下载中断或被判定不合法）。清理失败只记日志。
+    /// 启动时清理上次更新留下的临时文件：<c>.old</c>（替换成功后的旧版本）、
+    /// 半截的 <c>.new</c>（下载中断或被判定不合法）与 <c>.new.zip</c>（整包还没解完）。
+    /// 清理失败只记日志。
     /// </summary>
     public static void CleanupStaleFiles()
     {
         if (CurrentExecutable is not { } target) return;
 
-        foreach (var suffix in new[] { BackupSuffix, StagedSuffix })
+        foreach (var suffix in new[] { BackupSuffix, StagedSuffix, StagedSuffix + ArchiveSuffix })
         {
             var path = target + suffix;
             if (TryDelete(path)) Log.Info($"已清理上次更新留下的文件：{Path.GetFileName(path)}");
