@@ -24,6 +24,15 @@ public static class BackgroundService
     /// <summary>背景素材目录。</summary>
     public static string StorageDirectory => Path.Combine(Paths.Data, "Background");
 
+    /// <summary>
+    /// 最近一次背景素材解不开的原因（例如视频缺解码器）。
+    /// 由界面层的背景层回填，设置页读它给用户一句解释——否则用户只会看到"背景没了"而不知道为什么。
+    /// </summary>
+    public static string? LastMediaError { get; private set; }
+
+    /// <summary>记下 / 清掉背景素材的加载错误。null 表示这次加载成功。</summary>
+    public static void ReportMediaError(string? message) => LastMediaError = message;
+
     // ————— 判定 —————
 
     /// <summary>按扩展名判定背景类型。不支持的类型返回 None。</summary>
@@ -55,9 +64,12 @@ public static class BackgroundService
         if (kind == BackgroundKind.None)
         {
             return new BackgroundImport(false,
-                "不支持的文件类型。可用的有 jpg / png / bmp / gif / mp4。",
+                $"不支持的文件类型。可用的有 {string.Join(" / ", [.. ImageExtensions, ".gif", .. VideoExtensions])}。",
                 BackgroundKind.None, string.Empty);
         }
+
+        // 换了新素材，上一次的加载错误就不再适用
+        ReportMediaError(null);
 
         try
         {
@@ -86,6 +98,7 @@ public static class BackgroundService
         try
         {
             ClearFiles();
+            ReportMediaError(null);
 
             Log.Info("已清除个性化背景素材");
         }

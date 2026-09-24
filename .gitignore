@@ -3,15 +3,18 @@ bin/
 obj/
 publish/
 
-# 运行时数据：内含设置与可能的密钥（如 Nexus API Key），绝不能进版本库
-Data/
+# 运行时数据：内含设置与可能的密钥（如 Nexus API Key），绝不能进版本库。
+# 同样锚定到根目录，避免以后出现同名源码目录时被一起忽略。
+/Data/
 *.failed
 
-# 放在仓库里的游戏本体副本与 Mod 库，体积很大，不进版本库
-Stardew Valley/
-Stardew Valley SMAPI/
-MODS/
-SMAPI * installer*
+# 放在仓库里的游戏本体副本与 Mod 库，体积很大，不进版本库。
+# 这几条必须锚定在仓库根目录（开头的 /）：写成 MODS/ 这种不带锚点的形式，
+# 会连 src/StardewLauncher.Core/Mods/ 这样的源码目录一起忽略掉。
+/Stardew Valley/
+/Stardew Valley SMAPI/
+/MODS/
+/SMAPI * installer*
 
 # 游戏美术素材：版权归 ConcernedApe，且体积大，不随本仓库分发
 星露谷物语素材/

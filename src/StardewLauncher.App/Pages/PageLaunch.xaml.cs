@@ -444,6 +444,30 @@ public partial class PageLaunch : LauncherPage
     private void OnSelectInstanceClick(object sender, RoutedEventArgs e)
         => (Window.GetWindow(this) as MainWindow)?.SwitchToPage(NavPages.Instance);
 
+    /// <summary>「实例设置」：改当前实例的名字 / 游戏目录 / 类型 / 备注。没有实例时退回"去实例页新建"。</summary>
+    private void OnInstanceSettingsClick(object sender, RoutedEventArgs e)
+    {
+        if (InstanceStore.Current is not { } instance)
+        {
+            OnSelectInstanceClick(sender, e);
+            return;
+        }
+
+        var dialog = new NewInstanceWindow(instance);
+        if (Window.GetWindow(this) is { } owner) dialog.Owner = owner;
+
+        if (dialog.ShowDialog() != true) return;
+
+        instance.Name = dialog.InstanceName;
+        instance.Note = dialog.InstanceNote;
+        instance.Kind = dialog.Kind;
+        instance.GameDir = dialog.GameDirectory;
+
+        // Update 会按新的游戏目录重新解析 Install，并通知界面刷新
+        InstanceStore.Update(instance);
+        RefreshCurrentInstance();
+    }
+
     private void OnGoSetupClick(object sender, RoutedEventArgs e)
         => (Window.GetWindow(this) as MainWindow)?.SwitchToPage(NavPages.Setup);
 

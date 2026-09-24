@@ -22,6 +22,24 @@ public partial class NewInstanceWindow : Window
         SetKind(InstanceKind.Modded);
     }
 
+    /// <summary>
+    /// 编辑模式：预填现有实例，标题与确认按钮改成「保存」。
+    /// 先切类型再填文字——SetKind 会在名字等于默认名时顺手改名，倒过来会把用户的名字改掉。
+    /// </summary>
+    public NewInstanceWindow(Instance existing) : this()
+    {
+        Title = "实例设置";
+        BtnCreate.Content = "保存";
+
+        SetKind(existing.Kind);
+
+        TxtName.Text = existing.Name;
+        TxtNote.Text = existing.Note;
+        TxtGameDir.Text = existing.GameDir;
+
+        ValidateDirectory();
+    }
+
     /// <summary>用户填写的实例名称，点「创建」后有效。</summary>
     public string InstanceName { get; private set; } = string.Empty;
 

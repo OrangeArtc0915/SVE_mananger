@@ -357,7 +357,7 @@ public static class WeatherService
                 FetchedAt = snapshot.FetchedAt
             };
 
-            File.WriteAllText(CacheFile, JsonSerializer.Serialize(cache, CacheOptions));
+            IO.AtomicFile.WriteAllText(CacheFile, JsonSerializer.Serialize(cache, CacheOptions));
         }
         catch (Exception ex)
         {

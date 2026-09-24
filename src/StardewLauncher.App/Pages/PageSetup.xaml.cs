@@ -972,11 +972,18 @@ public partial class PageSetup : LauncherPage
         var hasBackground = settings.BackgroundKind != BackgroundKind.None
                             && File.Exists(settings.BackgroundFile);
 
+        if (!hasBackground)
+        {
+            SetBackgroundStatus("未设置，使用主题渐变。", warn: false);
+            return;
+        }
+
+        var status = $"当前：{DescribeBackgroundKind(settings.BackgroundKind)}　{Path.GetFileName(settings.BackgroundFile)}";
+
+        // 素材解不开（例如视频缺解码器）时把原因一并说出来，免得用户只看到"背景没了"
         SetBackgroundStatus(
-            hasBackground
-                ? $"当前：{DescribeBackgroundKind(settings.BackgroundKind)}　{Path.GetFileName(settings.BackgroundFile)}"
-                : "未设置，使用主题渐变。",
-            warn: false);
+            BackgroundService.LastMediaError is { } error ? $"{status}　（{error}）" : status,
+            warn: BackgroundService.LastMediaError is not null);
     }
 
     private static string DescribeBackgroundKind(BackgroundKind kind) => kind switch

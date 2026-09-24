@@ -50,7 +50,8 @@ public static class SettingsStore
     {
         try
         {
-            File.WriteAllText(Paths.SettingsFile, JsonSerializer.Serialize(Current, Options));
+            // 原子写：进程在写入途中被杀掉时，宁可保留上一份，也不要留下半个文件
+            IO.AtomicFile.WriteAllText(Paths.SettingsFile, JsonSerializer.Serialize(Current, Options));
         }
         catch (Exception ex)
         {

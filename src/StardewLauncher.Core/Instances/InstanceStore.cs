@@ -79,6 +79,20 @@ public static class InstanceStore
         }
     }
 
+    /// <summary>
+    /// 保存对已有实例的修改（改名 / 换游戏目录 / 换类型 / 改备注）。
+    /// 会重新解析一次游戏目录，并通知界面刷新。
+    /// </summary>
+    public static void Update(Instance instance)
+    {
+        instance.Install = StardewInstall.TryCreate(instance.GameDir, out var install) ? install : null;
+
+        Save(instance);
+        Changed?.Invoke();
+
+        Log.Info($"已更新实例「{instance.Name}」（{instance.KindText}），游戏目录：{instance.GameDir}");
+    }
+
     public static Instance Create(string name, string gameDir, string note = "",
         InstanceKind kind = InstanceKind.Modded)
     {
@@ -110,7 +124,7 @@ public static class InstanceStore
         try
         {
             Directory.CreateDirectory(Paths.Instances);
-            File.WriteAllText(Paths.InstanceFile(instance.Id), JsonSerializer.Serialize(instance, Options));
+            IO.AtomicFile.WriteAllText(Paths.InstanceFile(instance.Id), JsonSerializer.Serialize(instance, Options));
         }
         catch (Exception ex)
         {

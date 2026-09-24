@@ -466,7 +466,7 @@ public static class ResumableDownloader
         try
         {
             var json = JsonSerializer.Serialize(new SegmentState(url, total, validator, [.. done]));
-            File.WriteAllText(StatePath(partPath), json);
+            IO.AtomicFile.WriteAllText(StatePath(partPath), json);
         }
         catch (Exception ex)
         {

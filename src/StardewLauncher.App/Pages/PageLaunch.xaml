@@ -141,7 +141,11 @@
                                              Height="32"
                                              Content="选择实例"
                                              Click="OnSelectInstanceClick" />
-                            <c:OutlineButton Grid.Column="2" Height="32" Content="实例设置" />
+                            <c:OutlineButton Grid.Column="2"
+                                             Height="32"
+                                             Content="实例设置"
+                                             ToolTip="改名、换游戏目录或切换实例类型"
+                                             Click="OnInstanceSettingsClick" />
                         </Grid>
 
                         <!-- 未安装 SMAPI 时的提示条 -->

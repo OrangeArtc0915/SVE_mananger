@@ -361,6 +361,21 @@
                                                     <TextBlock FontSize="11.5"
                                                                Foreground="{DynamicResource Text.Tertiary}"
                                                                Text="{Binding TypeText}" />
+
+                                                    <!-- 更新检查发现新版本时的标记，点它打开下载页 -->
+                                                    <Border Margin="6,0,0,0"
+                                                            Padding="7,1"
+                                                            Background="{DynamicResource Accent.Faint}"
+                                                            CornerRadius="{StaticResource Radius.Pill}"
+                                                            Cursor="Hand"
+                                                            MouseLeftButtonUp="OnUpdateBadgeClick"
+                                                            ToolTip="打开新版本的下载页"
+                                                            Visibility="{Binding HasUpdate, Converter={StaticResource BoolToVis}}">
+                                                        <TextBlock FontSize="10.5"
+                                                                   FontWeight="SemiBold"
+                                                                   Foreground="{DynamicResource Accent.Base}"
+                                                                   Text="{Binding UpdateText}" />
+                                                    </Border>
                                                 </StackPanel>
                                             </StackPanel>
 

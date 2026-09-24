@@ -194,7 +194,7 @@ public static class SmapiUpdateChecker
         try
         {
             Directory.CreateDirectory(Paths.Cache);
-            File.WriteAllText(CacheFile, JsonSerializer.Serialize(cache, JsonOptions));
+            IO.AtomicFile.WriteAllText(CacheFile, JsonSerializer.Serialize(cache, JsonOptions));
         }
         catch (Exception ex)
         {

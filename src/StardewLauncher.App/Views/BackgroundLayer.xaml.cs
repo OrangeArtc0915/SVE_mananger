@@ -7,6 +7,7 @@ using System.Windows.Threading;
 using StardewLauncher.App.Animation;
 using StardewLauncher.App.Theme;
 using StardewLauncher.Core.App;
+using StardewLauncher.Core.Appearance;
 using StardewLauncher.Core.Logging;
 
 namespace StardewLauncher.App.Views;
@@ -344,8 +345,19 @@ public partial class BackgroundLayer : UserControl
     /// </summary>
     private void OnVideoFailed(object sender, ExceptionRoutedEventArgs e)
     {
+        // 没设视频背景时 MediaElement 也会报一次"解不开"（此时它根本没有源），
+        // 那不是问题，记一条普通日志就行，别让它污染日志、也别让设置页显示假警告。
+        if (VidBackground.Source is null)
+        {
+            Log.Info($"背景视频层未启用（{e.ErrorException?.Message ?? "没有媒体源"}）");
+            return;
+        }
+
         Log.Warn($"背景视频无法解码（{e.ErrorException?.Message ?? "未知原因"}），已回退为无背景。" +
                  "常见原因是系统不支持该视频编码（HEVC / AV1 需要额外装解码器）");
+
+        // 让设置页能把原因告诉用户，不然他只看到"背景没了"
+        BackgroundService.ReportMediaError("这个视频系统解不开（HEVC / AV1 需要额外安装解码器），已退回主题渐变");
 
         _videoProbe?.Stop();
 
@@ -393,6 +405,9 @@ public partial class BackgroundLayer : UserControl
         _gifIndex = 0;
         _gifTimer.Stop();
         _videoProbe?.Stop();
+
+        // 每次重新铺背景都从"没有错误"开始；真的解不开时由 OnVideoFailed 再记上
+        BackgroundService.ReportMediaError(null);
 
         // 没有背景了，推拉与视差一并收掉，别留着每帧渲染
         _hasContent = false;

@@ -66,7 +66,7 @@ public static class HomepageLayout
                 ImageFile = settings.HomepageImageFile ?? string.Empty
             };
 
-            File.WriteAllText(filePath, JsonSerializer.Serialize(model, Options));
+            IO.AtomicFile.WriteAllText(filePath, JsonSerializer.Serialize(model, Options));
 
             Log.Info($"已导出主页布局：{filePath}");
             return new HomepageLayoutResult(true, $"已导出到 {filePath}");

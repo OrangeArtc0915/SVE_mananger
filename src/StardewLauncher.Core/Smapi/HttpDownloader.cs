@@ -1,5 +1,6 @@
 using System.IO;
 using System.Net.Http;
+using System.Text;
 using StardewLauncher.Core.Logging;
 
 namespace StardewLauncher.Core.Smapi;
@@ -79,6 +80,65 @@ public static class HttpDownloader
                 }
 
                 return text;
+            }
+            catch (OperationCanceledException)
+            {
+                Log.Warn($"请求已取消：{url}");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Log.Warn($"请求失败（第 {attempt + 1} 次）：{url}（{ex.Message}）");
+
+                if (attempt >= RetryDelaysMs.Length) return null;
+
+                try
+                {
+                    await Task.Delay(RetryDelaysMs[attempt], token);
+                }
+                catch (OperationCanceledException)
+                {
+                    return null;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// POST 一段 JSON 并返回响应文本（与 GET 一样带重试，失败返回 null，不抛异常）。
+    /// 给只接受 POST 的公开接口用，例如 smapi.io 的 Mod 更新查询。
+    /// </summary>
+    public static async Task<string?> PostJsonAsync(string url, string json, string? userAgent = null,
+        CancellationToken token = default)
+    {
+        if (string.IsNullOrWhiteSpace(url)) return null;
+
+        for (var attempt = 0; ; attempt++)
+        {
+            try
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Post, url)
+                {
+                    Content = new StringContent(json, Encoding.UTF8, "application/json")
+                };
+
+                request.Headers.TryAddWithoutValidation("User-Agent",
+                    string.IsNullOrWhiteSpace(userAgent) ? DefaultUserAgent : userAgent);
+
+                using var response = await Client.SendAsync(request, HttpCompletionOption.ResponseContentRead, token);
+
+                var status = (int)response.StatusCode;
+
+                // 4xx 是对方的明确答复，重试也是同样结果；408 / 429 除外
+                if (status is >= 400 and < 500 and not (408 or 429))
+                {
+                    Log.Warn($"请求被拒绝：{url}（{status} {response.ReasonPhrase}）");
+                    return null;
+                }
+
+                response.EnsureSuccessStatusCode();
+
+                return await response.Content.ReadAsStringAsync(token);
             }
             catch (OperationCanceledException)
             {

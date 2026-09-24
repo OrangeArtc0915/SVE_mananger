@@ -14,6 +14,7 @@ using StardewLauncher.Core.IO;
 using StardewLauncher.Core.Logging;
 using StardewLauncher.Core.Mods;
 using StardewLauncher.Core.Nexus;
+using StardewLauncher.Core.Smapi;
 
 namespace StardewLauncher.App.Pages;
 
@@ -33,6 +34,16 @@ public sealed class ModItem
     public string DisplayAuthor => Entry.DisplayAuthor;
 
     public string DisplayVersion => Entry.DisplayVersion;
+
+    /// <summary>更新检查发现的新版本号，没查过或已是最新时为 null。</summary>
+    public string? UpdateVersion => Entry.SuggestedVersion;
+
+    public bool HasUpdate => !string.IsNullOrWhiteSpace(Entry.SuggestedVersion);
+
+    /// <summary>有新版本时显示的短标签。</summary>
+    public string UpdateText => $"有新版 {Entry.SuggestedVersion}";
+
+    public string UpdateUrl => Entry.UpdateUrl ?? string.Empty;
 
     public string TypeText => Entry.TypeText;
 
@@ -156,6 +167,11 @@ public partial class PageMod : LauncherPage
 
     /// <summary>当前选中的标签 Id（多选取并集）。</summary>
     private readonly HashSet<string> _selectedTagIds = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>更新检查结果：Mod 的稳定键 → 新版本信息。重新扫描后靠它把结果贴回去。</summary>
+    private readonly Dictionary<string, ModUpdateInfo> _updates = new(StringComparer.OrdinalIgnoreCase);
+
+    private bool _checkingUpdates;
 
     private ModScanResult? _lastScan;
     private string? _modsDirectory;
@@ -301,6 +317,8 @@ public partial class PageMod : LauncherPage
         _lastScan = result;
         _depsExpanded = false;
 
+        ApplyKnownUpdates();
+
         _allItems.Clear();
         foreach (var mod in result.Mods) _allItems.Add(new ModItem(mod));
         RefreshTagChips();
@@ -308,6 +326,80 @@ public partial class PageMod : LauncherPage
         UpdateSummary();
         UpdateDependencyBar();
         ApplyFilter();
+
+        // 按设置在后台补一次更新检查：走 6 小时缓存，通常不发请求，也不打扰对方接口
+        if (SettingsStore.Current.ModUpdateCheckEnabled) _ = CheckUpdatesAsync(force: false, silent: true);
+    }
+
+    // ————— 更新检查 —————
+
+    /// <summary>把已知的更新结果贴回扫描出来的条目上（重新扫描后不会丢）。</summary>
+    private void ApplyKnownUpdates()
+    {
+        if (_lastScan is null) return;
+
+        foreach (var mod in _lastScan.Mods)
+        {
+            mod.SuggestedVersion = null;
+            mod.UpdateUrl = null;
+
+            if (!_updates.TryGetValue(ModTagStore.KeyOf(mod), out var info)) continue;
+
+            mod.SuggestedVersion = info.Version;
+            mod.UpdateUrl = info.Url;
+        }
+    }
+
+    /// <summary>
+    /// 向 smapi.io 查一次更新。<paramref name="force"/> 为 false 时优先用 6 小时内的缓存；
+    /// <paramref name="silent"/> 为 true 时不在界面上汇报（自动检查用）。
+    /// </summary>
+    private async Task CheckUpdatesAsync(bool force, bool silent)
+    {
+        if (_checkingUpdates || _lastScan is not { } scan) return;
+
+        _checkingUpdates = true;
+
+        try
+        {
+            var install = InstanceStore.Current?.Install;
+
+            if (force) ShowNotice("正在向 smapi.io 查询更新…", false);
+
+            ModUpdateCheckResult result;
+            try
+            {
+                result = await ModUpdateChecker.CheckAsync(scan.Mods, install?.SmapiVersion, install?.GameVersion, force);
+            }
+            catch (Exception ex)
+            {
+                Log.Warn($"Mod 更新检查失败：{ex.Message}");
+                if (!silent) ShowNotice($"更新检查失败：{ex.Message}", true);
+                return;
+            }
+
+            if (!result.Ok)
+            {
+                if (!silent) ShowNotice(result.Message, true);
+                return;
+            }
+
+            foreach (var pair in result.Updates) _updates[pair.Key] = pair.Value;
+
+            ApplyKnownUpdates();
+            ApplyFilter();
+
+            if (silent) return;
+
+            ShowNotice(result.Updates.Count == 0
+                ? $"检查完成：{result.Message}，没有发现新版本。"
+                : $"检查完成：{result.Message}，其中 {result.Updates.Count} 个有新版本（卡片上已标记，点标记可打开下载页）。",
+                false);
+        }
+        finally
+        {
+            _checkingUpdates = false;
+        }
     }
 
     /// <summary>按标签存储重建每个 Mod 的标签胶囊。</summary>
@@ -495,11 +587,17 @@ public partial class PageMod : LauncherPage
 
     private void OnRefreshClick(object sender, RoutedEventArgs e) => _ = ScanAsync();
 
-    private void OnCheckUpdateClick(object sender, RoutedEventArgs e)
+    /// <summary>「检查更新」：向 smapi.io 查询每个 Mod 有没有新版本（带 UpdateKeys 的才查得到）。</summary>
+    private void OnCheckUpdateClick(object sender, RoutedEventArgs e) => _ = CheckUpdatesAsync(force: true, silent: false);
+
+    /// <summary>点卡片上的「有新版 x.y.z」标记：打开新版本的页面。</summary>
+    private void OnUpdateBadgeClick(object sender, MouseButtonEventArgs e)
     {
-        // 占位：本次不联网，仅提示并记日志
-        ShowNotice("更新检查将在后续接入", false);
-        Log.Info("用户点击了「检查更新」，当前为占位实现");
+        if (sender is not FrameworkElement { DataContext: ModItem item }) return;
+        if (string.IsNullOrWhiteSpace(item.UpdateUrl)) return;
+
+        Log.Info($"打开 {item.DisplayName} 的新版本页面：{item.UpdateUrl}");
+        ShellHelper.OpenUrl(item.UpdateUrl);
     }
 
     private void OnDismissNoticeClick(object sender, RoutedEventArgs e)

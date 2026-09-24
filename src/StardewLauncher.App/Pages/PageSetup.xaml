@@ -386,6 +386,12 @@
                                          Tag="SmapiUpdateCheckEnabled"
                                          Click="OnUpdateToggleClick" />
 
+                        <TextBlock Margin="0,6,0,0"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   TextWrapping="Wrap"
+                                   Text="「检查 Mod 更新」开启后，每次进入 Mod 管理页会顺带查一次新版本（结果缓存 6 小时）；随时也可以在那里点「检查更新」立刻重查。只有 manifest.json 里写了 UpdateKeys 的 Mod 才查得到。" />
+
                         <Border Height="1"
                                 Margin="0,12,0,12"
                                 Background="{DynamicResource Border.Default}" />
