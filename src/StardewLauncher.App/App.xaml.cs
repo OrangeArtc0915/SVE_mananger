@@ -88,8 +88,8 @@ public partial class App : Application
 
         WarmUpSmapiRelease();
 
-        // 设置里开了"启动时自动检查更新"才查；查到新版本要等主窗口出来后再问用户
-        if (SettingsStore.Current.CheckUpdateOnStartup) QueueStartupUpdateCheck();
+        // 上次自动更新失败过就先说清楚，不然用户只会看到"更新完还是旧版本"
+        QueueStartupUpdateCheck();
 
 #if DEBUG
         SelfCheck.Run();
@@ -331,7 +331,27 @@ public partial class App : Application
     /// </summary>
     private void QueueStartupUpdateCheck()
         => Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle,
-            new Action(() => _ = CheckLauncherUpdateOnStartupAsync()));
+            new Action(() => _ = HandleStartupUpdateAsync()));
+
+    /// <summary>
+    /// 启动后两件事：先把上次更新失败的说明摆给用户（如果有），
+    /// 再看设置里有没有开「启动时自动检查更新」。刚失败过就跳过自动检查，
+    /// 免得立刻又弹一次更新提示。
+    /// </summary>
+    private async Task HandleStartupUpdateAsync()
+    {
+        var failure = LauncherUpdater.TakePendingFailureNote();
+
+        if (failure is not null)
+        {
+            Dialogs.Warn(MainWindow, failure, $"{AppInfo.Name} 更新未完成");
+            return;
+        }
+
+        if (!SettingsStore.Current.CheckUpdateOnStartup) return;
+
+        await CheckLauncherUpdateOnStartupAsync();
+    }
 
     /// <summary>
     /// 启动时在后台查一次启动器版本。查到新版本就问用户：现在更新 → 交给设置页下载并替换；

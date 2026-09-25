@@ -69,6 +69,12 @@ public static class LauncherUpdater
     /// <summary>整包 zip 下载时的临时后缀（解出 exe 后立刻删掉）。</summary>
     private const string ArchiveSuffix = ".zip";
 
+    /// <summary>
+    /// 替换失败时由脚本留下的说明文件（紧挨着 exe），下次启动时读给用户看。
+    /// 没有它的话，替换失败只会表现为"更新完还是旧版本"，用户完全不知道发生了什么。
+    /// </summary>
+    private const string FailureNoteSuffix = ".update-failed.txt";
+
     private static readonly JsonSerializerOptions Json = new()
     {
         PropertyNameCaseInsensitive = true
@@ -308,6 +314,16 @@ public static class LauncherUpdater
 
         var staged = target + StagedSuffix;
         var fromArchive = IsArchiveUrl(url);
+
+        // 还有别的实例在跑同一个 exe 时，替换一定会失败（Windows 不让覆盖正在运行的 exe，
+        // 旧文件也删不掉），先拦下来，别让用户白等一百多兆的下载
+        if (OtherInstanceRunning(target) is { } other)
+        {
+            return new UpdateInstallResult(false,
+                $"还有另一个启动器在运行（进程 {other}），现在替换会失败。请先把它关掉再更新。");
+        }
+
+        var backup = PickBackupPath(target);
         var downloadPath = fromArchive ? staged + ArchiveSuffix : staged;
 
         try
@@ -350,7 +366,7 @@ public static class LauncherUpdater
 
         try
         {
-            var script = WriteInstallScript(target, staged);
+            var script = WriteInstallScript(target, staged, backup);
             StartScript(script);
 
             Log.Info($"更新已就绪，退出后由脚本替换并重启：{target}");
@@ -447,13 +463,19 @@ public static class LauncherUpdater
     }
 
     /// <summary>
-    /// 写一个临时 cmd：等本进程退出 → 旧文件改名备份 → 新文件就位 → 重新启动；
-    /// 就位失败就把备份换回去，尽量不留下一个打不开的目录。
+    /// 写一个临时 cmd：等本进程退出 → 旧文件改名备份 → 新文件就位 → 重新启动。
+    ///
+    /// <para>
+    /// 每一步都校验结果并重试若干次（文件常被安全软件或残留进程短暂占用）：
+    /// 新文件没就位就把备份换回去，失败时留一份说明给下次启动的启动器显示 ——
+    /// 之前有过"替换失败但静默重启旧版本，用户以为更新没生效"的情况，所以失败必须留痕。
+    /// </para>
     /// </summary>
-    private static string WriteInstallScript(string target, string staged)
+    private static string WriteInstallScript(string target, string staged, string backup)
     {
         var scriptPath = Path.Combine(Path.GetTempPath(), $"stardewlauncher-update-{Environment.ProcessId}.cmd");
         var pid = Environment.ProcessId;
+        var note = target + FailureNoteSuffix;
 
         var lines = new[]
         {
@@ -461,45 +483,156 @@ public static class LauncherUpdater
             "setlocal enabledelayedexpansion",
             $"set \"TARGET={target}\"",
             $"set \"STAGED={staged}\"",
-            "set \"BACKUP=%TARGET%.old\"",
-            "set /a TRIES=0",
+            $"set \"BACKUP={backup}\"",
+            $"set \"NOTE={note}\"",
+            "set /a WAIT=0",
 
-            // 等本进程真正退出。tasklist 还列着它就说明没退干净（此时文件也还锁着），
-            // 每秒问一次，最多等 90 秒。
+            // 等本进程真正退出。tasklist 还列着它就说明没退干净（此时文件也还锁着），每秒问一次
             ":wait",
             $"tasklist /FI \"PID eq {pid}\" 2>nul | find \"{pid}\" >nul",
             "if errorlevel 1 goto ready",
-            "set /a TRIES+=1",
-            "if !TRIES! GEQ 90 (",
-            "  del /f /q \"%~f0\" >nul 2>&1",
-            "  exit /b 2",
-            ")",
+            "set /a WAIT+=1",
+            "if !WAIT! GEQ 90 goto timeout",
             "ping -n 2 127.0.0.1 >nul",
             "goto wait",
 
+            ":timeout",
+            "> \"%NOTE%\" echo timeout",
+            "del /f /q \"%~f0\" >nul 2>&1",
+            "exit /b 2",
+
             ":ready",
-            "if exist \"%BACKUP%\" del /f /q \"%BACKUP%\" >nul 2>&1",
+            "set /a TRY=0",
+
+            ":swap",
+            "set /a TRY+=1",
+            "attrib -r -h -s \"%TARGET%\" >nul 2>&1",
+            "attrib -r -h -s \"%STAGED%\" >nul 2>&1",
+            "attrib -r -h -s \"%BACKUP%\" >nul 2>&1",
+            "del /f /q \"%BACKUP%\" >nul 2>&1",
+            "if exist \"%BACKUP%\" goto retry",
             "move /y \"%TARGET%\" \"%BACKUP%\" >nul 2>&1",
+            "if exist \"%TARGET%\" goto retry",
             "move /y \"%STAGED%\" \"%TARGET%\" >nul 2>&1",
 
-            // 新版本没就位：把旧版本换回去，并且一样要重新打开 ——
-            // 不能让用户停在一个"启动器没了"的状态里
-            "if not exist \"%TARGET%\" (",
-            "  move /y \"%BACKUP%\" \"%TARGET%\" >nul 2>&1",
-            "  start \"\" \"%TARGET%\"",
-            "  del /f /q \"%~f0\" >nul 2>&1",
-            "  exit /b 1",
+            // 以"待安装的那份有没有被搬走"为准：搬走了才算就位
+            "if exist \"%STAGED%\" goto rollback",
+            "goto done",
+
+            ":rollback",
+            "if exist \"%TARGET%\" goto retry",
+            "move /y \"%BACKUP%\" \"%TARGET%\" >nul 2>&1",
+            "if not exist \"%TARGET%\" goto broken",
+            "goto retry",
+
+            ":retry",
+            "if !TRY! LSS 5 (",
+            "  ping -n 2 127.0.0.1 >nul",
+            "  goto swap",
             ")",
 
+            // 重试用尽：把旧版本重新打开，并留下失败标记（只写 ASCII 标记，
+            // 中文由启动器那边翻译 —— cmd 的 echo 会按控制台代码页写，直接写中文可能变乱码）
+            "> \"%NOTE%\" echo locked",
+            "if exist \"%TARGET%\" start \"\" \"%TARGET%\"",
+            "del /f /q \"%~f0\" >nul 2>&1",
+            "exit /b 1",
+
+            ":broken",
+            "> \"%NOTE%\" echo broken",
+            "del /f /q \"%~f0\" >nul 2>&1",
+            "exit /b 3",
+
             // 换好了：重新打开（就是新版本），再清掉备份与脚本自己
+            ":done",
             "start \"\" \"%TARGET%\"",
-            "ping -n 3 127.0.0.1 >nul",
-            "if exist \"%BACKUP%\" del /f /q \"%BACKUP%\" >nul 2>&1",
-            "del /f /q \"%~f0\" >nul 2>&1"
+            "ping -n 4 127.0.0.1 >nul",
+            "del /f /q \"%BACKUP%\" >nul 2>&1",
+            "del /f /q \"%~f0\" >nul 2>&1",
+            "exit /b 0"
         };
 
         File.WriteAllLines(scriptPath, lines);
         return scriptPath;
+    }
+
+    /// <summary>
+    /// 挑一个能用的备份文件名。默认是 <c>.old</c>；那个名字被占用且删不掉时换个后缀，
+    /// 否则脚本第一步就会卡住，整个替换都做不成。
+    /// </summary>
+    private static string PickBackupPath(string target)
+    {
+        for (var index = 0; index < 5; index++)
+        {
+            var candidate = index == 0 ? target + BackupSuffix : $"{target}{BackupSuffix}{index}";
+
+            if (!File.Exists(candidate)) return candidate;
+            if (TryDelete(candidate)) return candidate;
+        }
+
+        return $"{target}{BackupSuffix}{Guid.NewGuid():N}";
+    }
+
+    /// <summary>有没有别的进程在跑同一个 exe。读不到某个进程的信息就跳过它，不因此拦住用户。</summary>
+    private static int? OtherInstanceRunning(string target)
+    {
+        var name = Path.GetFileNameWithoutExtension(target);
+
+        foreach (var process in Process.GetProcessesByName(name))
+        {
+            using (process)
+            {
+                if (process.Id == Environment.ProcessId) continue;
+
+                try
+                {
+                    var image = process.MainModule?.FileName;
+                    if (string.Equals(image, target, StringComparison.OrdinalIgnoreCase)) return process.Id;
+                }
+                catch
+                {
+                    // 权限不够或进程已退出，当作没占用
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// 取走上次更新失败留下的标记（如果有），并把它删掉，返回给用户看的话。
+    /// 调用方负责显示出来 —— 更新失败必须让人看见，不能悄悄停回旧版本。
+    /// </summary>
+    public static string? TakePendingFailureNote()
+    {
+        if (CurrentExecutable is not { } target) return null;
+
+        var path = target + FailureNoteSuffix;
+
+        try
+        {
+            if (!File.Exists(path)) return null;
+
+            var raw = File.ReadAllText(path).Trim();
+            File.Delete(path);
+
+            Log.Warn($"上次自动更新未完成（标记：{raw}）");
+
+            return raw.ToLowerInvariant() switch
+            {
+                "timeout" => "上次自动更新没有完成：启动器进程一直没退出，所以没有改动任何文件。可以再试一次。",
+                "broken" => "上次自动更新失败：新旧文件都没能就位，请到发布页手动下载安装。",
+                "" => "上次自动更新没能完成。",
+                _ => "上次自动更新没能完成：新版本的文件一直被占用，替换失败。\n\n"
+                     + "常见原因是还有另一个启动器实例在运行，或者安全软件正在扫描刚下载的文件。"
+                     + "可以重启一次电脑后重试，或直接到发布页手动下载。"
+            };
+        }
+        catch (Exception ex)
+        {
+            Log.Warn($"读取上次更新失败的标记失败：{ex.Message}");
+            return null;
+        }
     }
 
     private static void StartScript(string scriptPath)
@@ -517,15 +650,22 @@ public static class LauncherUpdater
     // ————— 收尾 —————
 
     /// <summary>
-    /// 启动时清理上次更新留下的临时文件：<c>.old</c>（替换成功后的旧版本）、
+    /// 启动时清理上次更新留下的临时文件：<c>.old</c> 与它的编号变体（替换成功后的旧版本）、
     /// 半截的 <c>.new</c>（下载中断或被判定不合法）与 <c>.new.zip</c>（整包还没解完）。
-    /// 清理失败只记日志。
+    /// 清理失败只记日志 —— 那些文件常常被安全软件占着，过几次启动就清掉了。
     /// </summary>
     public static void CleanupStaleFiles()
     {
         if (CurrentExecutable is not { } target) return;
 
-        foreach (var suffix in new[] { BackupSuffix, StagedSuffix, StagedSuffix + ArchiveSuffix })
+        var candidates = new List<string> { StagedSuffix, StagedSuffix + ArchiveSuffix };
+
+        for (var index = 0; index < 5; index++)
+        {
+            candidates.Add(index == 0 ? BackupSuffix : $"{BackupSuffix}{index}");
+        }
+
+        foreach (var suffix in candidates)
         {
             var path = target + suffix;
             if (TryDelete(path)) Log.Info($"已清理上次更新留下的文件：{Path.GetFileName(path)}");
