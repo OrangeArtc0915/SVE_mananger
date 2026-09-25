@@ -89,10 +89,193 @@
                                              Click="OnOpenToolClick" />
                         </Grid>
                     </c:SurfaceCard>
+
+                    <!-- 环境体检 -->
+                    <c:SurfaceCard MinWidth="320"
+                                   Margin="14,0,0,0"
+                                   MaxWidth="420"
+                                   Padding="0"
+                                   UseShadow="False"
+                                   HasHoverEffect="False">
+                        <Grid Margin="16,14,16,14">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                <svg:SvgIcon Width="20"
+                                             Height="20"
+                                             VerticalAlignment="Center"
+                                             Icon="lucide/shield-check"
+                                             IconBrush="{DynamicResource Accent.Base}" />
+                                <TextBlock Margin="8,0,0,0"
+                                           VerticalAlignment="Center"
+                                           FontSize="15"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Text.Primary}"
+                                           Text="环境体检" />
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="1"
+                                       Margin="0,8,0,0"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource Text.Secondary}"
+                                       Text="把启动器、游戏目录、SMAPI、Mod 与磁盘一次扫完；结论可以复制，也能连日志一起导成反馈包。"
+                                       TextWrapping="Wrap" />
+
+                            <c:OutlineButton Grid.Row="2"
+                                             Margin="0,12,0,0"
+                                             HorizontalAlignment="Left"
+                                             Content="打开"
+                                             Tag="health"
+                                             Tone="Solid"
+                                             Click="OnOpenToolClick" />
+                        </Grid>
+                    </c:SurfaceCard>
+
+                    <!-- Mod 冲突检查 -->
+                    <c:SurfaceCard MinWidth="320"
+                                   Margin="14,0,0,0"
+                                   MaxWidth="420"
+                                   Padding="0"
+                                   UseShadow="False"
+                                   HasHoverEffect="False">
+                        <Grid Margin="16,14,16,14">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                <svg:SvgIcon Width="20"
+                                             Height="20"
+                                             VerticalAlignment="Center"
+                                             Icon="lucide/layers"
+                                             IconBrush="{DynamicResource Accent.Base}" />
+                                <TextBlock Margin="8,0,0,0"
+                                           VerticalAlignment="Center"
+                                           FontSize="15"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Text.Primary}"
+                                           Text="Mod 冲突检查" />
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="1"
+                                       Margin="0,8,0,0"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource Text.Secondary}"
+                                       Text="找出多个 Mod 抢同一个 ID、压根加载不了、以及放错层级导致 SMAPI 看不到的目录。"
+                                       TextWrapping="Wrap" />
+
+                            <c:OutlineButton Grid.Row="2"
+                                             Margin="0,12,0,0"
+                                             HorizontalAlignment="Left"
+                                             Content="打开"
+                                             Tag="conflict"
+                                             Tone="Solid"
+                                             Click="OnOpenToolClick" />
+                        </Grid>
+                    </c:SurfaceCard>
+                    <!-- SMAPI 日志分析 -->
+                    <c:SurfaceCard MinWidth="320"
+                                   Margin="14,0,0,0"
+                                   MaxWidth="420"
+                                   Padding="0"
+                                   UseShadow="False"
+                                   HasHoverEffect="False">
+                        <Grid Margin="16,14,16,14">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                <svg:SvgIcon Width="20"
+                                             Height="20"
+                                             VerticalAlignment="Center"
+                                             Icon="lucide/scroll-text"
+                                             IconBrush="{DynamicResource Accent.Base}" />
+                                <TextBlock Margin="8,0,0,0"
+                                           VerticalAlignment="Center"
+                                           FontSize="15"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Text.Primary}"
+                                           Text="SMAPI 日志分析" />
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="1"
+                                       Margin="0,8,0,0"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource Text.Secondary}"
+                                       Text="读最近一份 SMAPI 日志，按来源统计错误与警告，直接指出是哪个 Mod 在刷屏。"
+                                       TextWrapping="Wrap" />
+
+                            <c:OutlineButton Grid.Row="2"
+                                             Margin="0,12,0,0"
+                                             HorizontalAlignment="Left"
+                                             Content="打开"
+                                             Tag="log"
+                                             Tone="Solid"
+                                             Click="OnOpenToolClick" />
+                        </Grid>
+                    </c:SurfaceCard>
+
+                    <!-- 原版文件还原 -->
+                    <c:SurfaceCard MinWidth="320"
+                                   Margin="14,0,0,0"
+                                   MaxWidth="420"
+                                   Padding="0"
+                                   UseShadow="False"
+                                   HasHoverEffect="False">
+                        <Grid Margin="16,14,16,14">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                <svg:SvgIcon Width="20"
+                                             Height="20"
+                                             VerticalAlignment="Center"
+                                             Icon="lucide/rotate-ccw"
+                                             IconBrush="{DynamicResource Accent.Base}" />
+                                <TextBlock Margin="8,0,0,0"
+                                           VerticalAlignment="Center"
+                                           FontSize="15"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Text.Primary}"
+                                           Text="原版文件还原" />
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="1"
+                                       Margin="0,8,0,0"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource Text.Secondary}"
+                                       Text="被 Mod 覆盖过的游戏原版文件，可以从覆盖前备份里救回来；还会告诉你这是谁覆盖的。"
+                                       TextWrapping="Wrap" />
+
+                            <c:OutlineButton Grid.Row="2"
+                                             Margin="0,12,0,0"
+                                             HorizontalAlignment="Left"
+                                             Content="打开"
+                                             Tag="restore"
+                                             Tone="Solid"
+                                             Click="OnOpenToolClick" />
+                        </Grid>
+                    </c:SurfaceCard>
                 </WrapPanel>
             </ScrollViewer>
 
             <views:SaveManagerView x:Name="SaveManager" Visibility="Collapsed" />
+            <views:HealthCheckView x:Name="HealthCheck" Visibility="Collapsed" />
+            <views:ModConflictView x:Name="ModConflict" Visibility="Collapsed" />
+            <views:SmapiLogView x:Name="SmapiLog" Visibility="Collapsed" />
+            <views:GameFileRestoreView x:Name="GameRestore" Visibility="Collapsed" />
         </Grid>
     </Grid>
 </c:LauncherPage>

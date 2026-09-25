@@ -1,0 +1,182 @@
+<UserControl x:Class="StardewLauncher.App.Views.ModConflictView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:StardewLauncher.App.Controls"
+             xmlns:svg="clr-namespace:StardewLauncher.App.Controls.Svg">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- 工具栏 -->
+        <StackPanel Grid.Row="0"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+            <c:OutlineButton x:Name="BtnOpenDir"
+                             Content="打开 Mods 目录"
+                             Tone="Outline"
+                             Click="OnOpenModsDirClick" />
+            <c:OutlineButton x:Name="BtnRefresh"
+                             Margin="8,0,0,0"
+                             Content="重新检查"
+                             Tone="Solid"
+                             Click="OnRefreshClick" />
+        </StackPanel>
+
+        <!-- 摘要 -->
+        <c:SurfaceCard Grid.Row="1"
+                       Margin="0,10,0,0"
+                       Padding="0"
+                       HasHoverEffect="False"
+                       UseShadow="False">
+            <Grid Margin="16,13,16,13">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <svg:SvgIcon x:Name="IconSummary"
+                             Grid.Column="0"
+                             Width="22"
+                             Height="22"
+                             VerticalAlignment="Center"
+                             Icon="lucide/shield-check"
+                             IconBrush="{DynamicResource Status.Success}" />
+
+                <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                    <TextBlock x:Name="LabSummaryTitle"
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource Text.Primary}"
+                               Text="还没检查"
+                               TextWrapping="Wrap" />
+                    <TextBlock x:Name="LabSummaryDetail"
+                               Margin="0,3,0,0"
+                               FontSize="12"
+                               Foreground="{DynamicResource Text.Secondary}"
+                               Text="点右上角「重新检查」扫一遍 Mods 目录"
+                               TextWrapping="Wrap" />
+                </StackPanel>
+            </Grid>
+        </c:SurfaceCard>
+
+        <!-- 提示条 -->
+        <Border x:Name="BarNotice"
+                Grid.Row="2"
+                Margin="0,10,0,0"
+                Padding="12,10"
+                Background="{DynamicResource Accent.Faint}"
+                CornerRadius="{StaticResource Radius.Item}"
+                Visibility="Collapsed">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <svg:SvgIcon x:Name="IconNotice"
+                             Grid.Column="0"
+                             Width="16"
+                             Height="16"
+                             Margin="0,1,0,0"
+                             VerticalAlignment="Top"
+                             Icon="lucide/info"
+                             IconBrush="{DynamicResource Accent.Base}" />
+
+                <TextBlock x:Name="LabNotice"
+                           Grid.Column="1"
+                           Margin="10,0,8,0"
+                           VerticalAlignment="Center"
+                           FontSize="12"
+                           Foreground="{DynamicResource Text.Primary}"
+                           TextWrapping="Wrap" />
+
+                <c:RoundIconButton Grid.Column="2"
+                                   VerticalAlignment="Center"
+                                   Icon="lucide/x"
+                                   IconSize="13"
+                                   Tone="Plain"
+                                   Click="OnDismissNoticeClick" />
+            </Grid>
+        </Border>
+
+        <!-- 冲突列表 -->
+        <ScrollViewer x:Name="ScrollConflicts"
+                      Grid.Row="3"
+                      Margin="0,14,0,0"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto"
+                      Visibility="Collapsed">
+            <ItemsControl x:Name="PanConflicts">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <c:SurfaceCard Margin="0,0,0,10"
+                                       Padding="0"
+                                       HasHoverEffect="False"
+                                       UseShadow="False">
+                            <StackPanel Margin="16,13,16,13">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Padding="7,2"
+                                            VerticalAlignment="Center"
+                                            Background="{DynamicResource Status.WarnSoft}"
+                                            CornerRadius="{StaticResource Radius.Pill}">
+                                        <TextBlock FontSize="11"
+                                                   Foreground="{DynamicResource Status.Warn}"
+                                                   Text="{Binding KindText}" />
+                                    </Border>
+
+                                    <TextBlock Margin="10,0,0,0"
+                                               VerticalAlignment="Center"
+                                               FontSize="14"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource Text.Primary}"
+                                               Text="{Binding Title}"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+
+                                <TextBlock Margin="0,8,0,0"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource Text.Secondary}"
+                                           Text="{Binding Detail}"
+                                           TextWrapping="Wrap" />
+
+                                <ItemsControl Margin="0,10,0,0" ItemsSource="{Binding Targets}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Margin="0,0,0,5"
+                                                    Padding="10,7"
+                                                    Background="{DynamicResource Surface.Sunken}"
+                                                    CornerRadius="{StaticResource Radius.Item}">
+                                                <StackPanel>
+                                                    <TextBlock FontSize="12"
+                                                               Foreground="{DynamicResource Text.Primary}"
+                                                               Text="{Binding Name}"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock Margin="0,2,0,0"
+                                                               FontSize="11"
+                                                               Foreground="{DynamicResource Text.Secondary}"
+                                                               Text="{Binding Note}"
+                                                               TextWrapping="Wrap" />
+                                                    <TextBlock Margin="0,2,0,0"
+                                                               FontSize="11"
+                                                               Foreground="{DynamicResource Text.Tertiary}"
+                                                               Text="{Binding Path}"
+                                                               TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </c:SurfaceCard>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

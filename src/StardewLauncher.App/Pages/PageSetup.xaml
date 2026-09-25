@@ -486,6 +486,21 @@
                                 Margin="0,12,0,12"
                                 Background="{DynamicResource Border.Default}" />
 
+                        <TextBlock FontSize="12" Foreground="{DynamicResource Text.Secondary}" Text="覆盖前备份" />
+                        <c:OutlineButton x:Name="BtnBackupBeforeImport"
+                                         Margin="0,8,0,0"
+                                         HorizontalAlignment="Left"
+                                         Click="OnToggleBackupBeforeImportClick" />
+                        <TextBlock Margin="0,8,0,0"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   TextWrapping="Wrap"
+                                   Text="安装包要覆盖游戏原版文件（XNB 替换、Content 覆盖）时，先把原文件复制一份 .bak- 留在旁边，出问题能在「工具箱 → 原版文件还原」里救回来。关掉后不再生成备份，也就没有东西可以还原。" />
+
+                        <Border Height="1"
+                                Margin="0,12,0,12"
+                                Background="{DynamicResource Border.Default}" />
+
                         <TextBlock FontSize="12" Foreground="{DynamicResource Text.Secondary}" Text="下载源" />
                         <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
                             <c:OutlineButton x:Name="BtnDownloadSourceGitHub"
@@ -707,6 +722,60 @@
                                    Foreground="{DynamicResource Text.Tertiary}"
                                    TextWrapping="Wrap"
                                    Text="日志会按大小滚动，自动保留最近若干份，便于排查启动与下载问题。" />
+
+                        <Border Height="1"
+                                Margin="0,12,0,12"
+                                Background="{DynamicResource Border.Default}" />
+
+                        <TextBlock FontSize="12" Foreground="{DynamicResource Text.Secondary}" Text="日志上限" />
+                        <TextBlock Margin="0,6,0,0"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   Text="保留份数（超出后删最旧的）" />
+                        <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                            <c:OutlineButton x:Name="BtnLogKeep8" Tag="8" Content="8 份" Click="OnLogKeepClick" />
+                            <c:OutlineButton x:Name="BtnLogKeep16" Margin="8,0,0,0" Tag="16" Content="16 份" Click="OnLogKeepClick" />
+                            <c:OutlineButton x:Name="BtnLogKeep32" Margin="8,0,0,0" Tag="32" Content="32 份" Click="OnLogKeepClick" />
+                        </StackPanel>
+                        <TextBlock Margin="0,10,0,0"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   Text="单份日志超过多少就换新文件" />
+                        <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                            <c:OutlineButton x:Name="BtnLogSize4" Tag="4" Content="4 MB" Click="OnLogSizeClick" />
+                            <c:OutlineButton x:Name="BtnLogSize8" Margin="8,0,0,0" Tag="8" Content="8 MB" Click="OnLogSizeClick" />
+                            <c:OutlineButton x:Name="BtnLogSize16" Margin="8,0,0,0" Tag="16" Content="16 MB" Click="OnLogSizeClick" />
+                        </StackPanel>
+                        <TextBlock x:Name="LabLogLimit"
+                                   Margin="0,8,0,0"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   TextWrapping="Wrap" />
+
+                        <Border Height="1"
+                                Margin="0,12,0,12"
+                                Background="{DynamicResource Border.Default}" />
+
+                        <TextBlock FontSize="12" Foreground="{DynamicResource Text.Secondary}" Text="存档备份" />
+                        <TextBlock Margin="0,6,0,0"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   Text="每个存档最多保留几份（超出后删最旧的）" />
+                        <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                            <c:OutlineButton x:Name="BtnSaveKeep5" Tag="5" Content="5 份" Click="OnSaveKeepClick" />
+                            <c:OutlineButton x:Name="BtnSaveKeep10" Margin="8,0,0,0" Tag="10" Content="10 份" Click="OnSaveKeepClick" />
+                            <c:OutlineButton x:Name="BtnSaveKeep20" Margin="8,0,0,0" Tag="20" Content="20 份" Click="OnSaveKeepClick" />
+                            <c:OutlineButton x:Name="BtnSaveKeep30" Margin="8,0,0,0" Tag="30" Content="30 份" Click="OnSaveKeepClick" />
+                        </StackPanel>
+                        <c:OutlineButton x:Name="BtnSnapshotBeforeRestore"
+                                         Margin="0,10,0,0"
+                                         HorizontalAlignment="Left"
+                                         Click="OnToggleSnapshotClick" />
+                        <TextBlock x:Name="LabSaveRetention"
+                                   Margin="0,8,0,0"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   TextWrapping="Wrap" />
                     </StackPanel>
                 </c:SurfaceCard>
 

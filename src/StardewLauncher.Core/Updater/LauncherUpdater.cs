@@ -599,6 +599,10 @@ public static class LauncherUpdater
         return null;
     }
 
+    /// <summary>上次更新是否留有失败标记。只查不取，供体检之类的地方看一眼。</summary>
+    public static bool HasPendingFailureNote()
+        => CurrentExecutable is { } target && File.Exists(target + FailureNoteSuffix);
+
     /// <summary>
     /// 取走上次更新失败留下的标记（如果有），并把它删掉，返回给用户看的话。
     /// 调用方负责显示出来 —— 更新失败必须让人看见，不能悄悄停回旧版本。

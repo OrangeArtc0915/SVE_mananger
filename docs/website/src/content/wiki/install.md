@@ -12,7 +12,7 @@ order: 2
 | GitHub Releases | <https://github.com/OrangeArtc0915/SVE_mananger/releases> | 海外线路，更新最先到这里 |
 | Gitee 发行版 | <https://gitee.com/orangearc655743/SVE_mananger_File/releases> | 国内镜像，包的内容完全一样 |
 
-下载文件名形如 `StardewLauncher-v1.6.1-win-x64.zip`。
+下载文件名形如 `StardewLauncher-v1.7.0-win-x64.zip`。
 
 ## 安装
 
@@ -44,6 +44,7 @@ Data\
   instances\                  实例定义：每个实例一个 json
     <id>.json                 实例配置（用哪个游戏目录、是否走 SMAPI）
   save-backups\               存档备份：每个存档一份目录，里面按时间排
+  game-backups\               覆盖前备份的索引（备份文件本身留在游戏目录里）
   profiles\                   Mod 配置档：一档一个 json
   Cache\                      缓存
   Log\                        落盘日志

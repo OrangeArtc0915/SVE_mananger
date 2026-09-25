@@ -47,6 +47,7 @@ public partial class PageSetup : LauncherPage
         RefreshNexusAccount();
         RefreshNxmProtocol();
         RefreshAutoInstall();
+        RefreshRetention();
         RefreshNexusQuota();
         RefreshDownloadSource();
         RefreshUpdateLine();
@@ -63,6 +64,7 @@ public partial class PageSetup : LauncherPage
         RefreshNexusAccount();
         RefreshNxmProtocol();
         RefreshAutoInstall();
+        RefreshRetention();
         RefreshNexusQuota();
         RefreshDownloadSource();
         RefreshUpdateLine();
@@ -375,6 +377,81 @@ public partial class PageSetup : LauncherPage
 
         dialog.Show();
     }
+
+    private void OnToggleBackupBeforeImportClick(object sender, RoutedEventArgs e)
+    {
+        var settings = CoreApp.SettingsStore.Current;
+        settings.BackupBeforeImport = !settings.BackupBeforeImport;
+        CoreApp.SettingsStore.Save();
+        RefreshRetention();
+    }
+
+    private void OnToggleSnapshotClick(object sender, RoutedEventArgs e)
+    {
+        var settings = CoreApp.SettingsStore.Current;
+        settings.SnapshotBeforeRestore = !settings.SnapshotBeforeRestore;
+        CoreApp.SettingsStore.Save();
+        RefreshRetention();
+    }
+
+    private void OnLogKeepClick(object sender, RoutedEventArgs e)
+        => ApplyRetention(sender, value => CoreApp.SettingsStore.Current.MaxLogFileCount = value);
+
+    private void OnLogSizeClick(object sender, RoutedEventArgs e)
+        => ApplyRetention(sender, value => CoreApp.SettingsStore.Current.MaxLogFileSize = value * 1024L * 1024);
+
+    private void OnSaveKeepClick(object sender, RoutedEventArgs e)
+        => ApplyRetention(sender, value => CoreApp.SettingsStore.Current.SaveBackupKeepCount = value);
+
+    /// <summary>几个「选一个数字」的按钮共用一条路径：取 Tag 里的数、写进设置、刷新选中态。</summary>
+    private void ApplyRetention(object sender, Action<int> apply)
+    {
+        if (sender is not FrameworkElement { Tag: string text } || !int.TryParse(text, out var value)) return;
+
+        apply(value);
+        CoreApp.SettingsStore.Save();
+        RefreshRetention();
+    }
+
+    /// <summary>刷新备份与日志相关的所有控件。日志上限要重启才生效，所以文案里点明。</summary>
+    private void RefreshRetention()
+    {
+        if (BtnBackupBeforeImport is null) return;
+
+        var settings = CoreApp.SettingsStore.Current;
+
+        BtnBackupBeforeImport.Content = $"覆盖游戏原版文件前先备份：{(settings.BackupBeforeImport ? "开" : "关")}";
+        BtnBackupBeforeImport.Tone = settings.BackupBeforeImport ? ButtonTone.Solid : ButtonTone.Outline;
+
+        Highlight(BtnLogKeep8, settings.MaxLogFileCount == 8);
+        Highlight(BtnLogKeep16, settings.MaxLogFileCount == 16);
+        Highlight(BtnLogKeep32, settings.MaxLogFileCount == 32);
+
+        var sizeMb = settings.MaxLogFileSize / 1024 / 1024;
+        Highlight(BtnLogSize4, sizeMb == 4);
+        Highlight(BtnLogSize8, sizeMb == 8);
+        Highlight(BtnLogSize16, sizeMb == 16);
+
+        LabLogLimit.Text = $"当前：保留 {settings.MaxLogFileCount} 份，单份上限 {sizeMb} MB。" +
+                           "改完下次启动生效（日志文件在启动时按这套上限打开）。";
+
+        Highlight(BtnSaveKeep5, settings.SaveBackupKeepCount == 5);
+        Highlight(BtnSaveKeep10, settings.SaveBackupKeepCount == 10);
+        Highlight(BtnSaveKeep20, settings.SaveBackupKeepCount == 20);
+        Highlight(BtnSaveKeep30, settings.SaveBackupKeepCount == 30);
+
+        BtnSnapshotBeforeRestore.Content =
+            $"回滚存档前先打快照：{(settings.SnapshotBeforeRestore ? "开" : "关")}";
+        BtnSnapshotBeforeRestore.Tone = settings.SnapshotBeforeRestore ? ButtonTone.Solid : ButtonTone.Outline;
+
+        LabSaveRetention.Text = $"当前：每个存档保留 {settings.SaveBackupKeepCount} 份备份。"
+                                + (settings.SnapshotBeforeRestore
+                                    ? "回滚前会自动给当前存档打一份 -auto 快照，所以回滚本身也能反悔。"
+                                    : "回滚前不再自动打快照，回滚之后就没有退路了。");
+    }
+
+    private static void Highlight(OutlineButton button, bool selected)
+        => button.Tone = selected ? ButtonTone.Solid : ButtonTone.Outline;
 
     private void OnToggleAutoInstallClick(object sender, RoutedEventArgs e)
     {

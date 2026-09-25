@@ -1,0 +1,263 @@
+<UserControl x:Class="StardewLauncher.App.Views.SmapiLogView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:StardewLauncher.App.Controls"
+             xmlns:svg="clr-namespace:StardewLauncher.App.Controls.Svg">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- 工具栏 -->
+        <StackPanel Grid.Row="0"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+            <c:OutlineButton x:Name="BtnOpenDir"
+                             Content="打开日志文件夹"
+                             Tone="Outline"
+                             Click="OnOpenDirClick" />
+            <c:OutlineButton x:Name="BtnCopy"
+                             Margin="8,0,0,0"
+                             Content="复制报告"
+                             Tone="Outline"
+                             Click="OnCopyClick" />
+            <c:OutlineButton x:Name="BtnRefresh"
+                             Margin="8,0,0,0"
+                             Content="重新分析"
+                             Tone="Solid"
+                             Click="OnRefreshClick" />
+        </StackPanel>
+
+        <!-- 摘要 -->
+        <c:SurfaceCard Grid.Row="1"
+                       Margin="0,10,0,0"
+                       Padding="0"
+                       HasHoverEffect="False"
+                       UseShadow="False">
+            <Grid Margin="16,13,16,13">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <svg:SvgIcon x:Name="IconSummary"
+                             Grid.Column="0"
+                             Width="22"
+                             Height="22"
+                             VerticalAlignment="Center"
+                             Icon="lucide/shield-check"
+                             IconBrush="{DynamicResource Status.Success}" />
+
+                <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                    <TextBlock x:Name="LabSummaryTitle"
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource Text.Primary}"
+                               Text="还没分析"
+                               TextWrapping="Wrap" />
+                    <TextBlock x:Name="LabSummaryDetail"
+                               Margin="0,3,0,0"
+                               FontSize="12"
+                               Foreground="{DynamicResource Text.Secondary}"
+                               Text="点右上角「重新分析」读最近一份 SMAPI 日志"
+                               TextWrapping="Wrap" />
+                </StackPanel>
+            </Grid>
+        </c:SurfaceCard>
+
+        <!-- 提示条 -->
+        <Border x:Name="BarNotice"
+                Grid.Row="2"
+                Margin="0,10,0,0"
+                Padding="12,10"
+                Background="{DynamicResource Accent.Faint}"
+                CornerRadius="{StaticResource Radius.Item}"
+                Visibility="Collapsed">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <svg:SvgIcon x:Name="IconNotice"
+                             Grid.Column="0"
+                             Width="16"
+                             Height="16"
+                             Margin="0,1,0,0"
+                             VerticalAlignment="Top"
+                             Icon="lucide/info"
+                             IconBrush="{DynamicResource Accent.Base}" />
+
+                <TextBlock x:Name="LabNotice"
+                           Grid.Column="1"
+                           Margin="10,0,8,0"
+                           VerticalAlignment="Center"
+                           FontSize="12"
+                           Foreground="{DynamicResource Text.Primary}"
+                           TextWrapping="Wrap" />
+
+                <c:RoundIconButton Grid.Column="2"
+                                   VerticalAlignment="Center"
+                                   Icon="lucide/x"
+                                   IconSize="13"
+                                   Tone="Plain"
+                                   Click="OnDismissNoticeClick" />
+            </Grid>
+        </Border>
+
+        <ScrollViewer x:Name="ScrollBody"
+                      Grid.Row="3"
+                      Margin="0,14,0,0"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- 按来源：谁在报错 -->
+                <ItemsControl x:Name="PanSources">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <c:SurfaceCard Margin="0,0,0,10"
+                                           Padding="0"
+                                           HasHoverEffect="False"
+                                           UseShadow="False">
+                                <Grid Margin="16,13,16,13">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <svg:SvgIcon Grid.Column="0"
+                                                 Width="18"
+                                                 Height="18"
+                                                 Margin="0,2,0,0"
+                                                 VerticalAlignment="Top">
+                                        <svg:SvgIcon.Style>
+                                            <Style TargetType="svg:SvgIcon">
+                                                <Setter Property="Icon" Value="lucide/triangle-alert" />
+                                                <Setter Property="IconBrush" Value="{DynamicResource Status.Warn}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding HasErrors}" Value="True">
+                                                        <Setter Property="IconBrush" Value="{DynamicResource Status.Danger}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </svg:SvgIcon.Style>
+                                    </svg:SvgIcon>
+
+                                    <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock VerticalAlignment="Center"
+                                                       FontSize="14"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource Text.Primary}"
+                                                       Text="{Binding Source}"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <Border Margin="10,0,0,0"
+                                                    Padding="7,2"
+                                                    VerticalAlignment="Center"
+                                                    Background="{DynamicResource Surface.Sunken}"
+                                                    CornerRadius="{StaticResource Radius.Pill}">
+                                                <TextBlock FontSize="11"
+                                                           Foreground="{DynamicResource Text.Secondary}"
+                                                           Text="{Binding CountText}" />
+                                            </Border>
+                                        </StackPanel>
+
+                                        <ItemsControl Margin="0,6,0,0" ItemsSource="{Binding Samples}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Margin="0,1,0,0"
+                                                               FontSize="11"
+                                                               Foreground="{DynamicResource Text.Tertiary}"
+                                                               Text="{Binding}"
+                                                               TextWrapping="Wrap" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Grid>
+                            </c:SurfaceCard>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- 被 SMAPI 跳过的 Mod -->
+                <c:SurfaceCard x:Name="CardSkipped"
+                               Margin="0,0,0,10"
+                               Padding="0"
+                               HasHoverEffect="False"
+                               UseShadow="False"
+                               Visibility="Collapsed">
+                    <StackPanel Margin="16,13,16,13">
+                        <StackPanel Orientation="Horizontal">
+                            <svg:SvgIcon Width="18"
+                                         Height="18"
+                                         VerticalAlignment="Center"
+                                         Icon="lucide/circle-minus"
+                                         IconBrush="{DynamicResource Status.Warn}" />
+                            <TextBlock Margin="8,0,0,0"
+                                       VerticalAlignment="Center"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource Text.Primary}"
+                                       Text="这些 Mod 被 SMAPI 跳过了" />
+                        </StackPanel>
+
+                        <ItemsControl x:Name="PanSkipped" Margin="0,8,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Margin="0,1,0,0"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource Text.Secondary}"
+                                               Text="{Binding}"
+                                               TextWrapping="Wrap" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </c:SurfaceCard>
+
+                <!-- 关键错误原文 -->
+                <c:SurfaceCard x:Name="CardHighlights"
+                               Margin="0,0,0,10"
+                               Padding="0"
+                               HasHoverEffect="False"
+                               UseShadow="False"
+                               Visibility="Collapsed">
+                    <StackPanel Margin="16,13,16,13">
+                        <StackPanel Orientation="Horizontal">
+                            <svg:SvgIcon Width="18"
+                                         Height="18"
+                                         VerticalAlignment="Center"
+                                         Icon="lucide/triangle-alert"
+                                         IconBrush="{DynamicResource Status.Danger}" />
+                            <TextBlock Margin="8,0,0,0"
+                                       VerticalAlignment="Center"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource Text.Primary}"
+                                       Text="关键错误原文" />
+                        </StackPanel>
+
+                        <ItemsControl x:Name="PanHighlights" Margin="0,8,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Margin="0,1,0,0"
+                                               FontFamily="Consolas, Microsoft YaHei UI"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource Text.Secondary}"
+                                               Text="{Binding}"
+                                               TextWrapping="Wrap" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </c:SurfaceCard>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

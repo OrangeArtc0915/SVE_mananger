@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using StardewLauncher.Core.App;
 using StardewLauncher.Core.Logging;
 
 namespace StardewLauncher.Core.Mods;
@@ -50,7 +51,11 @@ public static class PlanInstaller
             var steps = plan.Steps ?? [];
             var total = steps.Count;
             var finished = 0;
-            var backedUp = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            // 覆盖前备份可以在设置里关掉（默认开）。关掉后不生成 .bak-，也就没有东西能被「原版文件还原」救回来
+            var scope = SettingsStore.Current.BackupBeforeImport
+                ? new BackupScope(gameRoot, plan.Name)
+                : null;
 
             Log.Info($"开始套用安装规划「{plan.Name}」（{total} 步，confirmed={confirmed}）");
 
@@ -62,7 +67,7 @@ public static class PlanInstaller
 
                 try
                 {
-                    result = Execute(step, root, gameRoot, modsRoot, confirmed, backedUp);
+                    result = Execute(step, root, gameRoot, modsRoot, confirmed, scope);
                 }
                 catch (OperationCanceledException)
                 {
@@ -108,12 +113,12 @@ public static class PlanInstaller
     }
 
     private static PlanStepResult Execute(PlanStep step, string root, string gameRoot, string modsRoot,
-        bool confirmed, HashSet<string> backedUp)
+        bool confirmed, BackupScope? scope)
     {
         return step.Kind switch
         {
             PlanStepKind.CopyToMods => CopyToMods(step, root, modsRoot),
-            PlanStepKind.CopyToGame => CopyToGame(step, root, gameRoot, backedUp),
+            PlanStepKind.CopyToGame => CopyToGame(step, root, gameRoot, scope),
             PlanStepKind.CheckExists => CheckExists(step, gameRoot),
             PlanStepKind.CheckVersion => CheckVersion(step, gameRoot),
             PlanStepKind.RunProgram => RunProgram(step, root, confirmed),
@@ -142,13 +147,14 @@ public static class PlanInstaller
             return Fail(step, $"目标超出 Mods 目录：{step.Target}");
 
         // Source 的内容直接放进 Mods 目录（Source=Mods 时，包里的各个 Mod 文件夹原样落到 Mods 下）
-        var (copied, _, error) = CopyContents(source, destination, modsRoot, backup: null);
+        // 这里不备份也不登记：Mods 目录里的东西不算游戏原版文件
+        var (copied, _, error) = CopyContents(source, destination, modsRoot, scope: null);
         if (error is not null) return Fail(step, error);
 
         return Ok(step, $"已复制 {copied} 个文件到 Mods 目录");
     }
 
-    private static PlanStepResult CopyToGame(PlanStep step, string root, string gameRoot, HashSet<string> backedUp)
+    private static PlanStepResult CopyToGame(PlanStep step, string root, string gameRoot, BackupScope? scope)
     {
         if (string.IsNullOrWhiteSpace(gameRoot))
             return Fail(step, "游戏根目录不可用");
@@ -168,7 +174,7 @@ public static class PlanInstaller
         // 保留 Source 在包内的相对结构：Source=Content → 覆盖到游戏目录下的 Content
         var relativeSource = NormalizeRelative(step.Source);
 
-        var (copied, backups, error) = CopyOverlay(source, relativeSource, destination, gameRoot, backedUp);
+        var (copied, backups, error) = CopyOverlay(source, relativeSource, destination, gameRoot, scope);
         if (error is not null) return Fail(step, error);
 
         var message = backups > 0
@@ -180,7 +186,7 @@ public static class PlanInstaller
 
     /// <summary>把 source 的内容复制进 destination 目录；任何落点都必须在 limitRoot 内。</summary>
     private static (int Copied, int Backups, string? Error) CopyContents(string source, string destination,
-        string limitRoot, HashSet<string>? backup)
+        string limitRoot, BackupScope? scope)
     {
         var copied = 0;
         var backups = 0;
@@ -194,7 +200,7 @@ public static class PlanInstaller
                 var target = Path.GetFullPath(Path.Combine(destination, Path.GetFileName(source)));
                 if (!IsInside(limitRoot, target)) return (0, 0, "目标超出允许的目录");
 
-                if (backup is not null && TryBackup(target, backup)) backups++;
+                if (scope is not null && TryBackup(target, scope)) backups++;
 
                 File.Copy(source, target, overwrite: true);
                 return (1, backups, null);
@@ -210,7 +216,7 @@ public static class PlanInstaller
                 var directory = Path.GetDirectoryName(target);
                 if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
 
-                if (backup is not null && TryBackup(target, backup)) backups++;
+                if (scope is not null && TryBackup(target, scope)) backups++;
 
                 File.Copy(file, target, overwrite: true);
                 copied++;
@@ -229,7 +235,7 @@ public static class PlanInstaller
     /// Source=Content 时，包里的 Content\Characters\X.xnb 会落到游戏目录的 Content\Characters\X.xnb。
     /// </summary>
     private static (int Copied, int Backups, string? Error) CopyOverlay(string source, string relativeSource,
-        string destBase, string limitRoot, HashSet<string>? backup)
+        string destBase, string limitRoot, BackupScope? scope)
     {
         var copied = 0;
         var backups = 0;
@@ -244,7 +250,7 @@ public static class PlanInstaller
                 var directory = Path.GetDirectoryName(target);
                 if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
 
-                if (backup is not null && TryBackup(target, backup)) backups++;
+                if (scope is not null && TryBackup(target, scope)) backups++;
 
                 File.Copy(source, target, overwrite: true);
                 return (1, backups, null);
@@ -260,7 +266,7 @@ public static class PlanInstaller
                 var directory = Path.GetDirectoryName(target);
                 if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
 
-                if (backup is not null && TryBackup(target, backup)) backups++;
+                if (scope is not null && TryBackup(target, scope)) backups++;
 
                 File.Copy(file, target, overwrite: true);
                 copied++;
@@ -274,11 +280,14 @@ public static class PlanInstaller
         }
     }
 
-    /// <summary>覆盖前备份。同一文件在一次 Apply 里只备份一次。</summary>
-    private static bool TryBackup(string file, HashSet<string> backedUp)
+    /// <summary>
+    /// 覆盖前备份。同一文件在一次 Apply 里只备份一次；
+    /// 备份落在原文件旁边，同时在数据目录的索引里登记一条，供「原版文件还原」用。
+    /// </summary>
+    private static bool TryBackup(string file, BackupScope scope)
     {
         if (!File.Exists(file)) return false;
-        if (!backedUp.Add(file)) return false;
+        if (!scope.BackedUp.Add(file)) return false;
 
         var stamp = DateTime.Now.ToString("yyyyMMddHHmmss");
         var target = $"{file}.bak-{stamp}";
@@ -289,7 +298,22 @@ public static class PlanInstaller
         File.Copy(file, target, overwrite: false);
         Log.Info($"安装规划：已备份 {file} → {Path.GetFileName(target)}");
 
+        GameFileBackups.Register(scope.GameRoot, file, target, scope.Origin);
+
         return true;
+    }
+
+    /// <summary>
+    /// 一次安装里的备份上下文：同一文件只备份一次的去重集合，
+    /// 外加索引需要的「哪个游戏目录、哪次安装」。
+    /// </summary>
+    private sealed class BackupScope(string gameRoot, string origin)
+    {
+        public string GameRoot { get; } = gameRoot;
+
+        public string Origin { get; } = origin;
+
+        public HashSet<string> BackedUp { get; } = new(StringComparer.OrdinalIgnoreCase);
     }
 
     // ————— 检查 —————
