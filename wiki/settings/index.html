@@ -152,6 +152,12 @@ const configHue = 45;
 <li>万一替换失败，脚本会把旧版本换回来，不会留下一个打不开的目录。</li>
 </ol><blockquote>
 <p><strong>更新不会动你的数据</strong>：<code>Data\</code>（设置、实例、存档备份、扩展、个性化背景）原样保留。被替换的只有启动器那一个 exe。</p>
+</blockquote></section><section><h3 id="更新没换成会怎样">更新没换成会怎样<a class="anchor" href="#更新没换成会怎样"><span class="anchor-icon" data-pagefind-ignore="">#</span></a></h3><p>替换文件时 Windows 不允许覆盖正在运行的 exe，旧文件也可能被安全软件占着，所以启动器做了这些事：</p><ul>
+<li><strong>下载之前先检查</strong>有没有另一个启动器实例在跑同一个 exe。有的话直接告诉你「请先关掉其它启动器窗口再更新」，不会白下一百多兆；</li>
+<li>替换时会<strong>逐步骤校验并重试</strong>若干次，备份文件名被占用就自动换一个；</li>
+<li>万一还是没换成：<strong>旧版本会原样保留并重新打开</strong>，同时留下一份失败标记；下次启动时启动器会明确告诉你「自动更新没能完成」以及常见原因 —— 不会像以前那样悄悄停回旧版本、让你以为更新没生效。</li>
+</ul><blockquote>
+<p>如果提示文件一直被占用，<strong>重启一次电脑</strong>再试通常就好了：有时会残留一个已经退出、但还占着文件的进程。</p>
 </blockquote><p><strong>更新后残留的文件</strong>：正常替换后 <code>.old</code> / <code>.new</code> / <code>.new.zip</code> 会被清掉；如果上次更新到一半被中断，下次启动时会自动清理。</p><p><strong>想自己手动更新</strong>：直接到发布页下载新版本，解压后覆盖掉旧的 <code>StardewLauncher.exe</code> 即可，同目录的 <code>Data\</code> 不用动。</p></section></section>
 <section><h2 id="存档备份">存档备份<a class="anchor" href="#存档备份"><span class="anchor-icon" data-pagefind-ignore="">#</span></a></h2><p>「工具箱 → 存档管理」里的备份行为由两个设置控制，它们写在 <code>Data\Settings.json</code> 里（设置界面暂无对应控件）：</p>
 
