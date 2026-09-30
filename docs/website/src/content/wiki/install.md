@@ -12,7 +12,7 @@ order: 2
 | GitHub Releases | <https://github.com/OrangeArtc0915/SVE_mananger/releases> | 海外线路，更新最先到这里 |
 | Gitee 发行版 | <https://gitee.com/orangearc655743/SVE_mananger_File/releases> | 国内镜像，包的内容完全一样 |
 
-下载文件名形如 `StardewLauncher-v1.7.0-win-x64.zip`。
+下载文件名形如 `StardewLauncher-v1.8.0-win-x64.zip`。
 
 ## 安装
 
@@ -64,10 +64,11 @@ Data\
 
 ## 关于密钥
 
-设置里有两类密钥，都**只保存在 `Data\Settings.json` 里**，不会上传、不会写进日志、不会进版本库，界面上只显示掩码：
+启动器只保存一样密钥：在「联机」页填的**樱花 FRP 访问密钥**（用于开联机隧道，等价于账号密码，请勿分享）。
 
-- **Nexus API 密钥**：用于查询 Mod 详情与在线下载，可选
-- **樱花 FRP 访问密钥**：用于开联机隧道，等价于账号密码，请勿分享
+它写进 `Data\Settings.json` 前会先用 Windows DPAPI 加密，**只有当前 Windows 账户解得开** —— 直接打开这个文件看到的是密文，不会上传、不会写进日志、不会进版本库，界面上只显示掩码。以前明文保存的，启动时会自动转成密文。
+
+> 设置页里没有其它需要填的密钥。
 
 ## 卸载
 

@@ -221,8 +221,8 @@ export const commentConfig: CommentConfig = {
 };
 
 export const announcementConfig: AnnouncementConfig = {
-	title: "v1.7.0 已发布", // 公告标题
-	content: "工具箱扩到五个工具：环境体检（可导出反馈包）、Mod 冲突检查、SMAPI 日志分析、原版文件还原；设置页补上备份份数、日志上限等开关。", // 公告内容
+	title: "v1.8.0 已发布", // 公告标题
+	content: "Mod 管理补齐三件事：自动识别中文名、一键更新（GitHub 源直接下载替换并备份旧目录）、自动修复（manifest 语法 / 多套一层目录 / 重复 UniqueID）；设置页「Mod 与下载」也能直接做这三件事。另外启动器不再保存 Nexus 个人密钥，其余密钥一律加密落盘。", // 公告内容
 	closable: true, // 允许用户关闭公告
 	link: {
 		enable: true, // 启用链接
