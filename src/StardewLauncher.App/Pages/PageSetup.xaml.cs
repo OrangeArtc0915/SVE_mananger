@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using StardewLauncher.App.Controls;
+using StardewLauncher.App.Services;
 using StardewLauncher.App.Theme;
 using StardewLauncher.App.Views;
 using StardewLauncher.App.Windows;
@@ -26,8 +27,6 @@ namespace StardewLauncher.App.Pages;
 public partial class PageSetup : LauncherPage
 {
     private bool _smapiQueryRunning;
-    private bool _suppressNexusKeyChanged;
-    private bool _nexusKeyDirty;
     private bool _suppressWeatherCityChanged;
     private bool _weatherQueryRunning;
     private bool _suppressAccentSlider;
@@ -43,16 +42,15 @@ public partial class PageSetup : LauncherPage
         RefreshUpdateToggles();
         RefreshGameInfo();
         RefreshModLibrary();
-        RefreshNexusKey();
-        RefreshNexusAccount();
         RefreshNxmProtocol();
         RefreshAutoInstall();
         RefreshRetention();
-        RefreshNexusQuota();
         RefreshDownloadSource();
         RefreshUpdateLine();
         RefreshDownloadFolder();
         RefreshWeatherCity();
+
+        SwitchCategory(0);
     }
 
     public override void OnEnter()
@@ -60,18 +58,197 @@ public partial class PageSetup : LauncherPage
         RefreshSelection();
         RefreshUpdateToggles();
         RefreshModLibrary();
-        RefreshNexusKey();
-        RefreshNexusAccount();
         RefreshNxmProtocol();
         RefreshAutoInstall();
         RefreshRetention();
-        RefreshNexusQuota();
         RefreshDownloadSource();
         RefreshUpdateLine();
         RefreshDownloadFolder();
         RefreshWeatherCity();
         _ = RefreshSmapiAsync();
     }
+
+    // ————— Mod 维护（与 Mod 管理页共用 ModMaintenance 里的同一份状态） —————
+
+    /// <summary>「检查更新」：确保扫过之后，向 smapi.io 强制查一遍。</summary>
+    private async void OnCheckModUpdatesClick(object sender, RoutedEventArgs e)
+    {
+        if (!await EnsureModsScannedAsync()) return;
+
+        SetModMaintenanceStatus("正在向 smapi.io 查询更新…");
+
+        var result = await ModMaintenance.CheckUpdatesAsync(force: true);
+
+        if (result is null)
+        {
+            SetModMaintenanceStatus("更新检查失败，请稍后再试。");
+            return;
+        }
+
+        if (!result.Ok)
+        {
+            SetModMaintenanceStatus(result.Message);
+            return;
+        }
+
+        SetModMaintenanceStatus(result.Updates.Count == 0
+            ? $"检查完成：{result.Message}，没有发现新版本。"
+            : $"检查完成：{result.Message}，其中 {result.Updates.Count} 个有新版本。");
+    }
+
+    /// <summary>「一键更新」：来源是 GitHub 的自动下载替换，其余列出来让人走下载入口。</summary>
+    private async void OnQuickUpdateModsClick(object sender, RoutedEventArgs e)
+    {
+        if (!await EnsureModsScannedAsync()) return;
+
+        var targets = ModMaintenance.UpdatableMods();
+
+        if (targets.Count == 0)
+        {
+            SetModMaintenanceStatus("没有发现可更新的 Mod。先点一次「检查更新」。");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(ModMaintenance.ModsDirectory))
+        {
+            SetModMaintenanceStatus("还没有可用的 Mods 目录，请先在「游戏实例」里建一个 Mod 端实例。");
+            return;
+        }
+
+        if (!Dialogs.Confirm(Window.GetWindow(this)!, ModMaintenance.BuildUpdateConfirm(targets), "一键更新")) return;
+
+        SetModMaintenanceStatus("正在一键更新…");
+
+        ModUpdateInstallReport report;
+        try
+        {
+            report = await ModMaintenance.QuickUpdateAsync(ModProgress());
+        }
+        catch (Exception ex)
+        {
+            Log.Error("一键更新失败", ex);
+            SetModMaintenanceStatus($"一键更新失败：{ex.Message}");
+            return;
+        }
+
+        SetModMaintenanceStatus(report.Summary);
+
+        var detail = string.Join(Environment.NewLine,
+            report.Items.Select(item => $"{(item.Updated ? "✓" : "·")} {item.ModName}：{item.Message}"));
+
+        if (report.Failed > 0) Dialogs.Warn(Window.GetWindow(this)!, detail, "一键更新结果");
+        else Dialogs.Info(Window.GetWindow(this)!, detail, "一键更新结果");
+    }
+
+    /// <summary>「自动修复」：先列问题让用户确认，再一次性修完；改文件前都会备份。</summary>
+    private async void OnAutoRepairModsClick(object sender, RoutedEventArgs e)
+    {
+        if (!await EnsureModsScannedAsync()) return;
+
+        var findings = ModMaintenance.AnalyzeRepairs();
+
+        if (findings.Count == 0)
+        {
+            SetModMaintenanceStatus("没有发现可以自动修复的问题。");
+            return;
+        }
+
+        if (!Dialogs.Confirm(Window.GetWindow(this)!, ModMaintenance.BuildRepairConfirm(findings), "自动修复")) return;
+
+        SetModMaintenanceStatus("正在自动修复…");
+
+        ModRepairReport report;
+        try
+        {
+            report = await ModMaintenance.RepairAsync(findings, ModProgress());
+        }
+        catch (Exception ex)
+        {
+            Log.Error("自动修复失败", ex);
+            SetModMaintenanceStatus($"自动修复失败：{ex.Message}");
+            return;
+        }
+
+        SetModMaintenanceStatus(report.Changed
+            ? $"自动修复完成：修好 {report.Fixed} 项，未处理 {report.Skipped} 项，失败 {report.Failed} 项。"
+            : $"没有改动任何内容：未处理 {report.Skipped} 项，失败 {report.Failed} 项。");
+
+        var detail = string.Join(Environment.NewLine, report.Lines);
+
+        if (report.Failed > 0) Dialogs.Warn(Window.GetWindow(this)!, detail, "自动修复结果");
+        else Dialogs.Info(Window.GetWindow(this)!, detail, "自动修复结果");
+    }
+
+    /// <summary>共享里没有扫描结果就现扫一次；返回 false 表示当前实例没有可用的 Mods 目录。</summary>
+    private async Task<bool> EnsureModsScannedAsync()
+    {
+        if (ModMaintenance.LastScan is not null) return true;
+
+        SetModMaintenanceStatus("正在扫描 Mod…");
+
+        try
+        {
+            await ModMaintenance.RescanAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.Error("Mod 扫描失败", ex);
+            SetModMaintenanceStatus($"Mod 扫描失败：{ex.Message}");
+            return false;
+        }
+
+        if (ModMaintenance.LastScan is not null) return true;
+
+        SetModMaintenanceStatus("当前实例没有可用的 Mods 目录，请先在「游戏实例」里建一个 Mod 端实例。");
+        return false;
+    }
+
+    private IProgress<string> ModProgress()
+        => new Progress<string>(text =>
+        {
+            if (!string.IsNullOrEmpty(text)) SetModMaintenanceStatus(text);
+        });
+
+    private void SetModMaintenanceStatus(string text)
+    {
+        if (LabModMaintenanceStatus is null) return;
+
+        LabModMaintenanceStatus.Text = text;
+    }
+
+    // ————— 设置分类 —————
+
+    private const int CategoryCount = 7;
+
+    /// <summary>分类数量。只给自检用：折叠的卡片不参与布局，得逐个切出来才查得出重叠。</summary>
+    public override int SubViewCount => CategoryCount;
+
+    /// <summary>分类栏挂在窗口主侧栏上，选中态由 MainWindow 统一管，这里转一手。</summary>
+    public override void SelectSubView(int index)
+        => (Window.GetWindow(this) as MainWindow)?.SelectSetupCategory(index);
+
+    /// <summary>
+    /// 七张分类卡片同处一格，只把选中的那张显示出来，折叠的卡片不占布局。
+    /// 侧栏的选中态由 MainWindow 负责，这里只管卡片本身。
+    /// </summary>
+    internal void SwitchCategory(int index)
+    {
+        if (index is < 0 or >= CategoryCount) index = 0;
+
+        SurfaceCard[] cards =
+        [
+            CardAppearance, CardBackground, CardNav, CardGame, CardMods, CardNetwork, CardStorage
+        ];
+
+        for (var i = 0; i < cards.Length; i++)
+            cards[i].Visibility = i == index ? Visibility.Visible : Visibility.Collapsed;
+
+        ScrollCategory.ScrollToTop();
+    }
+
+    /// <summary>左上角返回按钮：回启动页。</summary>
+    private void OnBackClick(object sender, RoutedEventArgs e)
+        => (Window.GetWindow(this) as MainWindow)?.SwitchToPage(NavPages.Launch);
 
     private void OnThemeModeClick(object sender, RoutedEventArgs e)
     {
@@ -199,107 +376,7 @@ public partial class PageSetup : LauncherPage
         LabModLibraryPath.ToolTip = path;
     }
 
-    // ————— Nexus API Key 与下载目录 —————
-
-    /// <summary>显示 Nexus API Key 的掩码：只保留前 6 位与后 6 位，中间用 ... 代替。</summary>
-    private static string MaskKey(string key)
-    {
-        if (string.IsNullOrWhiteSpace(key)) return "";
-
-        var text = key.Trim();
-        if (text.Length > 12) return $"{text[..6]}...{text[^6..]}";
-
-        return text[..Math.Min(6, text.Length)] + "...";
-    }
-
-    private void RefreshNexusKey()
-    {
-        if (TxtNexusKey is null) return;
-
-        var key = CoreApp.SettingsStore.Current.NexusApiKey;
-
-        _suppressNexusKeyChanged = true;
-        TxtNexusKey.Text = MaskKey(key);
-        _suppressNexusKeyChanged = false;
-        _nexusKeyDirty = false;
-
-        LabNexusKeyHint.Text = string.IsNullOrWhiteSpace(key)
-            ? "未配置。用于查询 Mod 详情，不填也能用其它下载功能。填入后点「保存」。"
-            : "已配置，界面上只显示掩码。要更换请直接输入新 Key 后点「保存」。";
-    }
-
-    private void OnNexusKeyChanged(object sender, TextChangedEventArgs e)
-    {
-        if (_suppressNexusKeyChanged) return;
-        _nexusKeyDirty = true;
-    }
-
-    private void OnSaveNexusKeyClick(object sender, RoutedEventArgs e)
-    {
-        if (!_nexusKeyDirty)
-        {
-            LabNexusKeyHint.Text = "没有改动，无需保存。";
-            return;
-        }
-
-        // 只写设置文件，绝不把 Key 记进日志
-        CoreApp.SettingsStore.Current.NexusApiKey = (TxtNexusKey.Text ?? "").Trim();
-        CoreApp.SettingsStore.Save();
-
-        RefreshNexusKey();
-        LabNexusKeyHint.Text = "已保存。";
-
-        Log.Info("已更新 Nexus API Key 设置");
-    }
-
-    // ————— Nexus 账号、nxm 协议与配额 —————
-
-    private void RefreshNexusAccount()
-    {
-        if (LabNexusAccount is null) return;
-
-        if (string.IsNullOrWhiteSpace(LabNexusAccount.Text))
-        {
-            LabNexusAccount.Text = "尚未验证账号。点「验证账号」检查 API Key 是否可用。";
-            LabNexusAccount.SetResourceReference(TextBlock.ForegroundProperty, "Text.Tertiary");
-        }
-    }
-
-    private async void OnVerifyNexusClick(object sender, RoutedEventArgs e)
-    {
-        BtnVerifyNexus.IsEnabled = false;
-        LabNexusAccount.Text = "正在验证…";
-        LabNexusAccount.SetResourceReference(TextBlock.ForegroundProperty, "Text.Secondary");
-
-        try
-        {
-            var account = await NexusApi.ValidateAsync();
-
-            if (account is null)
-            {
-                LabNexusAccount.Text = "验证失败：" + (NexusApi.LastError ?? "未知原因");
-                LabNexusAccount.SetResourceReference(TextBlock.ForegroundProperty, "Status.Danger");
-            }
-            else
-            {
-                var tag = account.IsPremium ? "会员" : "非会员";
-                var supporter = account.IsSupporter ? " · 赞助者" : "";
-                LabNexusAccount.Text = $"{account.UserName}（ID {account.UserId}）· {tag}{supporter}";
-                LabNexusAccount.SetResourceReference(TextBlock.ForegroundProperty, "Status.Success");
-            }
-        }
-        catch (Exception ex)
-        {
-            LabNexusAccount.Text = "验证失败：" + ex.Message;
-            LabNexusAccount.SetResourceReference(TextBlock.ForegroundProperty, "Status.Danger");
-            Log.Warn($"验证 Nexus 账号失败：{ex.Message}");
-        }
-        finally
-        {
-            BtnVerifyNexus.IsEnabled = true;
-            RefreshNexusQuota();
-        }
-    }
+    // ————— nxm 协议 —————
 
     private void OnToggleNxmProtocolClick(object sender, RoutedEventArgs e)
     {
@@ -686,20 +763,6 @@ public partial class PageSetup : LauncherPage
             if (BtnRefreshWeather is not null) BtnRefreshWeather.IsEnabled = true;
             if (BtnSaveWeatherCity is not null) BtnSaveWeatherCity.IsEnabled = true;
         }
-    }
-
-    private void RefreshNexusQuota()
-    {
-        if (LabNexusQuota is null) return;
-
-        var quota = NexusApi.LastQuota;
-
-        var parts = new List<string>();
-        if (quota.HourlyRemaining is { } hourly) parts.Add($"每小时剩余 {hourly}");
-        if (quota.DailyRemaining is { } daily) parts.Add($"每日剩余 {daily}");
-        if (quota.HourlyReset is { } reset) parts.Add($"每小时额度重置于 {reset.ToLocalTime():HH:mm}");
-
-        LabNexusQuota.Text = parts.Count == 0 ? "未获取" : string.Join(" · ", parts);
     }
 
     private void RefreshDownloadFolder()

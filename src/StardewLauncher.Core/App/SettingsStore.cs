@@ -35,7 +35,16 @@ public static class SettingsStore
         try
         {
             var json = File.ReadAllText(file);
+
+            // 记录这一轮读取里有没有遇到旧版明文密钥，读完统一回写一次
+            SecretJsonConverter.ResetTracking();
             Current = JsonSerializer.Deserialize<Settings>(json, Options) ?? new Settings();
+
+            if (SecretJsonConverter.SawLegacyPlaintext)
+            {
+                Log.Info("检测到明文保存的密钥，已改为加密保存");
+                Save();
+            }
         }
         catch (Exception ex)
         {

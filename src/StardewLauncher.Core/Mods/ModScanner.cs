@@ -136,6 +136,10 @@ public static class ModScanner
 
         entry.Manifest = manifest;
         entry.State = disabled ? ModState.Disabled : ModState.Enabled;
+
+        // 顺手认一下中文名：manifest 的中文名、中文文件夹名、i18n 中文翻译三种来源
+        entry.ChineseName = ModNameLocalizer.TryResolve(entry);
+
         return entry;
     }
 

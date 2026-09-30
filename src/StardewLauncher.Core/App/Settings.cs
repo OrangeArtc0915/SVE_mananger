@@ -1,5 +1,7 @@
 namespace StardewLauncher.Core.App;
 
+using System.Text.Json.Serialization;
+
 public enum ThemeMode
 {
     Light = 0,
@@ -83,13 +85,6 @@ public sealed class Settings
     /// <summary>启动时自动检查更新。默认关闭，避免撞 GitHub API 限流。</summary>
     public bool CheckUpdateOnStartup { get; set; }
 
-    /// <summary>
-    /// Nexus Mods 个人 API 密钥。
-    /// 只保存在本机设置文件里，绝不写进源码、日志或版本库；界面上只显示掩码。
-    /// 仅用于查询 Mod 详情与在线下载；查更新可以走 smapi.io 的公开接口，无需此密钥。
-    /// </summary>
-    public string NexusApiKey { get; set; } = string.Empty;
-
     /// <summary>监控下载目录（浏览器下载 Mod 后从这里入库）。为空时启动会写入系统默认下载目录。</summary>
     public string DownloadFolder { get; set; } = string.Empty;
 
@@ -138,9 +133,10 @@ public sealed class Settings
     // ————— 樱花FRP —————
 
     /// <summary>
-    /// 樱花FRP 访问密钥。与 Nexus 密钥一样只保存在本机设置文件里，绝不写进日志或版本库。
-    /// 它等价于账号密码，泄露后别人可以拿你的账号开隧道。
+    /// 樱花FRP 访问密钥。等价于账号密码，泄露后别人可以拿你的账号开隧道。
+    /// 以 DPAPI 密文落盘（见 <see cref="SecretProtector"/>），绝不写进日志或版本库。
     /// </summary>
+    [JsonConverter(typeof(SecretJsonConverter))]
     public string SakuraAccessKey { get; set; } = string.Empty;
 
     /// <summary>上次启动过的樱花FRP 隧道 ID。</summary>

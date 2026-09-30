@@ -19,29 +19,37 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- 原版实例提示条 -->
-        <Border x:Name="BarVanilla"
-                Grid.Row="0"
-                Margin="0,0,0,10"
-                Padding="12,10"
-                Background="{DynamicResource Status.WarnSoft}"
-                CornerRadius="{StaticResource Radius.Item}"
-                Visibility="Collapsed">
-            <StackPanel Orientation="Horizontal">
-                <svg:SvgIcon Width="16"
-                             Height="16"
-                             Margin="0,1,0,0"
-                             VerticalAlignment="Top"
-                             Icon="lucide/triangle-alert"
-                             IconBrush="{DynamicResource Status.Warn}" />
-                <TextBlock Margin="10,0,0,0"
-                           VerticalAlignment="Center"
-                           FontSize="12"
-                           Foreground="{DynamicResource Text.Primary}"
-                           TextWrapping="Wrap"
-                           Text="当前是原版实例，这些 Mod 不会被加载。如需使用 Mod，请新建或切换到 Mod 端实例" />
-            </StackPanel>
-        </Border>
+        <!-- 标题行：与其他页面保持同一套标题 + 副标题样式 -->
+        <StackPanel Grid.Row="0">
+            <TextBlock FontSize="18" FontWeight="Bold" Text="Mod 管理" />
+            <TextBlock Margin="0,4,0,14"
+                       FontSize="12"
+                       Foreground="{DynamicResource Text.Secondary}"
+                       Text="导入、启用停用、检查更新与分类标签都在这一页；压缩包也可以直接拖进窗口" />
+
+            <!-- 原版实例提示条 -->
+            <Border x:Name="BarVanilla"
+                    Margin="0,0,0,10"
+                    Padding="12,10"
+                    Background="{DynamicResource Status.WarnSoft}"
+                    CornerRadius="{StaticResource Radius.Item}"
+                    Visibility="Collapsed">
+                <StackPanel Orientation="Horizontal">
+                    <svg:SvgIcon Width="16"
+                                 Height="16"
+                                 Margin="0,1,0,0"
+                                 VerticalAlignment="Top"
+                                 Icon="lucide/triangle-alert"
+                                 IconBrush="{DynamicResource Status.Warn}" />
+                    <TextBlock Margin="10,0,0,0"
+                               VerticalAlignment="Center"
+                               FontSize="12"
+                               Foreground="{DynamicResource Text.Primary}"
+                               TextWrapping="Wrap"
+                               Text="当前是原版实例，这些 Mod 不会被加载。如需使用 Mod，请新建或切换到 Mod 端实例" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
 
         <!-- 工具栏：搜索与主操作固定在左，其余按钮自动折行，避免窄窗口下互相重叠 -->
         <Grid Grid.Row="1">
@@ -110,12 +118,15 @@
                 <c:OutlineButton Margin="8,0,0,0" Content="导入 Mod" Click="OnImportClick" />
                 <c:OutlineButton Margin="8,0,0,0" Content="配置档" Click="OnProfilesClick" />
                 <c:OutlineButton Margin="8,0,0,0" Content="全部启用" Click="OnEnableAllClick" />
+                <c:OutlineButton Margin="8,0,0,0" Content="反转启用" Click="OnInvertEnabledClick" />
                 <c:OutlineButton Margin="8,0,0,0" Content="打开 Mods 目录" Click="OnOpenModsClick" />
                 <c:OutlineButton Margin="8,0,0,0" Content="刷新" Click="OnRefreshClick" />
                 <c:OutlineButton Margin="8,0,0,0"
                                  Content="检查更新"
                                  Tone="Solid"
                                  Click="OnCheckUpdateClick" />
+                <c:OutlineButton Margin="8,0,0,0" Content="一键更新" Click="OnQuickUpdateClick" />
+                <c:OutlineButton Margin="8,0,0,0" Content="自动修复" Click="OnAutoRepairClick" />
             </WrapPanel>
         </Grid>
 
@@ -375,6 +386,19 @@
                                                                    FontWeight="SemiBold"
                                                                    Foreground="{DynamicResource Accent.Base}"
                                                                    Text="{Binding UpdateText}" />
+                                                    </Border>
+
+                                                    <!-- 中文名是从 Mod 自己的文件里认出来的，标记一下并给出原名 -->
+                                                    <Border Margin="6,0,0,0"
+                                                            Padding="7,1"
+                                                            Background="{DynamicResource Surface.Sunken}"
+                                                            CornerRadius="{StaticResource Radius.Pill}"
+                                                            ToolTip="{Binding ChineseNameToolTip}"
+                                                            Visibility="{Binding HasChineseName, Converter={StaticResource BoolToVis}}">
+                                                        <TextBlock FontSize="10.5"
+                                                                   FontWeight="SemiBold"
+                                                                   Foreground="{DynamicResource Text.Secondary}"
+                                                                   Text="中文名" />
                                                     </Border>
                                                 </StackPanel>
                                             </StackPanel>

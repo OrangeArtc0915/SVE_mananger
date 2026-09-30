@@ -201,6 +201,100 @@ public static class HttpDownloader
         }
     }
 
+    /// <summary>
+    /// 把地址下载成文件（带重试与进度）。先写 .part 再改名，失败或取消都不会留下半截文件。
+    /// </summary>
+    public static async Task<bool> DownloadFileAsync(string url, string targetPath,
+        IProgress<double>? progress = null, CancellationToken token = default)
+    {
+        if (string.IsNullOrWhiteSpace(url) || string.IsNullOrWhiteSpace(targetPath)) return false;
+
+        for (var attempt = 0; ; attempt++)
+        {
+            var temp = targetPath + ".part";
+
+            try
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Headers.TryAddWithoutValidation("User-Agent", DefaultUserAgent);
+                request.Headers.TryAddWithoutValidation("Accept", "*/*");
+
+                using var response = await Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token);
+
+                var status = (int)response.StatusCode;
+
+                // 4xx 是对方的明确答复，重试也是同样结果；408 / 429 除外
+                if (status is >= 400 and < 500 and not (408 or 429))
+                {
+                    Log.Warn($"下载被拒绝：{url}（{status} {response.ReasonPhrase}）");
+                    return false;
+                }
+
+                response.EnsureSuccessStatusCode();
+
+                var total = response.Content.Headers.ContentLength ?? -1L;
+                var read = 0L;
+
+                var directory = Path.GetDirectoryName(targetPath);
+                if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
+
+                await using (var input = await response.Content.ReadAsStreamAsync(token))
+                await using (var output = new FileStream(temp, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    var buffer = new byte[81920];
+                    int count;
+                    while ((count = await input.ReadAsync(buffer, token)) > 0)
+                    {
+                        await output.WriteAsync(buffer.AsMemory(0, count), token);
+                        read += count;
+
+                        if (total > 0) progress?.Report(Math.Clamp((double)read / total, 0d, 1d));
+                    }
+                }
+
+                if (File.Exists(targetPath)) File.Delete(targetPath);
+                File.Move(temp, targetPath);
+
+                progress?.Report(1);
+                return true;
+            }
+            catch (OperationCanceledException)
+            {
+                TryDelete(temp);
+                Log.Warn($"下载已取消：{url}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                TryDelete(temp);
+                Log.Warn($"下载失败（第 {attempt + 1} 次）：{url}（{ex.Message}）");
+
+                if (attempt >= RetryDelaysMs.Length) return false;
+
+                try
+                {
+                    await Task.Delay(RetryDelaysMs[attempt], token);
+                }
+                catch (OperationCanceledException)
+                {
+                    return false;
+                }
+            }
+        }
+    }
+
+    private static void TryDelete(string path)
+    {
+        try
+        {
+            if (File.Exists(path)) File.Delete(path);
+        }
+        catch
+        {
+            // 临时文件删不掉不值得打扰用户，下次下载会覆盖
+        }
+    }
+
     /// <summary>丢弃指定地址的内存缓存，供需要强制走网络的调用方使用。</summary>
     internal static void InvalidateCache(string url)
     {

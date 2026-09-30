@@ -42,7 +42,6 @@ public partial class NexusBrowserView : UserControl
 
         LabAddress.Text = _address;
         LabAddress.ToolTip = _address;
-        RefreshKeyState();
 
         Loaded += OnLoaded;
     }
@@ -192,19 +191,6 @@ public partial class NexusBrowserView : UserControl
             Log.Warn($"读取 WebView2 Runtime 版本失败：{ex.Message}");
             return "未知";
         }
-    }
-
-    private void RefreshKeyState()
-    {
-        if (NexusApi.HasApiKey)
-        {
-            LabKeyState.Text = "已配置 Key";
-            LabKeyState.SetResourceReference(TextBlock.ForegroundProperty, "Text.Tertiary");
-            return;
-        }
-
-        LabKeyState.Text = "未配置 Key";
-        LabKeyState.SetResourceReference(TextBlock.ForegroundProperty, "Status.Warn");
     }
 
     // ————— 导航拦截 —————

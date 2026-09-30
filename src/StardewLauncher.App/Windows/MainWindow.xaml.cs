@@ -61,6 +61,10 @@ public partial class MainWindow : Window
     private int _currentPage = -1;
     private bool _glassEnabled;
     private bool _suppressNavCheck;
+    private bool _suppressSetupCategory;
+
+    /// <summary>设置页当前选中的分类，离开再回来时接着显示。</summary>
+    private int _setupCategory;
 
     /// <summary>页面错峰动画的整体延迟。开场那一下用它把内容入场推到面板放大之后。</summary>
     private double _staggerDelayOffsetMs;
@@ -242,6 +246,7 @@ public partial class MainWindow : Window
 
         _currentPage = page;
         SyncNavSelection(page);
+        ApplySidebarMode(page);
         Log.Info($"切换到页面 {page}");
 
         if (previous is null || ReferenceEquals(previous, target) || !AnimationEngine.IsEnabled)
@@ -345,6 +350,51 @@ public partial class MainWindow : Window
         NavLog.IsChecked = page == NavPages.Log;
 
         _suppressNavCheck = false;
+    }
+
+    // ————— 设置页分类栏（顶替主导航） —————
+
+    /// <summary>
+    /// 在设置页用分类栏顶替主导航栏，切到别的页面再换回来。
+    /// 只切两个 StackPanel 自己的 Visibility，主导航项各自的显隐（ApplyNavLayout 设的）不受影响。
+    /// </summary>
+    private void ApplySidebarMode(int page)
+    {
+        var inSetup = page == NavPages.Setup;
+
+        PanelSetupNav.Visibility = inSetup ? Visibility.Visible : Visibility.Collapsed;
+        PanNav.Visibility = inSetup ? Visibility.Collapsed : Visibility.Visible;
+
+        if (inSetup) SelectSetupCategory(_setupCategory);
+    }
+
+    private void OnSetupCategoryChecked(object sender, RoutedEventArgs e)
+    {
+        if (_suppressSetupCategory) return;
+        if (sender is not FrameworkElement { Tag: string tag }) return;
+        if (!int.TryParse(tag, out var index)) return;
+
+        SelectSetupCategory(index);
+    }
+
+    /// <summary>切到某个设置分类：同步侧栏选中态，并让设置页换上对应的卡片。自检走的也是这条路。</summary>
+    internal void SelectSetupCategory(int index)
+    {
+        if (index is < 0 or > 6) index = 0;
+        _setupCategory = index;
+
+        // 程序化改选中态同样会触发 Checked，这里挡掉避免回环
+        _suppressSetupCategory = true;
+        SetupCatAppearance.IsChecked = index == 0;
+        SetupCatBackground.IsChecked = index == 1;
+        SetupCatNav.IsChecked = index == 2;
+        SetupCatGame.IsChecked = index == 3;
+        SetupCatMods.IsChecked = index == 4;
+        SetupCatNetwork.IsChecked = index == 5;
+        SetupCatStorage.IsChecked = index == 6;
+        _suppressSetupCategory = false;
+
+        (GetPage(NavPages.Setup) as PageSetup)?.SwitchCategory(index);
     }
 
     // ————— 侧栏导航的顺序与显隐 —————

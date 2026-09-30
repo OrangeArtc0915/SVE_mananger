@@ -71,15 +71,11 @@
                            TextTrimming="CharacterEllipsis" />
             </Border>
 
-            <!-- 右：Key 状态 + 外部按钮 -->
+            <!-- 右：外部按钮 -->
             <StackPanel Grid.Column="2"
                         Margin="0,0,12,0"
                         VerticalAlignment="Center"
                         Orientation="Horizontal">
-                <TextBlock x:Name="LabKeyState"
-                           Margin="0,0,10,0"
-                           VerticalAlignment="Center"
-                           FontSize="11.5" />
                 <c:OutlineButton Padding="12,6"
                                  Content="打开系统浏览器"
                                  FontSize="12.5"

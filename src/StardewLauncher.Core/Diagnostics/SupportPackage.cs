@@ -163,7 +163,6 @@ public static class SupportPackage
         text.AppendLine($"删除到回收站：{settings.DeleteToRecycleBin}");
         text.AppendLine($"日志上限：{settings.MaxLogFileCount} 份 / {settings.MaxLogFileSize / 1024 / 1024} MB");
         text.AppendLine($"存档备份保留：{settings.SaveBackupKeepCount} 份，恢复前快照：{settings.SnapshotBeforeRestore}");
-        text.AppendLine($"已配置 Nexus 密钥：{(string.IsNullOrWhiteSpace(settings.NexusApiKey) ? "否" : "是")}");
         text.AppendLine($"已配置樱花密钥：{(string.IsNullOrWhiteSpace(settings.SakuraAccessKey) ? "否" : "是")}");
 
         return text.ToString();
@@ -215,21 +214,16 @@ public static class SupportPackage
     }
 
     /// <summary>
-    /// 兜底脱敏：把两个密钥的实际值从文本里抹掉。日志里理论上不会打印密钥，
+    /// 兜底脱敏：把密钥的实际值从文本里抹掉。日志里理论上不会打印密钥，
     /// 但「理论上不会」不能当作保证，多这一道几乎零成本。
     /// </summary>
     private static string Redact(string text)
     {
-        var settings = SettingsStore.Current;
+        var value = SettingsStore.Current.SakuraAccessKey?.Trim();
 
-        foreach (var secret in new[] { settings.NexusApiKey, settings.SakuraAccessKey })
-        {
-            var value = secret?.Trim();
-
-            // 太短的值（例如用户只填了两个字符）替换起来会误伤正常文本
-            if (!string.IsNullOrWhiteSpace(value) && value.Length >= 6)
-                text = text.Replace(value, Redacted, StringComparison.Ordinal);
-        }
+        // 太短的值（例如用户只填了两个字符）替换起来会误伤正常文本
+        if (!string.IsNullOrWhiteSpace(value) && value.Length >= 6)
+            text = text.Replace(value, Redacted, StringComparison.Ordinal);
 
         return text;
     }

@@ -52,21 +52,44 @@
         </Style>
     </c:LauncherPage.Resources>
 
-    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="24,20,24,16">
-            <TextBlock FontSize="18" FontWeight="Bold" Text="设置" />
-            <TextBlock Margin="0,4,0,14"
-                       FontSize="12"
-                       Foreground="{DynamicResource Text.Secondary}"
-                       Text="界面、存储与游戏相关的选项都在这里" />
+    <Grid Margin="24,20,24,16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-            <c:MasonryPanel Mode="Columns"
-                            ColumnGap="14"
-                            Columns="2"
-                            RowGap="14">
+        <!-- 标题行：左上角是返回按钮，右侧是标题与副标题 -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <c:OutlineButton Grid.Column="0"
+                             VerticalAlignment="Center"
+                             Content="← 返回"
+                             Tone="Outline"
+                             Click="OnBackClick" />
+
+            <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                <TextBlock FontSize="18" FontWeight="Bold" Text="设置" />
+                <TextBlock Margin="0,4,0,0"
+                           FontSize="12"
+                           Foreground="{DynamicResource Text.Secondary}"
+                           Text="界面、存储与游戏相关的选项都在这里" />
+            </StackPanel>
+        </Grid>
+
+        <!-- 当前分类的设置内容。分类栏挂在窗口主侧栏上（见 MainWindow），这里不再自带一列 -->
+        <ScrollViewer x:Name="ScrollCategory"
+                      Grid.Row="1"
+                      Margin="0,16,0,0"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto">
+            <Grid>
 
                 <!-- 1. 外观 -->
-                <c:SurfaceCard Title="外观">
+                <c:SurfaceCard x:Name="CardAppearance" Title="外观">
                     <StackPanel>
                         <TextBlock FontSize="12" Foreground="{DynamicResource Text.Secondary}" Text="明暗模式" />
                         <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
@@ -228,7 +251,7 @@
                 </c:SurfaceCard>
 
                 <!-- 1.5 个性化背景 -->
-                <c:SurfaceCard Title="个性化背景">
+                <c:SurfaceCard x:Name="CardBackground" Title="个性化背景" Visibility="Collapsed">
                     <StackPanel>
                         <TextBlock FontSize="12" Foreground="{DynamicResource Text.Secondary}" Text="窗口背景" />
                         <TextBlock x:Name="LabBackground"
@@ -308,7 +331,7 @@
                 </c:SurfaceCard>
 
                 <!-- 1.8 侧栏导航 -->
-                <c:SurfaceCard Title="侧栏导航">
+                <c:SurfaceCard x:Name="CardNav" Title="侧栏导航" Visibility="Collapsed">
                     <StackPanel>
                         <TextBlock FontSize="12"
                                    Foreground="{DynamicResource Text.Secondary}"
@@ -326,7 +349,7 @@
                 </c:SurfaceCard>
 
                 <!-- 2. 游戏与实例 -->
-                <c:SurfaceCard Title="游戏与实例">
+                <c:SurfaceCard x:Name="CardGame" Title="游戏与实例" Visibility="Collapsed">
                     <StackPanel>
                         <TextBlock FontSize="12" Foreground="{DynamicResource Text.Secondary}" Text="当前实例" />
                         <TextBlock x:Name="LabGameInfo"
@@ -441,7 +464,7 @@
                 </c:SurfaceCard>
 
                 <!-- 3. Mod 与下载 -->
-                <c:SurfaceCard Title="Mod 与下载">
+                <c:SurfaceCard x:Name="CardMods" Title="Mod 与下载" Visibility="Collapsed">
                     <StackPanel>
                         <TextBlock FontSize="12" Foreground="{DynamicResource Text.Secondary}" Text="Mod 库目录" />
                         <TextBlock x:Name="LabModLibraryPath"
@@ -545,66 +568,35 @@
                                    Foreground="{DynamicResource Text.Tertiary}"
                                    TextWrapping="Wrap"
                                    Text="开启后，在 Nexus 网页点「Mod Manager Download」会直接拉起本启动器下载。仅写入当前用户注册表，不需要管理员权限，随时可关闭。" />
-                    </StackPanel>
-                </c:SurfaceCard>
-
-                <!-- 4. 网络与账号 -->
-                <c:SurfaceCard Title="网络与账号">
-                    <StackPanel>
-                        <TextBlock FontSize="12" Foreground="{DynamicResource Text.Secondary}" Text="Nexus API Key" />
-                        <Border Height="34"
-                                Margin="0,8,0,0"
-                                Padding="10,0"
-                                Background="{DynamicResource Surface.Sunken}"
-                                BorderBrush="{DynamicResource Border.Default}"
-                                BorderThickness="1"
-                                CornerRadius="{StaticResource Radius.Button}">
-                            <TextBox x:Name="TxtNexusKey"
-                                     VerticalContentAlignment="Center"
-                                     Background="Transparent"
-                                     BorderThickness="0"
-                                     CaretBrush="{DynamicResource Text.Primary}"
-                                     Foreground="{DynamicResource Text.Primary}"
-                                     TextChanged="OnNexusKeyChanged" />
-                        </Border>
-
-                        <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
-                            <c:OutlineButton x:Name="BtnSaveNexusKey"
-                                             Content="保存"
-                                             Tone="Solid"
-                                             Click="OnSaveNexusKeyClick" />
-                            <c:OutlineButton x:Name="BtnVerifyNexus"
-                                             Margin="8,0,0,0"
-                                             Content="验证账号"
-                                             Click="OnVerifyNexusClick" />
-                        </StackPanel>
-
-                        <TextBlock x:Name="LabNexusKeyHint"
-                                   Margin="0,8,0,0"
-                                   FontSize="11.5"
-                                   Foreground="{DynamicResource Text.Tertiary}"
-                                   TextWrapping="Wrap" />
-
-                        <TextBlock x:Name="LabNexusAccount"
-                                   Margin="0,4,0,0"
-                                   FontSize="12"
-                                   Foreground="{DynamicResource Text.Secondary}"
-                                   TextWrapping="Wrap" />
-
-                        <TextBlock Margin="0,10,0,0"
-                                   FontSize="11.5"
-                                   Foreground="{DynamicResource Text.Tertiary}"
-                                   Text="Nexus 配额" />
-                        <TextBlock x:Name="LabNexusQuota"
-                                   Margin="0,3,0,0"
-                                   FontSize="12"
-                                   Foreground="{DynamicResource Text.Secondary}"
-                                   TextWrapping="Wrap" />
 
                         <Border Height="1"
                                 Margin="0,12,0,12"
                                 Background="{DynamicResource Border.Default}" />
 
+                        <TextBlock FontSize="12" Foreground="{DynamicResource Text.Secondary}" Text="Mod 维护" />
+                        <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                            <c:OutlineButton Content="检查更新"
+                                             Tone="Solid"
+                                             Click="OnCheckModUpdatesClick" />
+                            <c:OutlineButton Margin="8,0,0,0"
+                                             Content="一键更新"
+                                             Click="OnQuickUpdateModsClick" />
+                            <c:OutlineButton Margin="8,0,0,0"
+                                             Content="自动修复"
+                                             Click="OnAutoRepairModsClick" />
+                        </StackPanel>
+                        <TextBlock x:Name="LabModMaintenanceStatus"
+                                   Margin="0,8,0,0"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   TextWrapping="Wrap"
+                                   Text="与「Mod 管理」页共用同一份扫描结果：在这里检查更新、一键更新或自动修复，Mod 管理页会跟着刷新。" />
+                    </StackPanel>
+                </c:SurfaceCard>
+
+                <!-- 4. 网络与账号 -->
+                <c:SurfaceCard x:Name="CardNetwork" Title="网络与账号" Visibility="Collapsed">
+                    <StackPanel>
                         <TextBlock FontSize="12" Foreground="{DynamicResource Text.Secondary}" Text="在线下载 Mod" />
                         <c:OutlineButton x:Name="BtnBrowseNexus"
                                          Margin="0,8,0,0"
@@ -669,7 +661,7 @@
                 </c:SurfaceCard>
 
                 <!-- 5. 存储与日志 -->
-                <c:SurfaceCard Title="存储与日志">
+                <c:SurfaceCard x:Name="CardStorage" Title="存储与日志" Visibility="Collapsed">
                     <StackPanel>
                         <TextBlock FontSize="12" Foreground="{DynamicResource Text.Secondary}" Text="数据目录" />
                         <TextBlock x:Name="LabDataPath"
@@ -779,7 +771,7 @@
                     </StackPanel>
                 </c:SurfaceCard>
 
-            </c:MasonryPanel>
-        </StackPanel>
-    </ScrollViewer>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
 </c:LauncherPage>

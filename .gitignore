@@ -37,6 +37,9 @@ dotnet-sdk-*.exe
 Screenshot_*.jpg
 Screenshot_*.png
 
+# 代码签名工具与生成的证书：含私钥（.pfx/.pvk），绝不能进版本库
+/签名/
+
 # 用户级覆盖
 *.user
 .vs/

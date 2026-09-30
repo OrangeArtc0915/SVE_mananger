@@ -7,6 +7,7 @@ using System.Windows.Media;
 using Microsoft.Win32;
 using StardewLauncher.App.Controls;
 using StardewLauncher.App.Controls.Svg;
+using StardewLauncher.App.Services;
 using StardewLauncher.App.Views;
 using StardewLauncher.App.Windows;
 using StardewLauncher.Core.App;
@@ -31,6 +32,11 @@ public sealed class ModItem
     public bool IsEnabled => Entry.IsEnabled;
 
     public string DisplayName => Entry.DisplayName;
+
+    /// <summary>中文名是从 Mod 自己的文件里认出来的，卡片上给个小标记。</summary>
+    public bool HasChineseName => Entry.HasAutoChineseName;
+
+    public string ChineseNameToolTip => $"中文名由启动器自动识别，原名：{Entry.OriginalName}";
 
     public string DisplayAuthor => Entry.DisplayAuthor;
 
@@ -169,13 +175,15 @@ public partial class PageMod : LauncherPage
     /// <summary>当前选中的标签 Id（多选取并集）。</summary>
     private readonly HashSet<string> _selectedTagIds = new(StringComparer.OrdinalIgnoreCase);
 
-    /// <summary>更新检查结果：Mod 的稳定键 → 新版本信息。重新扫描后靠它把结果贴回去。</summary>
-    private readonly Dictionary<string, ModUpdateInfo> _updates = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>
+    /// 更新检查结果、扫描结果与 Mods 目录都由 <see cref="ModMaintenance"/> 统一持有：
+    /// 设置页里的「Mod 维护」改完之后，这里跟着 <see cref="ModMaintenance.Changed"/> 一起刷新。
+    /// </summary>
+    private static Dictionary<string, ModUpdateInfo> _updates => ModMaintenance.Updates;
 
-    private bool _checkingUpdates;
+    private static ModScanResult? _lastScan => ModMaintenance.LastScan;
+    private static string? _modsDirectory => ModMaintenance.ModsDirectory;
 
-    private ModScanResult? _lastScan;
-    private string? _modsDirectory;
     private bool _subscribed;
     private bool _scanning;
     private bool _dirty;
@@ -206,6 +214,7 @@ public partial class PageMod : LauncherPage
         _subscribed = true;
         InstanceStore.Changed += OnInstanceChanged;
         ModTagStore.Changed += OnTagsChanged;
+        ModMaintenance.Changed += OnMaintenanceChanged;
     }
 
     private void OnUnloaded(object sender, RoutedEventArgs e)
@@ -214,6 +223,22 @@ public partial class PageMod : LauncherPage
         _subscribed = false;
         InstanceStore.Changed -= OnInstanceChanged;
         ModTagStore.Changed -= OnTagsChanged;
+        ModMaintenance.Changed -= OnMaintenanceChanged;
+    }
+
+    /// <summary>
+    /// 设置页里的「Mod 维护」把更新或修复跑完了：重新读一遍共享状态渲染界面。
+    /// 可能在非 UI 线程触发，统一切回 UI 线程。
+    /// </summary>
+    private void OnMaintenanceChanged()
+    {
+        if (!Dispatcher.CheckAccess())
+        {
+            Dispatcher.BeginInvoke(OnMaintenanceChanged);
+            return;
+        }
+
+        RenderScan();
     }
 
     /// <summary>标签或关联变化时刷新胶囊与筛选结果。可能在非 UI 线程触发，统一切回 UI 线程。</summary>
@@ -278,78 +303,43 @@ public partial class PageMod : LauncherPage
 
     private async Task ScanOnceAsync()
     {
-        _modsDirectory = InstanceStore.Current?.ModsDirectory;
-
-        if (string.IsNullOrWhiteSpace(_modsDirectory))
-        {
-            _modsDirectory = null;
-            _lastScan = null;
-            _allItems.Clear();
-            SetScanning(false);
-            UpdateSummary();
-            UpdateDependencyBar();
-            ApplyFilter();
-            return;
-        }
-
         SetScanning(true);
 
-        ModScanResult result;
         try
         {
-            // 磁盘扫描与依赖解析都放到后台线程，界面只负责渲染结果
-            var directory = _modsDirectory;
-            result = await Task.Run(() =>
-            {
-                var scan = ModScanner.Scan(directory);
-                DependencyResolver.Evaluate(scan.Mods);
-                return scan;
-            });
+            await ModMaintenance.RescanAsync();
         }
         catch (Exception ex)
         {
-            SetScanning(false);
             Log.Error($"Mod 扫描失败：{_modsDirectory}", ex);
             ShowNotice($"Mod 扫描失败：{ex.Message}", true);
-            return;
+        }
+        finally
+        {
+            SetScanning(false);
         }
 
-        SetScanning(false);
-        _lastScan = result;
         _depsExpanded = false;
+        RenderScan();
+    }
 
-        ApplyKnownUpdates();
-
+    /// <summary>
+    /// 按共享的扫描结果重建列表。自己扫完要收尾，设置页里的「Mod 维护」改完 Mod 也走这里。
+    /// </summary>
+    private void RenderScan()
+    {
         _allItems.Clear();
-        foreach (var mod in result.Mods) _allItems.Add(new ModItem(mod));
-        RefreshTagChips();
 
+        if (_lastScan is { } scan)
+            foreach (var mod in scan.Mods) _allItems.Add(new ModItem(mod));
+
+        RefreshTagChips();
         UpdateSummary();
         UpdateDependencyBar();
         ApplyFilter();
-
-        // 按设置在后台补一次更新检查：走 6 小时缓存，通常不发请求，也不打扰对方接口
-        if (SettingsStore.Current.ModUpdateCheckEnabled) _ = CheckUpdatesAsync(force: false, silent: true);
     }
 
     // ————— 更新检查 —————
-
-    /// <summary>把已知的更新结果贴回扫描出来的条目上（重新扫描后不会丢）。</summary>
-    private void ApplyKnownUpdates()
-    {
-        if (_lastScan is null) return;
-
-        foreach (var mod in _lastScan.Mods)
-        {
-            mod.SuggestedVersion = null;
-            mod.UpdateUrl = null;
-
-            if (!_updates.TryGetValue(ModTagStore.KeyOf(mod), out var info)) continue;
-
-            mod.SuggestedVersion = info.Version;
-            mod.UpdateUrl = info.Url;
-        }
-    }
 
     /// <summary>
     /// 向 smapi.io 查一次更新。<paramref name="force"/> 为 false 时优先用 6 小时内的缓存；
@@ -357,50 +347,36 @@ public partial class PageMod : LauncherPage
     /// </summary>
     private async Task CheckUpdatesAsync(bool force, bool silent)
     {
-        if (_checkingUpdates || _lastScan is not { } scan) return;
+        if (_lastScan is null) return;
 
-        _checkingUpdates = true;
+        if (force) ShowNotice("正在向 smapi.io 查询更新…", false);
 
+        ModUpdateCheckResult? result;
         try
         {
-            var install = InstanceStore.Current?.Install;
-
-            if (force) ShowNotice("正在向 smapi.io 查询更新…", false);
-
-            ModUpdateCheckResult result;
-            try
-            {
-                result = await ModUpdateChecker.CheckAsync(scan.Mods, install?.SmapiVersion, install?.GameVersion, force);
-            }
-            catch (Exception ex)
-            {
-                Log.Warn($"Mod 更新检查失败：{ex.Message}");
-                if (!silent) ShowNotice($"更新检查失败：{ex.Message}", true);
-                return;
-            }
-
-            if (!result.Ok)
-            {
-                if (!silent) ShowNotice(result.Message, true);
-                return;
-            }
-
-            foreach (var pair in result.Updates) _updates[pair.Key] = pair.Value;
-
-            ApplyKnownUpdates();
-            ApplyFilter();
-
-            if (silent) return;
-
-            ShowNotice(result.Updates.Count == 0
-                ? $"检查完成：{result.Message}，没有发现新版本。"
-                : $"检查完成：{result.Message}，其中 {result.Updates.Count} 个有新版本（卡片上已标记，点标记可打开下载页）。",
-                false);
+            result = await ModMaintenance.CheckUpdatesAsync(force);
         }
-        finally
+        catch (Exception ex)
         {
-            _checkingUpdates = false;
+            Log.Warn($"Mod 更新检查失败：{ex.Message}");
+            if (!silent) ShowNotice($"更新检查失败：{ex.Message}", true);
+            return;
         }
+
+        if (result is null || !result.Ok)
+        {
+            if (!silent && result is not null) ShowNotice(result.Message, true);
+            return;
+        }
+
+        ApplyFilter();
+
+        if (silent) return;
+
+        ShowNotice(result.Updates.Count == 0
+            ? $"检查完成：{result.Message}，没有发现新版本。"
+            : $"检查完成：{result.Message}，其中 {result.Updates.Count} 个有新版本（卡片上已标记，点标记可打开下载页）。",
+            false);
     }
 
     /// <summary>按标签存储重建每个 Mod 的标签胶囊。</summary>
@@ -482,13 +458,8 @@ public partial class PageMod : LauncherPage
 
         HideDependencyView();
 
-        var keyword = TxtSearch.Text?.Trim() ?? string.Empty;
-
         // 过滤只在内存中的 _allItems 上做，绝不重新扫描磁盘；先按搜索词，再按标签（多选取并集）
-        var filtered = _allItems
-            .Where(item => string.IsNullOrEmpty(keyword) || Matches(item, keyword))
-            .Where(MatchesTags)
-            .ToList();
+        var filtered = FilteredItems();
 
         PanMods.ItemsSource = filtered;
         PanMods.Visibility = filtered.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -500,6 +471,20 @@ public partial class PageMod : LauncherPage
         }
 
         ShowEmptyState();
+    }
+
+    /// <summary>
+    /// 当前筛选出来的 Mod（搜索词 + 标签，多选取并集）。
+    /// 画列表和批量操作都走这里，保证「对筛选结果生效」的含义一致。
+    /// </summary>
+    private List<ModItem> FilteredItems()
+    {
+        var keyword = TxtSearch.Text?.Trim() ?? string.Empty;
+
+        return _allItems
+            .Where(item => string.IsNullOrEmpty(keyword) || Matches(item, keyword))
+            .Where(MatchesTags)
+            .ToList();
     }
 
     /// <summary>选中多个标签时取并集：带任一选中标签即可。</summary>
@@ -531,6 +516,7 @@ public partial class PageMod : LauncherPage
         var entry = item.Entry;
 
         return Contains(entry.DisplayName)
+               || Contains(entry.OriginalName)
                || Contains(entry.DisplayAuthor)
                || Contains(entry.UniqueId)
                || Contains(entry.DisplayDescription);
@@ -608,6 +594,114 @@ public partial class PageMod : LauncherPage
     {
         _depsExpanded = !_depsExpanded;
         UpdateDependencyBar();
+    }
+
+    // ————— 一键更新 —————
+
+    /// <summary>
+    /// 「一键更新」：把所有有新版本的 Mod 集中更新一遍。来源是 GitHub 的自动下载替换，
+    /// 其余来源（Nexus 等没有免登录直链）只列出来，让用户走页面上的下载入口。
+    /// </summary>
+    private async void OnQuickUpdateClick(object sender, RoutedEventArgs e)
+    {
+        var targets = ModMaintenance.UpdatableMods();
+
+        if (targets.Count == 0)
+        {
+            ShowNotice("没有发现可更新的 Mod。先点一次「检查更新」。", false);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_modsDirectory))
+        {
+            ShowNotice("还没有可用的 Mods 目录，请先创建游戏实例。", true);
+            return;
+        }
+
+        if (!Dialogs.Confirm(Window.GetWindow(this)!, ModMaintenance.BuildUpdateConfirm(targets), "一键更新")) return;
+
+        ShowNotice("正在一键更新…", false);
+
+        ModUpdateInstallReport report;
+        try
+        {
+            report = await ModMaintenance.QuickUpdateAsync(BuildProgress());
+        }
+        catch (Exception ex)
+        {
+            Log.Error("一键更新失败", ex);
+            ShowNotice($"一键更新失败：{ex.Message}", true);
+            return;
+        }
+
+        await ScanAsync();
+
+        ShowNotice(report.Summary, report.Failed > 0);
+
+        ShowMessage(
+            string.Join(Environment.NewLine,
+                report.Items.Select(item => $"{(item.Updated ? "✓" : "·")} {item.ModName}：{item.Message}")),
+            "一键更新结果",
+            report.Failed > 0 ? DialogTone.Warning : DialogTone.Info);
+    }
+
+    /// <summary>把维护动作的进度写到页面顶部那条提示上。</summary>
+    private IProgress<string> BuildProgress()
+        => new Progress<string>(text =>
+        {
+            if (string.IsNullOrEmpty(text)) return;
+
+            LabNotice.Text = text;
+            BarNotice.Visibility = Visibility.Visible;
+        });
+
+    // ————— 自动修复 —————
+
+    /// <summary>
+    /// 「自动修复」：先列出能就地改好的问题（manifest 语法、多套一层目录、重复 UniqueID），
+    /// 用户确认后一次修完。改文件前都会备份，改不动的如实报出来。
+    /// </summary>
+    private async void OnAutoRepairClick(object sender, RoutedEventArgs e)
+    {
+        if (_lastScan is null)
+        {
+            ShowNotice("还没有扫描结果，先点一次「刷新」。", true);
+            return;
+        }
+
+        var findings = ModMaintenance.AnalyzeRepairs();
+
+        if (findings.Count == 0)
+        {
+            ShowNotice("没有发现可以自动修复的问题。", false);
+            return;
+        }
+
+        if (!Dialogs.Confirm(Window.GetWindow(this)!, ModMaintenance.BuildRepairConfirm(findings), "自动修复")) return;
+
+        ShowNotice("正在自动修复…", false);
+
+        ModRepairReport report;
+        try
+        {
+            report = await ModMaintenance.RepairAsync(findings, BuildProgress());
+        }
+        catch (Exception ex)
+        {
+            Log.Error("自动修复失败", ex);
+            ShowNotice($"自动修复失败：{ex.Message}", true);
+            return;
+        }
+
+        await ScanAsync();
+
+        ShowNotice(report.Changed
+                ? $"自动修复完成：修好 {report.Fixed} 项，未处理 {report.Skipped} 项，失败 {report.Failed} 项。"
+                : $"没有改动任何内容：未处理 {report.Skipped} 项，失败 {report.Failed} 项。",
+            report.Failed > 0);
+
+        ShowMessage(string.Join(Environment.NewLine, report.Lines), "自动修复结果",
+            report.Failed > 0 ? DialogTone.Warning : DialogTone.Info);
     }
 
     // ————— 视图切换 —————
@@ -1116,6 +1210,47 @@ public partial class PageMod : LauncherPage
         if (failed > 0) text += $"\n首个失败原因：{firstError}";
         ShowNotice(text, failed > 0);
         Log.Info($"全部启用完成：成功 {ok} 个，失败 {failed} 个");
+
+        await ScanAsync();
+    }
+
+    /// <summary>
+    /// 把当前筛选结果的启用状态逐个反转：启用的停用、停用的启用。
+    /// 「全部启用」对着全部 Mod，这个对着筛选结果，两者配合能把一批 Mod 整组换下来。
+    /// </summary>
+    private async void OnInvertEnabledClick(object sender, RoutedEventArgs e)
+    {
+        var targets = FilteredItems();
+
+        if (targets.Count == 0)
+        {
+            ShowNotice("当前筛选结果里没有 Mod。", false);
+            return;
+        }
+
+        var ok = 0;
+        var failed = 0;
+        var firstError = string.Empty;
+
+        await Task.Run(() =>
+        {
+            foreach (var item in targets)
+            {
+                if (ModEnabler.TrySetEnabled(item.Entry, !item.IsEnabled, out var error))
+                {
+                    ok++;
+                    continue;
+                }
+
+                failed++;
+                if (firstError.Length == 0) firstError = $"{item.DisplayName}：{error}";
+            }
+        });
+
+        var text = $"已反转 {targets.Count} 个 Mod 的启用状态：成功 {ok} 个，失败 {failed} 个。";
+        if (failed > 0) text += $"\n首个失败原因：{firstError}";
+        ShowNotice(text, failed > 0);
+        Log.Info($"反转启用状态完成：成功 {ok} 个，失败 {failed} 个");
 
         await ScanAsync();
     }

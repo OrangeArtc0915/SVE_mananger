@@ -38,8 +38,21 @@ public sealed class ModEntry
     /// <summary>解析失败时的可读原因。</summary>
     public string? ParseError { get; set; }
 
-    public string DisplayName
+    /// <summary>从 Mod 自身文件里认出来的中文名（见 <see cref="ModNameLocalizer"/>），没认出来则为 null。</summary>
+    public string? ChineseName { get; set; }
+
+    /// <summary>manifest.json 里写的原名；没写就退回文件夹名。</summary>
+    public string OriginalName
         => string.IsNullOrWhiteSpace(Manifest?.Name) ? RawFolderName : Manifest!.Name;
+
+    /// <summary>认出了中文名，而且它和原名不是同一个。</summary>
+    public bool HasAutoChineseName
+        => !string.IsNullOrWhiteSpace(ChineseName)
+           && !string.Equals(ChineseName, OriginalName, StringComparison.Ordinal);
+
+    /// <summary>列表上显示的名字：优先用认出中文的那个，否则用原名。</summary>
+    public string DisplayName
+        => string.IsNullOrWhiteSpace(ChineseName) ? OriginalName : ChineseName!;
 
     public string DisplayAuthor
         => string.IsNullOrWhiteSpace(Manifest?.Author) ? "未知作者" : Manifest!.Author;

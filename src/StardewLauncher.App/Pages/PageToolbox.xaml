@@ -45,11 +45,14 @@
             <ScrollViewer x:Name="PanTools"
                           HorizontalScrollBarVisibility="Disabled"
                           VerticalScrollBarVisibility="Auto">
-                <WrapPanel>
+                <!-- 用瀑布流按可用宽度自动分列；间距交给面板的 ColumnGap / RowGap，
+                     卡片自己不再带外边距，否则换行后的第一张会被多顶出一段 -->
+                <c:MasonryPanel Mode="AutoFit"
+                                ColumnGap="14"
+                                ItemWidth="320"
+                                RowGap="14">
                     <!-- 存档管理 -->
-                    <c:SurfaceCard MinWidth="320"
-                                   MaxWidth="420"
-                                   Padding="0"
+                    <c:SurfaceCard Padding="0"
                                    UseShadow="False"
                                    HasHoverEffect="False">
                         <Grid Margin="16,14,16,14">
@@ -91,10 +94,7 @@
                     </c:SurfaceCard>
 
                     <!-- 环境体检 -->
-                    <c:SurfaceCard MinWidth="320"
-                                   Margin="14,0,0,0"
-                                   MaxWidth="420"
-                                   Padding="0"
+                    <c:SurfaceCard Padding="0"
                                    UseShadow="False"
                                    HasHoverEffect="False">
                         <Grid Margin="16,14,16,14">
@@ -136,10 +136,7 @@
                     </c:SurfaceCard>
 
                     <!-- Mod 冲突检查 -->
-                    <c:SurfaceCard MinWidth="320"
-                                   Margin="14,0,0,0"
-                                   MaxWidth="420"
-                                   Padding="0"
+                    <c:SurfaceCard Padding="0"
                                    UseShadow="False"
                                    HasHoverEffect="False">
                         <Grid Margin="16,14,16,14">
@@ -180,10 +177,7 @@
                         </Grid>
                     </c:SurfaceCard>
                     <!-- SMAPI 日志分析 -->
-                    <c:SurfaceCard MinWidth="320"
-                                   Margin="14,0,0,0"
-                                   MaxWidth="420"
-                                   Padding="0"
+                    <c:SurfaceCard Padding="0"
                                    UseShadow="False"
                                    HasHoverEffect="False">
                         <Grid Margin="16,14,16,14">
@@ -225,10 +219,7 @@
                     </c:SurfaceCard>
 
                     <!-- 原版文件还原 -->
-                    <c:SurfaceCard MinWidth="320"
-                                   Margin="14,0,0,0"
-                                   MaxWidth="420"
-                                   Padding="0"
+                    <c:SurfaceCard Padding="0"
                                    UseShadow="False"
                                    HasHoverEffect="False">
                         <Grid Margin="16,14,16,14">
@@ -268,7 +259,7 @@
                                              Click="OnOpenToolClick" />
                         </Grid>
                     </c:SurfaceCard>
-                </WrapPanel>
+                </c:MasonryPanel>
             </ScrollViewer>
 
             <views:SaveManagerView x:Name="SaveManager" Visibility="Collapsed" />

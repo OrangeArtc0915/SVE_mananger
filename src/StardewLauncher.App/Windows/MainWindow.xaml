@@ -195,6 +195,55 @@
                                            Checked="OnNavChecked" />
                             </StackPanel>
 
+                            <!-- 设置页的分类栏：进入设置时顶替上面的主导航，离开后还原 -->
+                            <StackPanel x:Name="PanelSetupNav"
+                                        Margin="0,12,0,0"
+                                        VerticalAlignment="Top"
+                                        Visibility="Collapsed">
+                                <c:NavItem x:Name="SetupCatAppearance"
+                                           GroupName="SetupNav"
+                                           Icon="lucide/palette"
+                                           Tag="0"
+                                           Text="外观"
+                                           Checked="OnSetupCategoryChecked" />
+                                <c:NavItem x:Name="SetupCatBackground"
+                                           GroupName="SetupNav"
+                                           Icon="lucide/image"
+                                           Tag="1"
+                                           Text="个性化背景"
+                                           Checked="OnSetupCategoryChecked" />
+                                <c:NavItem x:Name="SetupCatNav"
+                                           GroupName="SetupNav"
+                                           Icon="lucide/layout-list"
+                                           Tag="2"
+                                           Text="侧栏导航"
+                                           Checked="OnSetupCategoryChecked" />
+                                <c:NavItem x:Name="SetupCatGame"
+                                           GroupName="SetupNav"
+                                           Icon="lucide/layers"
+                                           Tag="3"
+                                           Text="游戏与实例"
+                                           Checked="OnSetupCategoryChecked" />
+                                <c:NavItem x:Name="SetupCatMods"
+                                           GroupName="SetupNav"
+                                           Icon="lucide/package"
+                                           Tag="4"
+                                           Text="Mod 与下载"
+                                           Checked="OnSetupCategoryChecked" />
+                                <c:NavItem x:Name="SetupCatNetwork"
+                                           GroupName="SetupNav"
+                                           Icon="lucide/globe"
+                                           Tag="5"
+                                           Text="网络与账号"
+                                           Checked="OnSetupCategoryChecked" />
+                                <c:NavItem x:Name="SetupCatStorage"
+                                           GroupName="SetupNav"
+                                           Icon="lucide/server"
+                                           Tag="6"
+                                           Text="存储与日志"
+                                           Checked="OnSetupCategoryChecked" />
+                            </StackPanel>
+
                             <StackPanel Margin="0,0,0,12" VerticalAlignment="Bottom">
                                 <!-- 单独分组，避免与主页面导航互斥；点击后弹独立窗口，不参与页面切换 -->
                                 <c:NavItem x:Name="NavWiki"

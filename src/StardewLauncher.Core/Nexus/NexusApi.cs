@@ -3,16 +3,9 @@ using System.IO;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using StardewLauncher.Core.App;
 using StardewLauncher.Core.Logging;
 
 namespace StardewLauncher.Core.Nexus;
-
-/// <summary>当前 API Key 对应的 Nexus 账号。</summary>
-public sealed record NexusAccount(string UserName, int UserId, bool IsPremium, bool IsSupporter);
-
-/// <summary>Nexus 限流配额（取自响应头，可能拿不到）。</summary>
-public sealed record NexusQuota(int? HourlyRemaining, int? DailyRemaining, DateTimeOffset? HourlyReset);
 
 /// <summary>Nexus 上的一个文件。</summary>
 public sealed record NexusModFile(int FileId, string Name, string? Version, string? Category,
@@ -35,7 +28,8 @@ public sealed record NexusModInfo(
     DateTimeOffset? UpdatedAt);
 
 /// <summary>
-/// Nexus Mods REST v1 客户端。所有请求都带用户的 <c>apikey</c> 头。
+/// Nexus Mods REST v1 客户端。启动器不再保存个人 API Key，因此这些请求不带 <c>apikey</c> 头，
+/// 只有 Nexus 允许匿名访问的接口才会成功；需要鉴权的接口会返回可读的失败原因。
 /// download_link 接口默认仅限会员，但携带 nxm 链接带来的 key/expires 时非会员同样可用
 /// （这是 Nexus 官方给第三方 Mod 管理器的标准路径，不做任何鉴权绕过）。
 /// 所有方法都不抛异常：失败返回 null / 空集合，并把可读原因写进 <see cref="LastError"/>。
@@ -57,51 +51,8 @@ public static class NexusApi
 
     private static readonly Regex ModIdPattern = new(@"/mods/(\d+)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-    /// <summary>最近一次响应里的配额信息，供设置页显示。</summary>
-    public static NexusQuota LastQuota { get; private set; } = new(null, null, null);
-
     /// <summary>最近一次调用的错误说明，供界面显示可读原因。</summary>
     public static string? LastError { get; private set; }
-
-    /// <summary>是否已在设置里填了 Nexus API Key。</summary>
-    public static bool HasApiKey => !string.IsNullOrWhiteSpace(SettingsStore.Current.NexusApiKey);
-
-    /// <summary>校验 API Key。失败（含网络失败）返回 null，不抛异常。</summary>
-    public static async Task<NexusAccount?> ValidateAsync(string? apiKey = null, CancellationToken token = default)
-    {
-        LastError = null;
-
-        var key = string.IsNullOrWhiteSpace(apiKey) ? SettingsStore.Current.NexusApiKey : apiKey.Trim();
-        if (string.IsNullOrWhiteSpace(key))
-        {
-            LastError = "未配置 Nexus API Key";
-            Log.Warn("未配置 Nexus API Key，跳过账号校验");
-            return null;
-        }
-
-        try
-        {
-            using var response = await SendAsync(BaseUrl + "users/validate.json", key, token);
-            if (response is null) return null;
-            if (await DescribeFailureAsync(response, "users/validate", token) is not null) return null;
-
-            var json = await response.Content.ReadAsStringAsync(token);
-            using var document = JsonDocument.Parse(json);
-            var root = document.RootElement;
-
-            return new NexusAccount(
-                StringOf(root, "name")?.Trim() ?? "",
-                IntOf(root, "user_id") ?? 0,
-                BoolOf(root, "is_premium"),
-                BoolOf(root, "is_supporter"));
-        }
-        catch (Exception ex)
-        {
-            LastError = $"解析账号信息失败：{ex.Message}";
-            Log.Warn($"校验 Nexus 账号失败：{ex.Message}");
-            return null;
-        }
-    }
 
     /// <summary>按 Mod ID 查星露谷 Mod 详情（默认域名的便捷重载）。</summary>
     public static Task<NexusModInfo?> GetModAsync(int modId, CancellationToken token = default)
@@ -124,7 +75,7 @@ public static class NexusApi
 
         try
         {
-            using var response = await SendAsync(url, null, token);
+            using var response = await SendAsync(url, token);
             if (response is null) return null;
             if (await DescribeFailureAsync(response, $"mods/{modId}", token) is not null) return null;
 
@@ -177,7 +128,7 @@ public static class NexusApi
 
         try
         {
-            using var response = await SendAsync(url, null, token);
+            using var response = await SendAsync(url, token);
             if (response is null) return files;
             if (await DescribeFailureAsync(response, $"mods/{modId}/files", token) is not null) return files;
 
@@ -248,7 +199,7 @@ public static class NexusApi
 
         try
         {
-            using var response = await SendAsync(url, null, token);
+            using var response = await SendAsync(url, token);
             if (response is null) return null;
             if (await DescribeFailureAsync(response, $"download_link {modId}/{fileId}", token) is not null) return null;
 
@@ -319,25 +270,15 @@ public static class NexusApi
 
     // ————— HTTP 与错误处理 —————
 
-    private static async Task<HttpResponseMessage?> SendAsync(string url, string? apiKeyOverride,
-        CancellationToken token)
+    private static async Task<HttpResponseMessage?> SendAsync(string url, CancellationToken token)
     {
         try
         {
-            var key = string.IsNullOrWhiteSpace(apiKeyOverride)
-                ? SettingsStore.Current.NexusApiKey
-                : apiKeyOverride.Trim();
-
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
-            // 个人 API Key 只放在请求头里，绝不写进日志
-            if (!string.IsNullOrWhiteSpace(key))
-                request.Headers.TryAddWithoutValidation("apikey", key.Trim());
             request.Headers.TryAddWithoutValidation("User-Agent", UserAgent);
             request.Headers.TryAddWithoutValidation("Accept", "application/json");
 
-            var response = await Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token);
-            ReadQuota(response);
-            return response;
+            return await Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token);
         }
         catch (OperationCanceledException)
         {
@@ -371,7 +312,7 @@ public static class NexusApi
         {
             429 => DescribeRetryAfter(response),
             403 => "（无权限：非会员需要 nxm 链接携带 key/expires 才能取直链）",
-            401 => "（API Key 无效或已失效）",
+            401 => "（该接口需要 Nexus 账号鉴权）",
             _ => ""
         };
 
@@ -394,48 +335,6 @@ public static class NexusApi
             return $"（已被限流，可重试时间 {date:HH:mm:ss}）";
 
         return "（请求过于频繁，已被限流）";
-    }
-
-    /// <summary>每次响应后读取 Nexus 的限流配额响应头。</summary>
-    private static void ReadQuota(HttpResponseMessage response)
-    {
-        try
-        {
-            var hourly = HeaderInt(response, "X-RL-Hourly-Remaining");
-            var daily = HeaderInt(response, "X-RL-Daily-Remaining");
-            var reset = HeaderDate(response, "X-RL-Hourly-Reset");
-
-            if (hourly is not null || daily is not null || reset is not null)
-                LastQuota = new NexusQuota(hourly, daily, reset);
-        }
-        catch
-        {
-            // 配额只是展示用，读不到就保持原值
-        }
-    }
-
-    private static int? HeaderInt(HttpResponseMessage response, string name)
-    {
-        if (!response.Headers.TryGetValues(name, out var values)) return null;
-
-        foreach (var value in values)
-        {
-            if (int.TryParse(value?.Trim(), out var parsed)) return parsed;
-        }
-
-        return null;
-    }
-
-    private static DateTimeOffset? HeaderDate(HttpResponseMessage response, string name)
-    {
-        if (!response.Headers.TryGetValues(name, out var values)) return null;
-
-        foreach (var value in values)
-        {
-            if (DateTimeOffset.TryParse(value?.Trim(), out var parsed)) return parsed;
-        }
-
-        return null;
     }
 
     // ————— JsonElement 取值助手 —————
