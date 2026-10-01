@@ -1,0 +1,576 @@
+<w:LauncherWindow x:Class="StardewLauncher.App.Windows.ConfigWizardWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:w="clr-namespace:StardewLauncher.App.Windows"
+        xmlns:c="clr-namespace:StardewLauncher.App.Controls"
+        xmlns:svg="clr-namespace:StardewLauncher.App.Controls.Svg"
+        Title="首次运行配置向导"
+        Width="680"
+        Height="600"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Background="{DynamicResource Surface.Window}"
+        Foreground="{DynamicResource Text.Primary}"
+        Icon="pack://application:,,,/StardewLauncher;component/Assets/AppIcon.png"
+        FontFamily="{StaticResource AppFont}"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
+
+    <Grid Margin="20,6,20,16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- 步骤指示点：当前步用强调色实心，其余为描边色空心 -->
+        <StackPanel Grid.Row="0"
+                    Margin="0,4,0,0"
+                    HorizontalAlignment="Center"
+                    Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal">
+                <Border x:Name="Dot1"
+                        Width="24"
+                        Height="24"
+                        Background="{DynamicResource Border.Default}"
+                        CornerRadius="{StaticResource Radius.Pill}">
+                    <TextBlock x:Name="DotText1"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontSize="11.5"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource Text.Secondary}"
+                               Text="1" />
+                </Border>
+                <TextBlock x:Name="LabStep1"
+                           Margin="7,0,0,0"
+                           VerticalAlignment="Center"
+                           FontSize="11.5"
+                           Foreground="{DynamicResource Text.Tertiary}"
+                           Text="欢迎" />
+            </StackPanel>
+
+            <Border Width="26"
+                    Height="1"
+                    Margin="10,0"
+                    VerticalAlignment="Center"
+                    Background="{DynamicResource Border.Default}" />
+
+            <StackPanel Orientation="Horizontal">
+                <Border x:Name="Dot2"
+                        Width="24"
+                        Height="24"
+                        Background="{DynamicResource Border.Default}"
+                        CornerRadius="{StaticResource Radius.Pill}">
+                    <TextBlock x:Name="DotText2"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontSize="11.5"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource Text.Secondary}"
+                               Text="2" />
+                </Border>
+                <TextBlock x:Name="LabStep2"
+                           Margin="7,0,0,0"
+                           VerticalAlignment="Center"
+                           FontSize="11.5"
+                           Foreground="{DynamicResource Text.Tertiary}"
+                           Text="游戏目录" />
+            </StackPanel>
+
+            <Border Width="26"
+                    Height="1"
+                    Margin="10,0"
+                    VerticalAlignment="Center"
+                    Background="{DynamicResource Border.Default}" />
+
+            <StackPanel Orientation="Horizontal">
+                <Border x:Name="Dot3"
+                        Width="24"
+                        Height="24"
+                        Background="{DynamicResource Border.Default}"
+                        CornerRadius="{StaticResource Radius.Pill}">
+                    <TextBlock x:Name="DotText3"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontSize="11.5"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource Text.Secondary}"
+                               Text="3" />
+                </Border>
+                <TextBlock x:Name="LabStep3"
+                           Margin="7,0,0,0"
+                           VerticalAlignment="Center"
+                           FontSize="11.5"
+                           Foreground="{DynamicResource Text.Tertiary}"
+                           Text="SMAPI" />
+            </StackPanel>
+
+            <Border Width="26"
+                    Height="1"
+                    Margin="10,0"
+                    VerticalAlignment="Center"
+                    Background="{DynamicResource Border.Default}" />
+
+            <StackPanel Orientation="Horizontal">
+                <Border x:Name="Dot4"
+                        Width="24"
+                        Height="24"
+                        Background="{DynamicResource Border.Default}"
+                        CornerRadius="{StaticResource Radius.Pill}">
+                    <TextBlock x:Name="DotText4"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontSize="11.5"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource Text.Secondary}"
+                               Text="4" />
+                </Border>
+                <TextBlock x:Name="LabStep4"
+                           Margin="7,0,0,0"
+                           VerticalAlignment="Center"
+                           FontSize="11.5"
+                           Foreground="{DynamicResource Text.Tertiary}"
+                           Text="创建实例" />
+            </StackPanel>
+        </StackPanel>
+
+        <!-- 提示条 -->
+        <Border x:Name="BarNotice"
+                Grid.Row="1"
+                Margin="0,12,0,0"
+                Padding="12,10"
+                Background="{DynamicResource Accent.Faint}"
+                CornerRadius="{StaticResource Radius.Item}"
+                Visibility="Collapsed">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <svg:SvgIcon x:Name="IconNotice"
+                             Grid.Column="0"
+                             Width="16"
+                             Height="16"
+                             Margin="0,1,0,0"
+                             VerticalAlignment="Top"
+                             Icon="lucide/info"
+                             IconBrush="{DynamicResource Accent.Base}" />
+
+                <TextBlock x:Name="LabNotice"
+                           Grid.Column="1"
+                           Margin="10,0,8,0"
+                           VerticalAlignment="Center"
+                           FontSize="12"
+                           Foreground="{DynamicResource Text.Primary}"
+                           TextWrapping="Wrap" />
+
+                <c:RoundIconButton Grid.Column="2"
+                                   VerticalAlignment="Center"
+                                   Icon="lucide/x"
+                                   IconSize="13"
+                                   Tone="Plain"
+                                   Click="OnDismissNoticeClick" />
+            </Grid>
+        </Border>
+
+        <!-- 四步内容同处一格，只显示当前那一步 -->
+        <Grid Grid.Row="2" Margin="0,14,0,0">
+
+            <!-- 第 1 步：欢迎 -->
+            <ScrollViewer x:Name="StepWelcome"
+                          HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="0,0,6,0">
+                    <TextBlock FontSize="19"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource Text.Primary}"
+                               Text="欢迎使用星露谷启动器" />
+                    <TextBlock Margin="0,8,0,0"
+                               FontSize="12.5"
+                               LineHeight="20"
+                               Foreground="{DynamicResource Text.Secondary}"
+                               TextWrapping="Wrap"
+                               Text="这个工具帮你管理星露谷的游戏实例、SMAPI 与 Mod，也能一键启动、备份存档、下载 Mod。第一次打开时有几步配置要确认，跟着走一遍就好。" />
+
+                    <Border Margin="0,16,0,0"
+                            Padding="16,14"
+                            Background="{DynamicResource Accent.Faint}"
+                            CornerRadius="{StaticResource Radius.Card}">
+                        <StackPanel>
+                            <TextBlock FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource Text.Primary}"
+                                       Text="接下来会带你做三件事" />
+
+                            <Grid Margin="0,12,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0"
+                                        Width="22"
+                                        Height="22"
+                                        VerticalAlignment="Top"
+                                        Background="{DynamicResource Accent.Base}"
+                                        CornerRadius="{StaticResource Radius.Pill}">
+                                    <TextBlock HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource Text.OnAccent}"
+                                               Text="1" />
+                                </Border>
+                                <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                    <TextBlock FontSize="12.5"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource Text.Primary}"
+                                               Text="选好游戏目录" />
+                                    <TextBlock Margin="0,2,0,0"
+                                               FontSize="11.5"
+                                               Foreground="{DynamicResource Text.Secondary}"
+                                               TextWrapping="Wrap"
+                                               Text="自动探测 Steam / GOG / Xbox 等常见位置，找不到也可以手动指定。" />
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Margin="0,10,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0"
+                                        Width="22"
+                                        Height="22"
+                                        VerticalAlignment="Top"
+                                        Background="{DynamicResource Accent.Base}"
+                                        CornerRadius="{StaticResource Radius.Pill}">
+                                    <TextBlock HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource Text.OnAccent}"
+                                               Text="2" />
+                                </Border>
+                                <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                    <TextBlock FontSize="12.5"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource Text.Primary}"
+                                               Text="检查 SMAPI" />
+                                    <TextBlock Margin="0,2,0,0"
+                                               FontSize="11.5"
+                                               Foreground="{DynamicResource Text.Secondary}"
+                                               TextWrapping="Wrap"
+                                               Text="看看这个游戏目录装没装 SMAPI，决定要不要建 Mod 端实例。" />
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Margin="0,10,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0"
+                                        Width="22"
+                                        Height="22"
+                                        VerticalAlignment="Top"
+                                        Background="{DynamicResource Accent.Base}"
+                                        CornerRadius="{StaticResource Radius.Pill}">
+                                    <TextBlock HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource Text.OnAccent}"
+                                               Text="3" />
+                                </Border>
+                                <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                    <TextBlock FontSize="12.5"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource Text.Primary}"
+                                               Text="建第一个实例" />
+                                    <TextBlock Margin="0,2,0,0"
+                                               FontSize="11.5"
+                                               Foreground="{DynamicResource Text.Secondary}"
+                                               TextWrapping="Wrap"
+                                               Text="实例是「用哪个游戏本体 + 哪种启动方式」的组合，建好就能点启动了。" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Margin="0,14,0,0"
+                               FontSize="11.5"
+                               Foreground="{DynamicResource Text.Tertiary}"
+                               TextWrapping="Wrap"
+                               Text="如果这些你现在不想弄，点左下角的「跳过向导」即可，之后可以随时到「设置 · 游戏与实例」里重新运行。" />
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- 第 2 步：选择游戏目录 -->
+            <ScrollViewer x:Name="StepDirectory"
+                          HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto"
+                          Visibility="Collapsed">
+                <StackPanel Margin="0,0,6,0">
+                    <TextBlock FontSize="15"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource Text.Primary}"
+                               Text="选择游戏目录" />
+                    <TextBlock Margin="0,6,0,0"
+                               FontSize="11.5"
+                               Foreground="{DynamicResource Text.Secondary}"
+                               TextWrapping="Wrap"
+                               Text="选星露谷的安装根目录（里面有 Stardew Valley.exe 的那个）。下面的是自动探测结果，没有的话点「手动选择…」。" />
+
+                    <c:OutlineButton x:Name="BtnManualDir"
+                                     Margin="0,10,0,0"
+                                     HorizontalAlignment="Left"
+                                     Padding="14,0"
+                                     Height="34"
+                                     Content="手动选择…"
+                                     Click="OnManualDirClick" />
+
+                    <TextBlock Margin="0,14,0,6"
+                               FontSize="12"
+                               Foreground="{DynamicResource Text.Secondary}"
+                               Text="自动探测到的目录" />
+
+                    <TextBlock x:Name="LabNoCandidate"
+                               FontSize="11.5"
+                               Foreground="{DynamicResource Text.Tertiary}"
+                               TextWrapping="Wrap"
+                               Visibility="Collapsed"
+                               Text="没有自动检测到游戏目录，请点上面的「手动选择…」。" />
+
+                    <StackPanel x:Name="PanCandidates" />
+
+                    <Border Margin="0,12,0,0"
+                            Padding="12,10"
+                            Background="{DynamicResource Surface.Sunken}"
+                            CornerRadius="{StaticResource Radius.Item}">
+                        <StackPanel>
+                            <TextBlock FontSize="11.5"
+                                       Foreground="{DynamicResource Text.Secondary}"
+                                       Text="当前选择" />
+                            <TextBlock x:Name="LabSelectedDir"
+                                       Margin="0,3,0,0"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource Text.Primary}"
+                                       TextWrapping="Wrap"
+                                       Text="尚未选择目录" />
+                            <TextBlock x:Name="LabValidateResult"
+                                       Margin="0,6,0,0"
+                                       FontSize="11.5"
+                                       TextWrapping="Wrap"
+                                       Text="先选一个目录，这里会显示校验结果。" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- 第 3 步：检查 SMAPI -->
+            <ScrollViewer x:Name="StepSmapi"
+                          HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto"
+                          Visibility="Collapsed">
+                <StackPanel Margin="0,0,6,0">
+                    <TextBlock FontSize="15"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource Text.Primary}"
+                               Text="检查 SMAPI" />
+                    <TextBlock Margin="0,6,0,0"
+                               FontSize="11.5"
+                               Foreground="{DynamicResource Text.Secondary}"
+                               TextWrapping="Wrap"
+                               Text="SMAPI 是加载 Mod 的框架。下面看看你选的游戏目录装没装它。" />
+
+                    <Border x:Name="BarSmapiState"
+                            Margin="0,14,0,0"
+                            Padding="12,10"
+                            Background="{DynamicResource Surface.Sunken}"
+                            CornerRadius="{StaticResource Radius.Item}">
+                        <StackPanel Orientation="Horizontal">
+                            <svg:SvgIcon x:Name="IconSmapiState"
+                                         Width="16"
+                                         Height="16"
+                                         Margin="0,1,0,0"
+                                         VerticalAlignment="Top"
+                                         Icon="lucide/flask-conical" />
+                            <TextBlock x:Name="LabSmapiState"
+                                       Margin="10,0,0,0"
+                                       FontSize="12.5"
+                                       FontWeight="SemiBold"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock x:Name="LabSmapiDetail"
+                               Margin="0,8,0,0"
+                               FontSize="11.5"
+                               Foreground="{DynamicResource Text.Secondary}"
+                               TextWrapping="Wrap" />
+
+                    <TextBlock Margin="0,16,0,0"
+                               FontSize="12"
+                               Foreground="{DynamicResource Text.Secondary}"
+                               Text="要建的实例类型" />
+
+                    <Grid Margin="0,6,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <c:OutlineButton x:Name="BtnKindModded"
+                                         Grid.Column="0"
+                                         Padding="12,8"
+                                         HorizontalAlignment="Stretch"
+                                         HorizontalContentAlignment="Left"
+                                         Click="OnKindModdedClick">
+                            <StackPanel>
+                                <TextBlock FontSize="13"
+                                           FontWeight="Bold"
+                                           Foreground="{DynamicResource Text.Primary}"
+                                           Text="Mod 端" />
+                                <TextBlock Margin="0,3,0,0"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource Text.Secondary}"
+                                           TextWrapping="Wrap"
+                                           Text="通过 SMAPI 启动，可以加载 Mod" />
+                            </StackPanel>
+                        </c:OutlineButton>
+
+                        <c:OutlineButton x:Name="BtnKindVanilla"
+                                         Grid.Column="2"
+                                         Padding="12,8"
+                                         HorizontalAlignment="Stretch"
+                                         HorizontalContentAlignment="Left"
+                                         Click="OnKindVanillaClick">
+                            <StackPanel>
+                                <TextBlock FontSize="13"
+                                           FontWeight="Bold"
+                                           Foreground="{DynamicResource Text.Primary}"
+                                           Text="原版" />
+                                <TextBlock Margin="0,3,0,0"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource Text.Secondary}"
+                                           TextWrapping="Wrap"
+                                           Text="直接启动游戏主程序，不加载 Mod" />
+                            </StackPanel>
+                        </c:OutlineButton>
+                    </Grid>
+
+                    <TextBlock x:Name="LabKindHint"
+                               Margin="0,8,0,0"
+                               FontSize="11.5"
+                               TextWrapping="Wrap"
+                               Visibility="Collapsed" />
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- 第 4 步：创建实例 -->
+            <ScrollViewer x:Name="StepCreate"
+                          HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto"
+                          Visibility="Collapsed">
+                <StackPanel Margin="0,0,6,0">
+                    <TextBlock FontSize="15"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource Text.Primary}"
+                               Text="创建第一个实例" />
+                    <TextBlock Margin="0,6,0,0"
+                               FontSize="11.5"
+                               Foreground="{DynamicResource Text.Secondary}"
+                               TextWrapping="Wrap"
+                               Text="给这个实例起个名字，点「完成」就建好了。实例不会复制游戏本体，只是记住用哪个目录、怎么启动。" />
+
+                    <TextBlock Margin="0,14,0,0"
+                               FontSize="12"
+                               Foreground="{DynamicResource Text.Secondary}"
+                               Text="实例名称" />
+                    <Border Height="38"
+                            Margin="0,6,0,0"
+                            Padding="10,0"
+                            Background="{DynamicResource Surface.Card}"
+                            BorderBrush="{DynamicResource Border.Default}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource Radius.Card}">
+                        <TextBox x:Name="TxtName"
+                                 VerticalContentAlignment="Center"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 CaretBrush="{DynamicResource Text.Primary}"
+                                 Foreground="{DynamicResource Text.Primary}" />
+                    </Border>
+
+                    <TextBlock Margin="0,14,0,0"
+                               FontSize="12"
+                               Foreground="{DynamicResource Text.Secondary}"
+                               Text="备注（可选）" />
+                    <Border Height="38"
+                            Margin="0,6,0,0"
+                            Padding="10,0"
+                            Background="{DynamicResource Surface.Card}"
+                            BorderBrush="{DynamicResource Border.Default}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource Radius.Card}">
+                        <TextBox x:Name="TxtNote"
+                                 VerticalContentAlignment="Center"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 CaretBrush="{DynamicResource Text.Primary}"
+                                 Foreground="{DynamicResource Text.Primary}" />
+                    </Border>
+
+                    <Border Margin="0,14,0,0"
+                            Padding="12,10"
+                            Background="{DynamicResource Accent.Faint}"
+                            CornerRadius="{StaticResource Radius.Item}">
+                        <TextBlock x:Name="LabCreateSummary"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource Text.Primary}"
+                                   TextWrapping="Wrap" />
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- 底部：跳过 / 上一步 / 下一步 -->
+        <Grid Grid.Row="3" Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <c:OutlineButton x:Name="BtnSkip"
+                             Grid.Column="0"
+                             Height="36"
+                             Padding="12,0"
+                             Content="跳过向导"
+                             Tone="Plain"
+                             Click="OnSkipClick" />
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <c:OutlineButton x:Name="BtnPrev"
+                                 Width="92"
+                                 Height="36"
+                                 Content="上一步"
+                                 Visibility="Collapsed"
+                                 Click="OnPrevClick" />
+                <c:OutlineButton x:Name="BtnNext"
+                                 Width="92"
+                                 Height="36"
+                                 Margin="8,0,0,0"
+                                 Content="下一步"
+                                 Tone="Solid"
+                                 Click="OnNextClick" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</w:LauncherWindow>

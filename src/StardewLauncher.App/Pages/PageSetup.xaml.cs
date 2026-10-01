@@ -14,6 +14,7 @@ using StardewLauncher.Core.Logging;
 using StardewLauncher.Core.Mods;
 using StardewLauncher.Core.Nexus;
 using StardewLauncher.Core.Smapi;
+using StardewLauncher.Core.Translate;
 using StardewLauncher.Core.Updater;
 using StardewLauncher.Core.Weather;
 using CoreApp = StardewLauncher.Core.App;
@@ -49,6 +50,7 @@ public partial class PageSetup : LauncherPage
         RefreshUpdateLine();
         RefreshDownloadFolder();
         RefreshWeatherCity();
+        RefreshTranslateSettings();
 
         SwitchCategory(0);
     }
@@ -65,6 +67,7 @@ public partial class PageSetup : LauncherPage
         RefreshUpdateLine();
         RefreshDownloadFolder();
         RefreshWeatherCity();
+        RefreshTranslateSettings();
         _ = RefreshSmapiAsync();
     }
 
@@ -293,6 +296,10 @@ public partial class PageSetup : LauncherPage
 
         ShellHelper.OpenFolder(dir);
     }
+
+    /// <summary>老用户也能主动重跑一遍配置向导：探测目录、检查 SMAPI、再建一个新实例。</summary>
+    private void OnRerunWizardClick(object sender, RoutedEventArgs e)
+        => new ConfigWizardWindow { Owner = Window.GetWindow(this) }.ShowDialog();
 
     private void OnOpenSmapiPageClick(object sender, RoutedEventArgs e)
         => ShellHelper.OpenUrl("https://smapi.io/");
@@ -671,6 +678,91 @@ public partial class PageSetup : LauncherPage
         }
 
         LabWeatherStatus.SetResourceReference(TextBlock.ForegroundProperty, "Text.Tertiary");
+    }
+
+    // ————— Mod 翻译 —————
+
+    /// <summary>当前选中的服务商。改选后要点「保存」才落盘，所以单独留一份未保存的值。</summary>
+    private string _translateProvider = "microsoft";
+
+    private void RefreshTranslateSettings()
+    {
+        if (TxtTranslateKey is null) return;
+
+        var settings = CoreApp.SettingsStore.Current;
+
+        _translateProvider = settings.TranslateProvider;
+        TxtTranslateKey.Text = settings.TranslateApiKey;
+        TxtTranslateRegion.Text = settings.TranslateRegion;
+
+        SyncTranslateProviderButtons();
+        UpdateTranslateStatus();
+    }
+
+    /// <summary>选中的那个画成实心、其余描边 —— 与「下载源 / 更新线路」的写法保持一致。</summary>
+    private void SyncTranslateProviderButtons()
+    {
+        (OutlineButton Button, string Key)[] buttons =
+        [
+            (BtnTranslateMicrosoft, "microsoft"),
+            (BtnTranslateBaidu, "baidu"),
+            (BtnTranslateDeepl, "deepl"),
+            (BtnTranslateNone, "none")
+        ];
+
+        foreach (var (button, key) in buttons)
+        {
+            button.Tone = string.Equals(_translateProvider, key, StringComparison.OrdinalIgnoreCase)
+                ? ButtonTone.Solid
+                : ButtonTone.Outline;
+        }
+    }
+
+    private void OnTranslateProviderClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: string key }) return;
+
+        _translateProvider = key;
+        SyncTranslateProviderButtons();
+        UpdateTranslateStatus(dirty: true);
+    }
+
+    private void OnSaveTranslateClick(object sender, RoutedEventArgs e)
+    {
+        var settings = CoreApp.SettingsStore.Current;
+
+        settings.TranslateProvider = _translateProvider;
+        settings.TranslateApiKey = (TxtTranslateKey.Text ?? string.Empty).Trim();
+        settings.TranslateRegion = (TxtTranslateRegion.Text ?? string.Empty).Trim();
+
+        CoreApp.SettingsStore.Save();
+
+        UpdateTranslateStatus();
+
+        // 只记「填没填」，绝不把密钥本身写进日志
+        Log.Info($"Mod 翻译设置已保存：服务商 {settings.TranslateProvider}，" +
+                 $"密钥 {(string.IsNullOrEmpty(settings.TranslateApiKey) ? "未填" : "已填")}");
+    }
+
+    private void UpdateTranslateStatus(bool dirty = false)
+    {
+        if (LabTranslateStatus is null) return;
+
+        var settings = CoreApp.SettingsStore.Current;
+        var provider = TranslateService.ProviderDisplayName(_translateProvider);
+        var target = TranslateService.TargetDisplayName(settings.TranslateTargetLanguage);
+
+        var configured = _translateProvider != "none"
+                         && !string.IsNullOrWhiteSpace(TxtTranslateKey.Text);
+
+        var text = configured
+            ? $"当前：{provider} → {target}。密钥已填，点「保存翻译设置」生效。"
+            : $"当前：{provider} → {target}。还没填密钥，翻译时会提示到这里来填。";
+
+        LabTranslateStatus.Text = dirty ? text + "（有未保存的改动）" : text;
+
+        LabTranslateStatus.SetResourceReference(TextBlock.ForegroundProperty,
+            configured ? "Text.Tertiary" : "Status.Warn");
     }
 
     private void OnWeatherCityChanged(object sender, TextChangedEventArgs e)

@@ -259,6 +259,132 @@
                                              Click="OnOpenToolClick" />
                         </Grid>
                     </c:SurfaceCard>
+
+                    <!-- 常用文件夹 -->
+                    <c:SurfaceCard Padding="0"
+                                   UseShadow="False"
+                                   HasHoverEffect="False">
+                        <Grid Margin="16,14,16,14">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                <svg:SvgIcon Width="20"
+                                             Height="20"
+                                             VerticalAlignment="Center"
+                                             Icon="lucide/folder-open"
+                                             IconBrush="{DynamicResource Accent.Base}" />
+                                <TextBlock Margin="8,0,0,0"
+                                           VerticalAlignment="Center"
+                                           FontSize="15"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Text.Primary}"
+                                           Text="常用文件夹" />
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="1"
+                                       Margin="0,8,0,0"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource Text.Secondary}"
+                                       Text="Mods、存档、日志、下载目录都收在一处，点一下直接打开；还能把自己常翻的目录收藏进来。"
+                                       TextWrapping="Wrap" />
+
+                            <c:OutlineButton Grid.Row="2"
+                                             Margin="0,12,0,0"
+                                             HorizontalAlignment="Left"
+                                             Content="打开"
+                                             Tag="folders"
+                                             Tone="Solid"
+                                             Click="OnOpenToolClick" />
+                        </Grid>
+                    </c:SurfaceCard>
+
+                    <!-- 批量 Mod 信息分析 -->
+                    <c:SurfaceCard Padding="0"
+                                   UseShadow="False"
+                                   HasHoverEffect="False">
+                        <Grid Margin="16,14,16,14">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                <svg:SvgIcon Width="20"
+                                             Height="20"
+                                             VerticalAlignment="Center"
+                                             Icon="lucide/list"
+                                             IconBrush="{DynamicResource Accent.Base}" />
+                                <TextBlock Margin="8,0,0,0"
+                                           VerticalAlignment="Center"
+                                           FontSize="15"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Text.Primary}"
+                                           Text="批量 Mod 信息分析" />
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="1"
+                                       Margin="0,8,0,0"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource Text.Secondary}"
+                                       Text="一次跑完八项检查：SMAPI 装没装、manifest 能不能解析、有没有重复 ID、前置齐不齐、版本够不够、有没有环、目录层级对不对、被依赖的有没有被禁用。"
+                                       TextWrapping="Wrap" />
+
+                            <c:OutlineButton Grid.Row="2"
+                                             Margin="0,12,0,0"
+                                             HorizontalAlignment="Left"
+                                             Content="打开"
+                                             Tag="audit"
+                                             Tone="Solid"
+                                             Click="OnOpenToolClick" />
+                        </Grid>
+                    </c:SurfaceCard>
+
+                    <!-- Mod 依赖关系图 -->
+                    <c:SurfaceCard Padding="0"
+                                   UseShadow="False"
+                                   HasHoverEffect="False">
+                        <Grid Margin="16,14,16,14">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                <svg:SvgIcon Width="20"
+                                             Height="20"
+                                             VerticalAlignment="Center"
+                                             Icon="lucide/network"
+                                             IconBrush="{DynamicResource Accent.Base}" />
+                                <TextBlock Margin="8,0,0,0"
+                                           VerticalAlignment="Center"
+                                           FontSize="15"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Text.Primary}"
+                                           Text="Mod 依赖关系图" />
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="1"
+                                       Margin="0,8,0,0"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource Text.Secondary}"
+                                       Text="把 manifest 里写的前置关系画成分层图，层号越小越先加载；缺失的前置画成红色虚线，点节点能看到它依赖谁、又被谁依赖。"
+                                       TextWrapping="Wrap" />
+
+                            <c:OutlineButton Grid.Row="2"
+                                             Margin="0,12,0,0"
+                                             HorizontalAlignment="Left"
+                                             Content="打开"
+                                             Tag="graph"
+                                             Tone="Solid"
+                                             Click="OnOpenToolClick" />
+                        </Grid>
+                    </c:SurfaceCard>
                 </c:MasonryPanel>
             </ScrollViewer>
 
@@ -267,6 +393,9 @@
             <views:ModConflictView x:Name="ModConflict" Visibility="Collapsed" />
             <views:SmapiLogView x:Name="SmapiLog" Visibility="Collapsed" />
             <views:GameFileRestoreView x:Name="GameRestore" Visibility="Collapsed" />
+            <views:QuickFoldersView x:Name="QuickFolders" Visibility="Collapsed" />
+            <views:ModAuditView x:Name="ModAudit" Visibility="Collapsed" />
+            <views:ModDependencyGraphView x:Name="DependencyGraph" Visibility="Collapsed" />
         </Grid>
     </Grid>
 </c:LauncherPage>

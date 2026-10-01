@@ -460,6 +460,22 @@
                                    Foreground="{DynamicResource Text.Tertiary}"
                                    TextWrapping="Wrap"
                                    Text="存档默认位于 %appdata%\StardewValley\Saves。若同时开启 Steam 云同步，请避免用其它工具改写同一份存档，以免互相覆盖。" />
+
+                        <Border Height="1"
+                                Margin="0,12,0,12"
+                                Background="{DynamicResource Border.Default}" />
+
+                        <TextBlock FontSize="12" Foreground="{DynamicResource Text.Secondary}" Text="配置向导" />
+                        <TextBlock Margin="0,4,0,0"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   TextWrapping="Wrap"
+                                   Text="重新走一遍首次运行的配置向导：探测游戏目录、检查 SMAPI、再建一个新实例。只是带着你重新设一遍，不会删改任何已有实例。" />
+                        <c:OutlineButton x:Name="BtnRerunWizard"
+                                         Margin="0,8,0,0"
+                                         HorizontalAlignment="Left"
+                                         Content="重新运行配置向导"
+                                         Click="OnRerunWizardClick" />
                     </StackPanel>
                 </c:SurfaceCard>
 
@@ -657,6 +673,100 @@
                                    Foreground="{DynamicResource Text.Tertiary}"
                                    TextWrapping="Wrap"
                                    Text="天气数据来自 Open-Meteo（免费公开接口，无需密钥）；城市名支持中文，例如「杭州」「北京」。" />
+
+                        <Border Height="1"
+                                Margin="0,12,0,12"
+                                Background="{DynamicResource Border.Default}" />
+
+                        <TextBlock FontSize="12" Foreground="{DynamicResource Text.Secondary}" Text="Mod 翻译" />
+                        <TextBlock Margin="0,6,0,0"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   TextWrapping="Wrap"
+                                   Text="在「Mod 管理」页点「Mod 翻译」，可以把 Mod 的名称与描述翻成中文。密钥以加密形式存在本机，不会写进日志。" />
+
+                        <TextBlock Margin="0,8,0,0"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   Text="服务商" />
+                        <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                            <c:OutlineButton x:Name="BtnTranslateMicrosoft"
+                                             Tag="microsoft"
+                                             Content="微软翻译"
+                                             Click="OnTranslateProviderClick" />
+                            <c:OutlineButton x:Name="BtnTranslateBaidu"
+                                             Margin="8,0,0,0"
+                                             Tag="baidu"
+                                             Content="百度翻译"
+                                             Click="OnTranslateProviderClick" />
+                            <c:OutlineButton x:Name="BtnTranslateDeepl"
+                                             Margin="8,0,0,0"
+                                             Tag="deepl"
+                                             Content="DeepL"
+                                             Click="OnTranslateProviderClick" />
+                            <c:OutlineButton x:Name="BtnTranslateNone"
+                                             Margin="8,0,0,0"
+                                             Tag="none"
+                                             Content="不翻译"
+                                             Click="OnTranslateProviderClick" />
+                        </StackPanel>
+
+                        <TextBlock Margin="0,8,0,0"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   Text="密钥" />
+                        <Border Height="34"
+                                Margin="0,6,0,0"
+                                Padding="10,0"
+                                Background="{DynamicResource Surface.Sunken}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource Radius.Button}">
+                            <TextBox x:Name="TxtTranslateKey"
+                                     VerticalContentAlignment="Center"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     CaretBrush="{DynamicResource Text.Primary}"
+                                     Foreground="{DynamicResource Text.Primary}" />
+                        </Border>
+
+                        <TextBlock Margin="0,8,0,0"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   Text="区域（只有微软翻译要填，可留空）" />
+                        <Border Height="34"
+                                Margin="0,6,0,0"
+                                Padding="10,0"
+                                Background="{DynamicResource Surface.Sunken}"
+                                BorderBrush="{DynamicResource Border.Default}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource Radius.Button}">
+                            <TextBox x:Name="TxtTranslateRegion"
+                                     VerticalContentAlignment="Center"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     CaretBrush="{DynamicResource Text.Primary}"
+                                     Foreground="{DynamicResource Text.Primary}" />
+                        </Border>
+
+                        <c:OutlineButton x:Name="BtnSaveTranslate"
+                                         Margin="0,10,0,0"
+                                         HorizontalAlignment="Left"
+                                         Content="保存翻译设置"
+                                         Tone="Solid"
+                                         Click="OnSaveTranslateClick" />
+
+                        <TextBlock x:Name="LabTranslateStatus"
+                                   Margin="0,8,0,0"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource Text.Secondary}"
+                                   TextWrapping="Wrap" />
+
+                        <TextBlock Margin="0,6,0,0"
+                                   FontSize="11.5"
+                                   Foreground="{DynamicResource Text.Tertiary}"
+                                   TextWrapping="Wrap"
+                                   Text="微软翻译：在 Azure 建一个「Translator」资源，复制密钥即可；百度翻译：把 APPID 与密钥按「APPID:密钥」的格式填进来；DeepL：直接填 Auth Key。" />
                     </StackPanel>
                 </c:SurfaceCard>
 

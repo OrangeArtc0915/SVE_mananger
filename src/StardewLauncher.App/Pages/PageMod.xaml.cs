@@ -17,6 +17,7 @@ using StardewLauncher.Core.Logging;
 using StardewLauncher.Core.Mods;
 using StardewLauncher.Core.Nexus;
 using StardewLauncher.Core.Smapi;
+using StardewLauncher.Core.Tasks;
 
 namespace StardewLauncher.App.Pages;
 
@@ -622,10 +623,12 @@ public partial class PageMod : LauncherPage
 
         ShowNotice("正在一键更新…", false);
 
-        ModUpdateInstallReport report;
+        ModUpdateInstallReport report = null!;
         try
         {
-            report = await ModMaintenance.QuickUpdateAsync(BuildProgress());
+            // 包进任务中心：这样它也会出现在下载监视器里，能看进度、能统一取消
+            await DelegateTask.RunAsync("一键更新 Mod", async (_, _) =>
+                report = await ModMaintenance.QuickUpdateAsync(BuildProgress()));
         }
         catch (Exception ex)
         {
@@ -681,10 +684,12 @@ public partial class PageMod : LauncherPage
 
         ShowNotice("正在自动修复…", false);
 
-        ModRepairReport report;
+        ModRepairReport report = null!;
         try
         {
-            report = await ModMaintenance.RepairAsync(findings, BuildProgress());
+            // 同上：让自动修复也进任务中心，长目录上修起来不至于「看起来卡住」
+            await DelegateTask.RunAsync("自动修复 Mod", async (_, _) =>
+                report = await ModMaintenance.RepairAsync(findings, BuildProgress()));
         }
         catch (Exception ex)
         {
@@ -1299,6 +1304,33 @@ public partial class PageMod : LauncherPage
 
         // 应用过配置档就重扫，否则列表上的启停状态会和磁盘不一致
         if (window.Applied) _ = ScanAsync();
+    }
+
+    /// <summary>Mod 合集：把整套 Mod 存成组合，之后一键切回来。</summary>
+    private void OnCollectionsClick(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(_modsDirectory))
+        {
+            ShowNotice("还没有可用的 Mods 目录，请先创建游戏实例。", true);
+            return;
+        }
+
+        var window = new ModCollectionWindow { Owner = Window.GetWindow(this) };
+        window.ShowDialog();
+
+        if (window.Applied) _ = ScanAsync();
+    }
+
+    /// <summary>Mod 翻译：把 Mod 的名称与描述翻成中文，只记在启动器这边。</summary>
+    private void OnTranslateClick(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(_modsDirectory))
+        {
+            ShowNotice("还没有可用的 Mods 目录，请先创建游戏实例。", true);
+            return;
+        }
+
+        new ModTranslationWindow { Owner = Window.GetWindow(this) }.ShowDialog();
     }
 
     // ————— 导入 —————

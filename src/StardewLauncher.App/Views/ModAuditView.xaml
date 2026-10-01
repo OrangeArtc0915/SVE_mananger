@@ -1,0 +1,207 @@
+<UserControl x:Class="StardewLauncher.App.Views.ModAuditView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:StardewLauncher.App.Controls"
+             xmlns:core="clr-namespace:StardewLauncher.Core.Mods;assembly=StardewLauncher.Core"
+             xmlns:svg="clr-namespace:StardewLauncher.App.Controls.Svg">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- 工具栏 -->
+        <StackPanel Grid.Row="0"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+            <c:OutlineButton x:Name="BtnOpenDir"
+                             Content="打开 Mods 目录"
+                             Tone="Outline"
+                             Click="OnOpenModsDirClick" />
+            <c:OutlineButton x:Name="BtnRun"
+                             Margin="8,0,0,0"
+                             Content="开始分析"
+                             Tone="Solid"
+                             Click="OnRunClick" />
+        </StackPanel>
+
+        <!-- 摘要 -->
+        <c:SurfaceCard Grid.Row="1"
+                       Margin="0,10,0,0"
+                       Padding="0"
+                       HasHoverEffect="False"
+                       UseShadow="False">
+            <Grid Margin="16,13,16,13">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <svg:SvgIcon x:Name="IconSummary"
+                             Grid.Column="0"
+                             Width="22"
+                             Height="22"
+                             VerticalAlignment="Center"
+                             Icon="lucide/list"
+                             IconBrush="{DynamicResource Status.Success}" />
+
+                <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                    <TextBlock x:Name="LabSummaryTitle"
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource Text.Primary}"
+                               Text="还没分析"
+                               TextWrapping="Wrap" />
+                    <TextBlock x:Name="LabSummaryDetail"
+                               Margin="0,3,0,0"
+                               FontSize="12"
+                               Foreground="{DynamicResource Text.Secondary}"
+                               Text="点右上角「开始分析」，一次把八项检查全跑一遍"
+                               TextWrapping="Wrap" />
+                </StackPanel>
+            </Grid>
+        </c:SurfaceCard>
+
+        <!-- 提示条 -->
+        <Border x:Name="BarNotice"
+                Grid.Row="2"
+                Margin="0,10,0,0"
+                Padding="12,10"
+                Background="{DynamicResource Accent.Faint}"
+                CornerRadius="{StaticResource Radius.Item}"
+                Visibility="Collapsed">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <svg:SvgIcon x:Name="IconNotice"
+                             Grid.Column="0"
+                             Width="16"
+                             Height="16"
+                             Margin="0,1,0,0"
+                             VerticalAlignment="Top"
+                             Icon="lucide/info"
+                             IconBrush="{DynamicResource Accent.Base}" />
+
+                <TextBlock x:Name="LabNotice"
+                           Grid.Column="1"
+                           Margin="10,0,8,0"
+                           VerticalAlignment="Center"
+                           FontSize="12"
+                           Foreground="{DynamicResource Text.Primary}"
+                           TextWrapping="Wrap" />
+
+                <c:RoundIconButton Grid.Column="2"
+                                   VerticalAlignment="Center"
+                                   Icon="lucide/x"
+                                   IconSize="13"
+                                   Tone="Plain"
+                                   Click="OnDismissNoticeClick" />
+            </Grid>
+        </Border>
+
+        <!-- 检查结果 -->
+        <ScrollViewer x:Name="ScrollChecks"
+                      Grid.Row="3"
+                      Margin="0,14,0,0"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto"
+                      Visibility="Collapsed">
+            <ItemsControl x:Name="PanChecks">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <c:SurfaceCard Margin="0,0,0,10"
+                                       Padding="0"
+                                       HasHoverEffect="False"
+                                       UseShadow="False">
+                            <StackPanel Margin="16,13,16,13">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border x:Name="Chip"
+                                            Padding="8,2"
+                                            VerticalAlignment="Center"
+                                            Background="{DynamicResource Surface.Sunken}"
+                                            CornerRadius="{StaticResource Radius.Pill}">
+                                        <TextBlock x:Name="ChipText"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource Status.Success}"
+                                                   Text="{Binding StatusText}" />
+                                    </Border>
+
+                                    <TextBlock Margin="10,0,0,0"
+                                               VerticalAlignment="Center"
+                                               FontSize="14"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource Text.Primary}"
+                                               Text="{Binding Name}" />
+                                </StackPanel>
+
+                                <TextBlock Margin="0,8,0,0"
+                                           FontSize="11.5"
+                                           Foreground="{DynamicResource Text.Tertiary}"
+                                           Text="{Binding Description}"
+                                           TextWrapping="Wrap" />
+
+                                <TextBlock Margin="0,6,0,0"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource Text.Secondary}"
+                                           Text="{Binding Summary}"
+                                           TextWrapping="Wrap" />
+
+                                <ItemsControl Margin="0,10,0,0" ItemsSource="{Binding Findings}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Margin="0,0,0,5"
+                                                    Padding="10,7"
+                                                    Background="{DynamicResource Surface.Sunken}"
+                                                    CornerRadius="{StaticResource Radius.Item}">
+                                                <StackPanel>
+                                                    <TextBlock FontSize="12"
+                                                               Foreground="{DynamicResource Text.Primary}"
+                                                               Text="{Binding Title}"
+                                                               TextWrapping="Wrap" />
+                                                    <TextBlock Margin="0,2,0,0"
+                                                               FontSize="11"
+                                                               Foreground="{DynamicResource Text.Secondary}"
+                                                               Text="{Binding Detail}"
+                                                               TextWrapping="Wrap" />
+                                                    <TextBlock Margin="0,2,0,0"
+                                                               FontSize="10.5"
+                                                               Foreground="{DynamicResource Text.Tertiary}"
+                                                               Text="{Binding Path}"
+                                                               TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </c:SurfaceCard>
+
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding Status}" Value="{x:Static core:AuditStatus.Fail}">
+                                <Setter TargetName="Chip" Property="Background" Value="{DynamicResource Status.WarnSoft}" />
+                                <Setter TargetName="ChipText" Property="Foreground" Value="{DynamicResource Status.Warn}" />
+                            </DataTrigger>
+
+                            <DataTrigger Binding="{Binding Status}" Value="{x:Static core:AuditStatus.Warn}">
+                                <Setter TargetName="Chip" Property="Background" Value="{DynamicResource Accent.Faint}" />
+                                <Setter TargetName="ChipText" Property="Foreground" Value="{DynamicResource Accent.Base}" />
+                            </DataTrigger>
+
+                            <DataTrigger Binding="{Binding Status}" Value="{x:Static core:AuditStatus.Skipped}">
+                                <Setter TargetName="Chip" Property="Background" Value="{DynamicResource Surface.Sunken}" />
+                                <Setter TargetName="ChipText" Property="Foreground" Value="{DynamicResource Text.Tertiary}" />
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

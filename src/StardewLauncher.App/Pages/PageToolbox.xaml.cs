@@ -16,6 +16,9 @@ public partial class PageToolbox : LauncherPage
     private const int SubConflict = 3;
     private const int SubSmapiLog = 4;
     private const int SubGameRestore = 5;
+    private const int SubQuickFolders = 6;
+    private const int SubModAudit = 7;
+    private const int SubDependencyGraph = 8;
 
     private int _subView = SubTools;
 
@@ -31,8 +34,8 @@ public partial class PageToolbox : LauncherPage
         ActivateCurrent();
     }
 
-    /// <summary>工具列表 + 五个工具的子视图。只给自检用。</summary>
-    public override int SubViewCount => 6;
+    /// <summary>工具列表 + 八个工具的子视图。只给自检用。</summary>
+    public override int SubViewCount => 9;
 
     public override void SelectSubView(int index) => SwitchSubView(index);
 
@@ -47,6 +50,9 @@ public partial class PageToolbox : LauncherPage
             "conflict" => SubConflict,
             "log" => SubSmapiLog,
             "restore" => SubGameRestore,
+            "folders" => SubQuickFolders,
+            "audit" => SubModAudit,
+            "graph" => SubDependencyGraph,
             _ => SubTools
         });
     }
@@ -55,7 +61,7 @@ public partial class PageToolbox : LauncherPage
 
     private void SwitchSubView(int index)
     {
-        _subView = index is >= SubSaveManager and <= SubGameRestore ? index : SubTools;
+        _subView = index is >= SubSaveManager and <= SubDependencyGraph ? index : SubTools;
 
         var listing = _subView == SubTools;
 
@@ -65,6 +71,9 @@ public partial class PageToolbox : LauncherPage
         ModConflict.Visibility = _subView == SubConflict ? Visibility.Visible : Visibility.Collapsed;
         SmapiLog.Visibility = _subView == SubSmapiLog ? Visibility.Visible : Visibility.Collapsed;
         GameRestore.Visibility = _subView == SubGameRestore ? Visibility.Visible : Visibility.Collapsed;
+        QuickFolders.Visibility = _subView == SubQuickFolders ? Visibility.Visible : Visibility.Collapsed;
+        ModAudit.Visibility = _subView == SubModAudit ? Visibility.Visible : Visibility.Collapsed;
+        DependencyGraph.Visibility = _subView == SubDependencyGraph ? Visibility.Visible : Visibility.Collapsed;
 
         BtnBack.Visibility = listing ? Visibility.Collapsed : Visibility.Visible;
 
@@ -100,6 +109,18 @@ public partial class PageToolbox : LauncherPage
             case SubGameRestore:
                 GameRestore.Activate();
                 break;
+
+            case SubQuickFolders:
+                QuickFolders.Activate();
+                break;
+
+            case SubModAudit:
+                ModAudit.Activate();
+                break;
+
+            case SubDependencyGraph:
+                DependencyGraph.Activate();
+                break;
         }
     }
 
@@ -110,6 +131,9 @@ public partial class PageToolbox : LauncherPage
         SubConflict => "Mod 冲突检查",
         SubSmapiLog => "SMAPI 日志分析",
         SubGameRestore => "原版文件还原",
+        SubQuickFolders => "常用文件夹",
+        SubModAudit => "批量 Mod 信息分析",
+        SubDependencyGraph => "Mod 依赖关系图",
         _ => string.Empty
     };
 
@@ -120,6 +144,9 @@ public partial class PageToolbox : LauncherPage
         SubConflict => "只看磁盘上已有的信息：重复 ID、加载不了的 Mod、放错层级的目录",
         SubSmapiLog => "读最近一份 SMAPI 日志，按来源找出在报错的 Mod，关键的原文可以整段复制",
         SubGameRestore => "覆盖前的备份就留在原文件旁边，这里按索引判断哪些能确定是原版，并支持还原",
+        SubQuickFolders => "经常要翻的几个目录收在这里，点一下直接在资源管理器里打开；也能收藏自己的目录",
+        SubModAudit => "一次跑完八项检查：SMAPI、manifest、重复 ID、缺前置、版本过低、循环依赖、目录层级、被依赖项被禁用",
+        SubDependencyGraph => "把 manifest 写的前置关系画成分层图，缺失的前置会画成红色；点节点看它依赖谁、被谁依赖",
         _ => string.Empty
     };
 }

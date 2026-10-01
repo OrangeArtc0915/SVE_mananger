@@ -3,6 +3,9 @@ bin/
 obj/
 publish/
 
+# WPF 构建过程中会在项目目录里临时生成一份 wpftmp 工程文件，构建完可能残留
+*_wpftmp.csproj
+
 # 运行时数据：内含设置与可能的密钥（如 Nexus API Key），绝不能进版本库。
 # 同样锚定到根目录，避免以后出现同名源码目录时被一起忽略。
 /Data/

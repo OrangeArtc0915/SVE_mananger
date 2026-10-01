@@ -209,4 +209,43 @@ public sealed class Settings
     /// 只加载这里列出的扩展，扫到但没启用的不会执行任何代码。
     /// </summary>
     public List<string> EnabledWidgetPlugins { get; set; } = [];
+
+    // ————— 常用文件夹 —————
+
+    /// <summary>用户自己收藏的目录（绝对路径）。内置目录另行现算，不存这里。</summary>
+    public List<string> QuickFolders { get; set; } = [];
+
+    // ————— 下载监视器 —————
+
+    /// <summary>下载历史最多保留多少条，超出后删最旧的。默认 50。</summary>
+    public int DownloadHistoryKeepCount { get; set; } = 50;
+
+    /// <summary>有任务在跑时，启动自动弹出下载监视器。默认关闭，避免打扰。</summary>
+    public bool ShowDownloadMonitorOnStart { get; set; }
+
+    // ————— Mod 翻译 —————
+
+    /// <summary>翻译服务商：microsoft / baidu / deepl / none。</summary>
+    public string TranslateProvider { get; set; } = "microsoft";
+
+    /// <summary>
+    /// 翻译服务的密钥。等价于账号凭证，以 DPAPI 密文落盘（见 <see cref="SecretProtector"/>），
+    /// 绝不写进日志或版本库。
+    /// </summary>
+    [JsonConverter(typeof(SecretJsonConverter))]
+    public string TranslateApiKey { get; set; } = string.Empty;
+
+    /// <summary>微软翻译的区域（Azure 资源区域），其他服务商忽略这一项。</summary>
+    public string TranslateRegion { get; set; } = string.Empty;
+
+    /// <summary>目标语言，默认简体中文。</summary>
+    public string TranslateTargetLanguage { get; set; } = "zh-Hans";
+
+    /// <summary>翻译结果缓存时间（小时），超时后重新请求。默认 168 小时（一周）。</summary>
+    public int TranslateCacheHours { get; set; } = 168;
+
+    // ————— 首次运行向导 —————
+
+    /// <summary>首次运行向导走完流程或用户主动跳过后置为 true，之后不再弹。</summary>
+    public bool FirstRunCompleted { get; set; }
 }

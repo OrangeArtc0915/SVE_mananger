@@ -59,6 +59,15 @@ public partial class PageLog : LauncherPage
         Reload();
     }
 
+    // ————— 下载监视器 —————
+
+    /// <summary>下载与安装这类耗时操作都登记在任务中心，这里开个窗口统一看进度和历史。</summary>
+    private void OnDownloadMonitorClick(object sender, RoutedEventArgs e)
+    {
+        var window = new Windows.DownloadMonitorWindow { Owner = Window.GetWindow(this) };
+        window.ShowDialog();
+    }
+
     // ————— 日志 —————
 
     private void Subscribe()

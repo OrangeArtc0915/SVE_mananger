@@ -5,6 +5,7 @@ using StardewLauncher.App.Theme;
 using StardewLauncher.App.Views;
 using StardewLauncher.App.Windows;
 using StardewLauncher.Core.App;
+using StardewLauncher.Core.Downloads;
 using StardewLauncher.Core.Games;
 using StardewLauncher.Core.Instances;
 using StardewLauncher.Core.IO;
@@ -13,6 +14,7 @@ using StardewLauncher.Core.Mods;
 using StardewLauncher.Core.Nexus;
 using StardewLauncher.Core.Plugins;
 using StardewLauncher.Core.Smapi;
+using StardewLauncher.Core.Translate;
 using StardewLauncher.Core.Updater;
 
 namespace StardewLauncher.App;
@@ -71,6 +73,10 @@ public partial class App : Application
 
         InstanceStore.Load();
         ModTagStore.Load();
+        ModCollectionStore.Load();
+        DownloadHistory.Load();
+        ModTranslationStore.Load();
+        TranslateCache.Load();
         InstallPlanStore.Load();
         ModProfileStore.Load();
         WidgetPluginCatalog.LoadEnabled();

@@ -5,11 +5,13 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
+using System.Windows.Threading;
 using StardewLauncher.App.Animation;
 using StardewLauncher.App.Controls;
 using StardewLauncher.App.Interop;
 using StardewLauncher.App.Pages;
 using StardewLauncher.App.Theme;
+using StardewLauncher.Core.Instances;
 using StardewLauncher.Core.IO;
 using StardewLauncher.Core.Logging;
 using StardewLauncher.Core.Updater;
@@ -94,6 +96,8 @@ public partial class MainWindow : Window
 
             // 主题变了要重铺一次：压暗层在深色主题用黑、浅色主题用白
             ThemeService.ThemeChanged += ApplyBackground;
+
+            QueueFirstRunWizard();
 #if DEBUG
             DebugCapture.TryRunOverlapScan(this);
             DebugCapture.TryCapture(this);
@@ -110,6 +114,34 @@ public partial class MainWindow : Window
             AnimationEngine.SetAmbientEnabled(!minimized);
         };
     }
+
+    /// <summary>
+    /// 首次运行向导的触发判定。只有「从没跑过向导、一个实例都没有、设置里也没记游戏目录」三条同时成立才弹；
+    /// 任一条不成立就说明是老用户，顺手把标记补上落盘，避免以后每次启动都白判一遍。
+    /// 让出一轮消息循环再弹，那时主窗口已经画出来，向导才有 owner、位置和焦点才正常。
+    /// </summary>
+    private void QueueFirstRunWizard()
+        => Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() =>
+        {
+            var settings = CoreApp.SettingsStore.Current;
+
+            var needed = !settings.FirstRunCompleted
+                         && InstanceStore.All.Count == 0
+                         && string.IsNullOrWhiteSpace(settings.GameDir);
+
+            if (!needed)
+            {
+                if (!settings.FirstRunCompleted)
+                {
+                    settings.FirstRunCompleted = true;
+                    CoreApp.SettingsStore.Save();
+                }
+
+                return;
+            }
+
+            new ConfigWizardWindow { Owner = this }.ShowDialog();
+        }));
 
     /// <summary>
     /// 开场动画：整个面板从略小放大到实际大小并淡入，标题栏从上方落下，侧栏导航逐项滑入。

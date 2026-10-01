@@ -210,7 +210,7 @@ public static class DependencyResolver
         => candidates.FirstOrDefault(candidate => candidate.IsEnabled) ?? candidates[0];
 
     /// <summary>取出一个 Mod 的全部必需依赖（含内容包指向的框架）。IsRequired 为 false 的会跳过。</summary>
-    private static IEnumerable<(string UniqueId, string? MinimumVersion)> RequiredDependencies(ModEntry mod)
+    public static IEnumerable<(string UniqueId, string? MinimumVersion)> RequiredDependencies(ModEntry mod)
     {
         foreach (var dependency in mod.Manifest?.Dependencies ?? [])
         {

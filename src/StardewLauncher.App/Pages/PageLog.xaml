@@ -18,22 +18,32 @@
                        Text="启动器的操作记录与游戏进程输出；只留最近 500 条在内存里，切走页面也不会丢" />
         </StackPanel>
 
-        <!-- 子标签 -->
-        <StackPanel Grid.Row="1"
-                    Margin="0,14,0,0"
-                    Orientation="Horizontal">
-            <c:OutlineButton x:Name="BtnAppLog"
-                             Content="应用日志"
-                             Tag="0"
-                             Tone="Solid"
-                             Click="OnTabClick" />
-            <c:OutlineButton x:Name="BtnGameLog"
-                             Margin="8,0,0,0"
-                             Content="游戏日志"
-                             Tag="1"
+        <!-- 子标签 + 下载监视器入口 -->
+        <Grid Grid.Row="1" Margin="0,14,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <c:OutlineButton x:Name="BtnAppLog"
+                                 Content="应用日志"
+                                 Tag="0"
+                                 Tone="Solid"
+                                 Click="OnTabClick" />
+                <c:OutlineButton x:Name="BtnGameLog"
+                                 Margin="8,0,0,0"
+                                 Content="游戏日志"
+                                 Tag="1"
+                                 Tone="Outline"
+                                 Click="OnTabClick" />
+            </StackPanel>
+
+            <c:OutlineButton Grid.Column="1"
+                             Content="下载监视器"
                              Tone="Outline"
-                             Click="OnTabClick" />
-        </StackPanel>
+                             Click="OnDownloadMonitorClick" />
+        </Grid>
 
         <c:SurfaceCard Grid.Row="2"
                        Margin="0,12,0,0"
