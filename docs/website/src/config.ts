@@ -70,16 +70,24 @@ export const siteConfig: SiteConfig = {
 
 		// 支持单张图片或图片数组，当数组长度 > 1 时自动启用轮播
 				src: {
-			desktop: ["/assets/banner/1.webp", "/assets/banner/2.webp"],
-			mobile: ["/assets/banner/1-mobile.webp", "/assets/banner/2-mobile.webp"],
-		}, // 使用本地横幅图片
+			desktop: [
+				"/assets/banner/bg-1.webp",
+				"/assets/banner/bg-2.webp",
+				"/assets/banner/bg-3.webp",
+			],
+			mobile: [
+				"/assets/banner/bg-1-mobile.webp",
+				"/assets/banner/bg-2-mobile.webp",
+				"/assets/banner/bg-3-mobile.webp",
+			],
+		}, // 使用本地横幅图片（3 张，3 秒轮播）
 
 		position: "center", // 等同于 object-position，仅支持 'top', 'center', 'bottom'。默认为 'center'
 
 		carousel: {
 			enable: true, // 为 true 时：为多张图片启用轮播。为 false 时：从数组中随机显示一张图片
 
-			interval: 6, // 轮播间隔时间（秒）
+			interval: 3, // 轮播间隔时间（秒）
 		},
 
 		waves: {
@@ -151,8 +159,8 @@ export const siteConfig: SiteConfig = {
 export const fullscreenWallpaperConfig: FullscreenWallpaperConfig = {
 	enable: false, // 启用全屏壁纸功能,非Banner模式下生效
 			src: {
-			desktop: ["/assets/banner/1.webp", "/assets/banner/2.webp"],
-			mobile: ["/assets/banner/1-mobile.webp", "/assets/banner/2-mobile.webp"],
+			desktop: ["/assets/banner/bg-1.webp", "/assets/banner/bg-2.webp"],
+			mobile: ["/assets/banner/bg-1-mobile.webp", "/assets/banner/bg-2-mobile.webp"],
 		}, // 使用本地横幅图片
 	position: "center", // 壁纸位置，等同于 object-position
 	carousel: {
@@ -384,30 +392,6 @@ export const sakuraConfig: SakuraConfig = {
 	zIndex: 100, // 层级，确保樱花在合适的层级显示
 };
 
-// Pio 看板娘配置
-export const pioConfig: import("./types/config").PioConfig = {
-	enable: false, // 启用看板娘
-	models: ["/pio/models/pio/model.json"], // 默认模型路径
-	position: "left", // 默认位置在右侧
-	width: 280, // 默认宽度
-	height: 250, // 默认高度
-	mode: "draggable", // 默认为可拖拽模式
-	hiddenOnMobile: true, // 默认在移动设备上隐藏
-	dialog: {
-		welcome: "Welcome to Mizuki Website!", // 欢迎词
-		touch: [
-			"What are you doing?",
-			"Stop touching me!",
-			"HENTAI!",
-			"Don't bully me like that!",
-		], // 触摸提示
-		home: "Click here to go back to homepage!", // 首页提示
-		skin: ["Want to see my new outfit?", "The new outfit looks great~"], // 换装提示
-		close: "QWQ See you next time~", // 关闭提示
-		link: "https://github.com/OrangeArtc0915/SVE_mananger", // 关于链接
-	},
-};
-
 // 导出所有配置的统一接口
 export const widgetConfigs = {
 	profile: profileConfig,
@@ -416,7 +400,6 @@ export const widgetConfigs = {
 	layout: sidebarLayoutConfig,
 	sakura: sakuraConfig,
 	fullscreenWallpaper: fullscreenWallpaperConfig,
-	pio: pioConfig, // 添加 pio 配置
 } as const;
 
 export const umamiConfig = {
