@@ -198,25 +198,28 @@ const siteHome = "/SVE_mananger/";
 				storageKey: "sve-firefly-live2d-hidden",
 			};
 
-			// 运行时 + 模型约 7 MB，等首屏加载完再拉，避免和横幅图抢带宽
+			// 运行时 + 模型约 6 MB。DOM 一解析完就开始拉，不再等 window.load
+			// （window.load 要等图片全部下完，实测白等 2 秒多）。
+			// 用 fetchPriority=low 让横幅等首屏资源仍然排在前面。
 			(function () {
 				function start() {
 					var s = document.createElement("script");
 					s.src = fireflyBase + "firefly-loader.js";
 					s.async = true;
+					if ("fetchPriority" in s) s.fetchPriority = "low";
 					document.head.appendChild(s);
 				}
 				function schedule() {
 					if ("requestIdleCallback" in window) {
-						requestIdleCallback(start, { timeout: 2000 });
+						requestIdleCallback(start, { timeout: 600 });
 					} else {
-						setTimeout(start, 200);
+						setTimeout(start, 100);
 					}
 				}
-				if (document.readyState === "complete") {
-					schedule();
+				if (document.readyState === "loading") {
+					document.addEventListener("DOMContentLoaded", schedule, { once: true });
 				} else {
-					window.addEventListener("load", schedule, { once: true });
+					schedule();
 				}
 			})();
 		})();</script> <!-- increase the page height during page transition to prevent the scrolling animation from jumping --> <div id="page-height-extend" class="hidden h-[300vh]" data-astro-cid-sckkx6r4 style="--bannerOffset: 15vh;--banner-height-home: 65vh;--banner-height: 35vh;--configHue: 45;--page-width: 90rem;"></div> <!-- Sakura Effect -->  </body> </html>  <script type="module" src="/SVE_mananger/_astro/Layout.astro_astro_type_script_index_0_lang.CpUd5Pvy.js"></script> <script type="module" src="/SVE_mananger/_astro/Layout.astro_astro_type_script_index_1_lang.CyOPd6y-.js"></script> <!-- 横幅里非首图先不下发 src，等首屏加载完再补上，避免和首屏抢带宽 --> <script>
