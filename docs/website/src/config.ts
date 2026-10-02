@@ -229,8 +229,8 @@ export const commentConfig: CommentConfig = {
 };
 
 export const announcementConfig: AnnouncementConfig = {
-	title: "v1.8.0 已发布", // 公告标题
-	content: "Mod 管理补齐三件事：自动识别中文名、一键更新（GitHub 源直接下载替换并备份旧目录）、自动修复（manifest 语法 / 多套一层目录 / 重复 UniqueID）；设置页「Mod 与下载」也能直接做这三件事。另外启动器不再保存 Nexus 个人密钥，其余密钥一律加密落盘。", // 公告内容
+	title: "v1.9.0 已发布", // 公告标题
+	content: "一次上新七个功能：首次运行配置向导、Mod 依赖关系图、批量 Mod 信息分析、常用文件夹、Mod 合集、Mod 翻译、下载监视器。工具箱从五个扩到八个，Mod 管理多了「合集」与「翻译」两个入口。", // 公告内容
 	closable: true, // 允许用户关闭公告
 	link: {
 		enable: true, // 启用链接

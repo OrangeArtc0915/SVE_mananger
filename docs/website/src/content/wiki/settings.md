@@ -163,15 +163,27 @@ order: 5
 
 ## 密钥与账号
 
-设置页里**不再有任何密钥输入框**。需要联网的功能各走各的公开接口；`nxm://` 链接自带下载所需的凭据，不会落到启动器的设置里。
+设置页里**不再保存 Nexus 个人密钥**；`nxm://` 链接自带下载所需的凭据，不会落到启动器的设置里。目前设置页里只有一处要填密钥 —— [Mod 翻译](#mod-翻译)，不想用翻译就不必填，其余联网功能各走各的公开接口。
 
-启动器保存的密钥（在「联机」页填的樱花 FRP 访问密钥）写进 `Data\Settings.json` 之前会先用 Windows DPAPI 加密，**只有当前 Windows 账户解得开** —— 直接打开这个文件看到的是密文。以前明文保存的，启动时会被自动转成密文。
+启动器保存的密钥（「联机」页的樱花 FRP 访问密钥、Mod 翻译的密钥）写进 `Data\Settings.json` 之前会先用 Windows DPAPI 加密，**只有当前 Windows 账户解得开** —— 直接打开这个文件看到的是密文。以前明文保存的，启动时会被自动转成密文。
 
 > 「工具箱 → 导出反馈包」里同样不会带上密钥的实际值。
 
 ### 在线下载 Mod
 
 从设置页也能直接跳到在线浏览页面。
+
+### Mod 翻译
+
+给「Mod 管理 → Mod 翻译」选服务商并填密钥：
+
+| 服务商 | 密钥怎么来 |
+| --- | --- |
+| 微软翻译（默认） | 在 Azure 建一个 **Translator** 资源，复制密钥；资源有区域的话把区域也填上 |
+| 百度翻译 | 把 **APPID 与密钥**按 `APPID:密钥` 的格式填进密钥框 |
+| DeepL | 直接填 Auth Key |
+
+密钥和其它密钥一样**加密落盘**（DPAPI），不会写进日志，也不会进反馈包。翻译结果与缓存分别存在 `Data\mod-translations.json` 与 `Data\translate-cache.json`（默认一周过期）。
 
 ## 天气与位置
 
@@ -209,5 +221,12 @@ order: 5
 | `SnapshotBeforeRestore` | true | 回滚存档前是否自动打一份 `-auto` 快照 |
 | `MaxLogFileCount` | 16 | 日志最多保留几份 |
 | `MaxLogFileSize` | 8388608 | 单份日志的上限（字节，即 8 MB），超过就换新文件 |
+| `QuickFolders` | 空 | [常用文件夹](/wiki/toolbox/#常用文件夹)里收藏的目录 |
+| `TranslateProvider` | microsoft | Mod 翻译用哪家（`microsoft` / `baidu` / `deepl`） |
+| `TranslateTargetLanguage` | zh-Hans | 翻译的目标语言 |
+| `TranslateCacheHours` | 168 | 翻译缓存多久过期（小时） |
+| `DownloadHistoryKeepCount` | 50 | 下载监视器最多保留几条历史 |
+| `ShowDownloadMonitorOnStart` | false | 启动时是否自动打开下载监视器 |
+| `FirstRunCompleted` | false | [首次运行向导](/wiki/quick-start/#第一次打开跟着向导走)跑过没有；置为 `false` 可以再触发一次 |
 
-> `Settings.json` 里含有 Nexus 与樱花 FRP 的密钥，**不要把这个文件发给别人或传到网上**。
+> `Settings.json` 里含有樱花 FRP 与 Mod 翻译的密钥（都是加密存的），**别把这个文件直接发给别人或传到网上**。
